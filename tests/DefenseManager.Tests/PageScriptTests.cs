@@ -9,7 +9,7 @@ public class PageScriptTests
 {
     private static FakeGame Home() => new() { Defenses = { Def(1), Def(2, cur: 0, broken: true), Def(3, cur: 100) } };
 
-    private static string BarView(FakeGame game) => LayoutBar.View(isEnabled: true, isInLayout: true, game.Read) ?? throw new InvalidOperationException("no bar view");
+    private static string BarView(FakeGame game) => LayoutBar.View(isEnabled: true, isInLayout: true, Where.Home, game.Read) ?? throw new InvalidOperationException("no bar view");
 
     private static string PanelView(FakeGame game) => DefenseView.Of(game.Read()) ?? throw new InvalidOperationException("no panel view");
 

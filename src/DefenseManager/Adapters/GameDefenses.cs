@@ -120,18 +120,26 @@ internal sealed class GameDefenses : IDefenseGame
         }
     }
 
-    /// <summary>True in a loaded game past the prologue, the only place the panel and its HUD button have work.</summary>
-    public bool IsGameLoaded()
+    /// <summary>
+    /// Where the player is: in no game, on an expedition, or at home with the defenses. Cheap enough for every refresh:
+    /// the home check reads two map ids off the character, and looks up two map rows only when they differ. A failed
+    /// home check counts as away.
+    /// </summary>
+    public Where Locate()
     {
         try
         {
-            return LoadedGame() != null;
+            var game = LoadedGame();
+
+            if (game == null) return Where.NoGame;
+
+            return IsHome(game.Value.Agents) ? Where.Home : Where.Away;
         }
         catch (Exception ex)
         {
             ReportOnce("game check", ex);
 
-            return false;
+            return Where.NoGame;
         }
     }
 

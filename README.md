@@ -6,8 +6,8 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 
 ## Features
 
-- **Panel key**: press `F7` to open and close the panel in a loaded game, past the prologue. `Esc` or the close button in the top-right corner also closes it.
-- **HUD button**: a shield at the top of the tool column in the bottom-left corner of the screen, above the game's own buttons there. It opens and closes the panel like `F7`, and hovering it shows "Defense Manager" with the key and "Repair or remove your outdoor defenses". It only shows in a loaded game past the prologue, and it hides with the rest of the column on the Layout screen.
+- **Panel key**: press `F7` to open and close the panel at home in a loaded game, past the prologue. `Esc` or the close button in the top-right corner also closes it.
+- **HUD button**: a shield at the top of the tool column in the bottom-left corner of the screen, above the game's own buttons there. It opens and closes the panel like `F7`, and hovering it shows "Defense Manager" with the key and "Repair or remove your outdoor defenses". It only shows at home in a loaded game past the prologue, so it is hidden on expeditions, and it hides with the rest of the column on the Layout screen.
 - **Layout screen buttons**: while the game's Layout screen is open, three buttons sit at the top middle of the screen, styled like Layout's own buttons: **Repair all (n)**, **Clear all broken (n)** and **Defense list (F7)**. The first two do exactly what the panel's buttons of the same name do. Defense list opens the panel with every defense on its own row. When the buttons are greyed out, the reason shows under them. They can be turned off in the config.
 - **Repair all (n)**: queues a repair for every damaged defense your materials cover (n is how many it would repair now). The character goes nearest-next from where they stand, so the round does not zigzag across the yard. A defense the remaining materials cannot cover is skipped and the round goes on to the next one they can.
 - **Clear all broken (n)**: queues the removal of every broken defense, nearest-next. A broken defense you already queued for repair is kept: you chose to fix it.
@@ -44,7 +44,8 @@ Costs, the materials you have, and the game's own repair check are all read at t
 
 This mod repairs and removes defenses and uses your materials. Back up your save before trying it for the first time.
 
-- Nothing can be repaired or removed during a zombie wave or while you are away from home. The panel says so and its buttons wait.
+- Nothing can be repaired or removed during a zombie wave. The panel says so and its buttons wait.
+- On an expedition the panel, the HUD button and the Layout buttons are hidden and `F7` does nothing, since your defenses are back home. They come back when you return home.
 - The game is paused while the Layout screen is open, so repairs and removals you queue there wait. The character starts on them when you leave Layout (or, if you had paused the game before opening Layout, when you unpause). The message after each press says so.
 - The Layout buttons sit at the top middle of the screen. If they cover something you need on your screen size, turn them off with `LayoutControls` in the config; `F7` and the HUD button still work.
 - If something else uses the materials before the character reaches a defense, the game decides what happens to that repair, not the mod.
@@ -79,11 +80,15 @@ Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, create
 
 Tested on Survival Log 1.1.18317 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.2.0 started, key F7, Layout controls on`. The same line, plus one line for every press saying what was queued and why anything was left, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.2.1 started, key F7, Layout controls on`. The same line, plus one line for every press saying what was queued and why anything was left, is in `BepInEx\defense-manager.log`, which survives restarts.
 
-If `F7` does nothing, check that you are in a loaded game past the prologue, and that no other mod uses the same key. You can pick another key in the config, or use the HUD button.
+If `F7` does nothing, check that you are at home in a loaded game past the prologue, and that no other mod uses the same key. You can pick another key in the config, or use the HUD button.
 
-If the Layout buttons do not show, check that `LayoutControls` is `true` in the config and that you are in a loaded game past the prologue. They can take a second to appear after Layout opens.
+If the Layout buttons do not show, check that `LayoutControls` is `true` in the config and that you are at home in a loaded game past the prologue. They can take a second to appear after Layout opens.
+
+## Changelog
+
+- 0.2.1: the Defense Manager button hides on expeditions.
 
 ## Feedback and bug reports
 

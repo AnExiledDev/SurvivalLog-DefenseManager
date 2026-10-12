@@ -129,13 +129,14 @@ internal sealed class DefenseSession
     }
 
     /// <summary>
-    /// Tells the page whether a game is loaded, so the HUD button shows only where it has work, and which key opens the
-    /// panel. Sent when that changes; a reloaded page starts blank, so its ready message has it sent again.
+    /// Tells the page whether the player is at home, so the HUD button shows only where it has work (not in the prologue,
+    /// not on an expedition), and which key opens the panel. Sent when that changes; a reloaded page starts blank, so its
+    /// ready message has it sent again.
     /// </summary>
     private void SendLive(float now)
     {
         _nextLiveCheckAt = now + RefreshSeconds;
-        var isLive = _game.IsGameLoaded();
+        var isLive = Presence.ShowsButton(_game.Locate());
 
         if (isLive == _sentLive) return;
 
@@ -169,7 +170,7 @@ internal sealed class DefenseSession
         {
             _wasInLayout = _game.IsInLayout();
 
-            return LayoutBar.View(_isLayoutBarEnabled, _wasInLayout, _game.Read);
+            return LayoutBar.View(_isLayoutBarEnabled, _wasInLayout, _game.Locate(), _game.Read);
         }
         catch (Exception ex)
         {
@@ -190,8 +191,8 @@ internal sealed class DefenseSession
     }
 
     /// <summary>
-    /// The view is read before anything is captured, so a failed read leaves the game's input alone. Outside a loaded
-    /// game (the title screen, the prologue) there is nothing to manage and the panel stays shut without a word.
+    /// The view is read before anything is captured, so a failed read leaves the game's input alone. Away from home (the
+    /// title screen, the prologue, an expedition) there is nothing to manage and the panel stays shut without a word.
     /// </summary>
     private void Open()
     {
@@ -223,7 +224,7 @@ internal sealed class DefenseSession
     /// <summary>
     /// Sends the view only when it changed, so an idle panel costs one read a second and nothing more. A read that
     /// throws shuts the panel, so the game gets its input back instead of a panel that can no longer update; so does
-    /// leaving the game.
+    /// leaving home, for an expedition or out of the game.
     /// </summary>
     private void PushView()
     {
@@ -277,7 +278,7 @@ internal sealed class DefenseSession
         _page.Status(FailedStatus);
     }
 
-    /// <summary>False when the read threw; otherwise the view JSON, or null when there is no game to manage.</summary>
+    /// <summary>False when the read threw; otherwise the view JSON, or null when the player is not at home to manage it.</summary>
     private bool TryReadView(string reason, out string? view)
     {
         try
@@ -299,7 +300,7 @@ internal sealed class DefenseSession
     {
         _nextRefreshAt = Time.unscaledTime + RefreshSeconds;
 
-        return DefenseView.Of(_game.Read());
+        return Presence.PanelView(_game.Locate(), _game.Read);
     }
 
     /// <summary>
