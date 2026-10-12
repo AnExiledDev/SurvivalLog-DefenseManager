@@ -24,6 +24,7 @@ internal sealed class DefenseSession
     private float _nextRefreshAt;
     private float _nextLiveCheckAt;
     private bool? _sentLive;
+    private bool? _loggedLive;
     private bool _isOpen;
     private bool _hasSentLayout;
     private string? _sentLayout;
@@ -136,11 +137,26 @@ internal sealed class DefenseSession
     private void SendLive(float now)
     {
         _nextLiveCheckAt = now + RefreshSeconds;
-        var isLive = Presence.ShowsButton(_game.Locate());
+        var where = _game.Locate();
+        var isLive = Presence.ShowsButton(where);
+
+        LogButtonChange(isLive, where);
 
         if (isLive == _sentLive) return;
 
         if (_page.Live(isLive, KeyName())) _sentLive = isLive;
+    }
+
+    /// <summary>
+    /// Logged when the button's state changes, not when it is sent: a reloaded page or a failed send has it sent again
+    /// without anything having changed.
+    /// </summary>
+    private void LogButtonChange(bool isLive, Where where)
+    {
+        if (isLive == _loggedLive) return;
+
+        _loggedLive = isLive;
+        _log($"HUD button {(isLive ? "shown" : "hidden")} ({where})");
     }
 
     /// <summary>

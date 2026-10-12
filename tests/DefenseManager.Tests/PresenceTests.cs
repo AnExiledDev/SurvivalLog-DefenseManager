@@ -38,9 +38,9 @@ public class PresenceTests
         Assert.Equal(DefenseView.Of(game.Read()), view);
     }
 
-    /// <summary>A null view keeps a shut panel shut and closes an open one at its next refresh.</summary>
+    /// <summary>The session keeps the panel shut on a null view, and closes an open one at its next refresh.</summary>
     [Fact]
-    public void On_an_expedition_the_panel_stays_shut_and_an_open_one_closes()
+    public void On_an_expedition_there_is_no_panel_view()
     {
         Assert.Null(Presence.PanelView(Where.Away, Home().Read));
     }
