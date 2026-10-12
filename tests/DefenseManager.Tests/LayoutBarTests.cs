@@ -19,7 +19,7 @@ public class LayoutBarTests
     [Fact]
     public void In_Layout_the_bar_counts_what_Repair_all_and_Clear_all_broken_would_take()
     {
-        var bar = Parse(LayoutBar.View(isEnabled: true, isInLayout: true, Home().Read));
+        var bar = Parse(LayoutBar.View(isEnabled: true, isInLayout: true, Where.Home, Home().Read));
 
         Assert.Equal(2, bar.GetProperty("repairAll").GetInt32());
         Assert.Equal(1, bar.GetProperty("clearAll").GetInt32());
@@ -31,7 +31,7 @@ public class LayoutBarTests
     {
         var game = Home();
 
-        Assert.Equal(DefenseView.Of(game.Read()), LayoutBar.View(isEnabled: true, isInLayout: true, game.Read));
+        Assert.Equal(Presence.PanelView(Where.Home, game.Read), LayoutBar.View(isEnabled: true, isInLayout: true, Where.Home, game.Read));
     }
 
     [Fact]
@@ -39,11 +39,12 @@ public class LayoutBarTests
     {
         var waveGame = Home();
         waveGame.IsWaveLocked = true;
+        // The map can change between the home check and the read, so the read's own away still greys the buttons.
         var awayGame = Home();
         awayGame.IsHome = false;
 
-        Assert.Equal(OutcomeMessage.WaveLockedText, Parse(LayoutBar.View(true, true, waveGame.Read)).GetProperty("locked").GetString());
-        Assert.Equal(OutcomeMessage.AwayFromHomeText, Parse(LayoutBar.View(true, true, awayGame.Read)).GetProperty("locked").GetString());
+        Assert.Equal(OutcomeMessage.WaveLockedText, Parse(LayoutBar.View(true, true, Where.Home, waveGame.Read)).GetProperty("locked").GetString());
+        Assert.Equal(OutcomeMessage.AwayFromHomeText, Parse(LayoutBar.View(true, true, Where.Home, awayGame.Read)).GetProperty("locked").GetString());
     }
 
     [Fact]
@@ -52,7 +53,7 @@ public class LayoutBarTests
         var game = Home();
         game.NotReadyReason = "no character";
 
-        var bar = Parse(LayoutBar.View(true, true, game.Read));
+        var bar = Parse(LayoutBar.View(true, true, Where.Home, game.Read));
 
         Assert.Equal("Can't manage defenses right now: no character.", bar.GetProperty("note").GetString());
         Assert.Equal(0, bar.GetProperty("repairAll").GetInt32());
@@ -61,13 +62,13 @@ public class LayoutBarTests
     [Fact]
     public void Switched_off_in_the_config_the_bar_never_shows()
     {
-        Assert.Null(LayoutBar.View(isEnabled: false, isInLayout: true, Home().Read));
+        Assert.Null(LayoutBar.View(isEnabled: false, isInLayout: true, Where.Home, Home().Read));
     }
 
     [Fact]
     public void Outside_Layout_the_bar_is_taken_away()
     {
-        Assert.Null(LayoutBar.View(isEnabled: true, isInLayout: false, Home().Read));
+        Assert.Null(LayoutBar.View(isEnabled: true, isInLayout: false, Where.Home, Home().Read));
     }
 
     [Fact]
@@ -76,6 +77,13 @@ public class LayoutBarTests
         var game = Home();
         game.IsNoGame = true;
 
-        Assert.Null(LayoutBar.View(true, true, game.Read));
+        Assert.Null(LayoutBar.View(true, true, Where.Home, game.Read));
+        Assert.Null(LayoutBar.View(true, true, Where.NoGame, Home().Read));
+    }
+
+    [Fact]
+    public void On_an_expedition_the_Layout_bar_stays_off()
+    {
+        Assert.Null(LayoutBar.View(isEnabled: true, isInLayout: true, Where.Away, Home().Read));
     }
 }

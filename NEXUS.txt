@@ -19,7 +19,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 
 [size=5]Hotkeys[/size]
 [list]
-[*][b]F7[/b]: open or close the panel (in a loaded game, past the prologue).[/*]
+[*][b]F7[/b]: open or close the panel (at home in a loaded game, past the prologue).[/*]
 [*][b]Esc[/b]: close the panel.[/*]
 [/list]
 F7 can be changed or turned off in the config. The game's own hotkeys are off while the panel is open.
@@ -29,7 +29,8 @@ The mod adds no data of its own to your save, but the repairs and removals it qu
 [size=5]Known issues[/size]
 [list]
 [*]Back up your save before trying it for the first time.[/*]
-[*]Nothing can be repaired or removed during a zombie wave or while you are away from home.[/*]
+[*]Nothing can be repaired or removed during a zombie wave.[/*]
+[*]On an expedition the panel, the HUD button and the Layout buttons are hidden, since your defenses are back home.[/*]
 [*]The game is paused while the Layout screen is open, so anything you queue there starts when you leave Layout (or when you unpause, if you had paused before).[/*]
 [*]The Layout buttons sit at the top middle of the screen. If they cover something on your screen size, turn them off in the config.[/*]
 [*]Nearest first is measured in a straight line, not along the path the character walks.[/*]
