@@ -14,6 +14,15 @@ namespace DefenseManager.Core;
 /// </summary>
 public static class DefenseView
 {
+    /// <summary>The view for a read: the defenses, an empty view saying why they could not be read, or null outside a game.</summary>
+    public static string? Of(DefenseRead read) => read switch
+    {
+        DefenseRead.Ready ready => Build(ready.Survey),
+        DefenseRead.NotReady notReady => Empty(OutcomeMessage.Describe(new DefenseOutcome.NotReady(notReady.Reason)) ?? notReady.Reason),
+        DefenseRead.NoGame => null,
+        _ => throw new InvalidOperationException("unknown defense read " + read),
+    };
+
     public static string Build(Survey survey)
     {
         var budget = MaterialBudget.Of(survey);

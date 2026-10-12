@@ -1,5 +1,5 @@
 Name: Defense Manager
-Summary: One panel for the traps and barricades outside your home. Repair all damaged defenses in one press, clear the broken ones, or repair and remove them one by one. Opens with F7 or a HUD button.
+Summary: One panel for the traps and barricades outside your home. Repair all damaged defenses in one press, clear the broken ones, or repair and remove them one by one. Opens with F7 or a HUD button, with Repair all and Clear all broken also on the game's Layout screen.
 
 Description (BBCode):
 Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel, so you can repair or clear them in one press.
@@ -13,6 +13,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Materials bar[/b]: each repair material as free / needed, outlined red when you are short.[/*]
 [*][b]Remove without the are-you-sure box[/b]: the same removal as the defense's own menu.[/*]
 [*][b]HUD button[/b]: a shield at the top of the bottom-left tool column opens the panel.[/*]
+[*][b]Layout screen buttons[/b]: while the game's Layout screen is open, Repair all, Clear all broken and Defense list sit at the top middle of the screen, styled like Layout's own buttons. Defense list opens the panel. Can be turned off in the config.[/*]
 [*][b]Game's own actions[/b]: repairs and removals join the end of your action queue, so your own queued actions run first.[/*]
 [/list]
 
@@ -29,6 +30,8 @@ The mod adds no data of its own to your save, but the repairs and removals it qu
 [list]
 [*]Back up your save before trying it for the first time.[/*]
 [*]Nothing can be repaired or removed during a zombie wave or while you are away from home.[/*]
+[*]The game is paused while the Layout screen is open, so anything you queue there starts when you leave Layout (or when you unpause, if you had paused before).[/*]
+[*]The Layout buttons sit at the top middle of the screen. If they cover something on your screen size, turn them off in the config.[/*]
 [*]Nearest first is measured in a straight line, not along the path the character walks.[/*]
 [*]Robot repair is not included.[/*]
 [*]Remove has no confirmation box. A removal you did not mean can be cancelled from the action queue.[/*]
@@ -53,7 +56,7 @@ If you run into anything strange, please tell me (see Feedback below).
 Delete [font=Courier New]DefenseManager.dll[/font] from the [font=Courier New]BepInEx&#92;plugins[/font] folder.
 
 [size=5]Configuration[/size]
-To change the key, edit [font=Courier New]BepInEx&#92;config&#92;com.dev.survivallog.defensemanager.cfg[/font] while the game is closed (see [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url]). Changes apply at the next game start.
+To change the key or turn off the Layout screen buttons, edit [font=Courier New]BepInEx&#92;config&#92;com.dev.survivallog.defensemanager.cfg[/font] while the game is closed (see [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url]). Changes apply at the next game start.
 
 [size=5]Feedback[/size]
 Found a bug or have an idea? Come say hi on the [url=https://discord.gg/trTsyxUFqg]Core Directive Discord[/url], or leave a comment here. For bugs, please include [font=Courier New]BepInEx&#92;LogOutput.log[/font] and [font=Courier New]BepInEx&#92;defense-manager.log[/font].

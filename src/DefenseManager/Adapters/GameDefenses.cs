@@ -135,6 +135,24 @@ internal sealed class GameDefenses : IDefenseGame
         }
     }
 
+    /// <summary>
+    /// True while the game's Layout screen (its plan mode) is up. Layout pauses the game's logic, so jobs lined up there
+    /// are kept but wait until the player leaves it.
+    /// </summary>
+    public bool IsInLayout()
+    {
+        try
+        {
+            return GameSingleton.Existing<BattleLogicWorld>()?.IsPlanMode ?? false;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("layout check", ex);
+
+            return false;
+        }
+    }
+
     private DefenseRead ReadSurvey()
     {
         var game = LoadedGame();

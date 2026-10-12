@@ -7,7 +7,8 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 ## Features
 
 - **Panel key**: press `F7` to open and close the panel in a loaded game, past the prologue. `Esc` or the close button in the top-right corner also closes it.
-- **HUD button**: a shield at the top of the tool column in the bottom-left corner of the screen, above the game's own buttons there. It opens and closes the panel like `F7`, and hovering it shows "Defense Manager" with the key and "Repair or remove your outdoor defenses". It only shows in a loaded game past the prologue, and it hides with the rest of the column in build mode.
+- **HUD button**: a shield at the top of the tool column in the bottom-left corner of the screen, above the game's own buttons there. It opens and closes the panel like `F7`, and hovering it shows "Defense Manager" with the key and "Repair or remove your outdoor defenses". It only shows in a loaded game past the prologue, and it hides with the rest of the column on the Layout screen.
+- **Layout screen buttons**: while the game's Layout screen is open, three buttons sit at the top middle of the screen, styled like Layout's own buttons: **Repair all (n)**, **Clear all broken (n)** and **Defense list (F7)**. The first two do exactly what the panel's buttons of the same name do. Defense list opens the panel with every defense on its own row. When the buttons are greyed out, the reason shows under them. They can be turned off in the config.
 - **Repair all (n)**: queues a repair for every damaged defense your materials cover (n is how many it would repair now). The character goes nearest-next from where they stand, so the round does not zigzag across the yard. A defense the remaining materials cannot cover is skipped and the round goes on to the next one they can.
 - **Clear all broken (n)**: queues the removal of every broken defense, nearest-next. A broken defense you already queued for repair is kept: you chose to fix it.
 - **One row per defense**: icon, name, state (Broken, Damaged or Intact), a condition bar, the repair cost, and a **Repair** and a **Remove** button. A defense already queued shows "Repair queued" or "Removal queued".
@@ -44,6 +45,8 @@ Costs, the materials you have, and the game's own repair check are all read at t
 This mod repairs and removes defenses and uses your materials. Back up your save before trying it for the first time.
 
 - Nothing can be repaired or removed during a zombie wave or while you are away from home. The panel says so and its buttons wait.
+- The game is paused while the Layout screen is open, so repairs and removals you queue there wait. The character starts on them when you leave Layout (or, if you had paused the game before opening Layout, when you unpause). The message after each press says so.
+- The Layout buttons sit at the top middle of the screen. If they cover something you need on your screen size, turn them off with `LayoutControls` in the config; `F7` and the HUD button still work.
 - If something else uses the materials before the character reaches a defense, the game decides what happens to that repair, not the mod.
 - Nearest-next is measured in a straight line from where the character stands, not along the path they walk.
 - Rows are listed by name. The walking order only applies to Repair all and Clear all broken.
@@ -76,9 +79,11 @@ Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, create
 
 Tested on Survival Log 1.1.18317 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.1.0 started, key F7`. The same line, plus one line for every press saying what was queued and why anything was left, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.2.0 started, key F7, Layout controls on`. The same line, plus one line for every press saying what was queued and why anything was left, is in `BepInEx\defense-manager.log`, which survives restarts.
 
 If `F7` does nothing, check that you are in a loaded game past the prologue, and that no other mod uses the same key. You can pick another key in the config, or use the HUD button.
+
+If the Layout buttons do not show, check that `LayoutControls` is `true` in the config and that you are in a loaded game past the prologue. They can take a second to appear after Layout opens.
 
 ## Feedback and bug reports
 
@@ -94,7 +99,7 @@ dotnet build src/DefenseManager -c Release -p:GameDir="C:\path\to\Survival Log"
 
 `GameDir` is the game folder. The default in the project file is a local path you will almost certainly need to override. The output DLL is at `src\DefenseManager\bin\Release\DefenseManager.dll`.
 
-The unit tests cover the pure rules (which defenses each button acts on, the walking order, the material budget, the panel view and the messages) and need nothing from the game:
+The unit tests cover the pure rules (which defenses each button acts on, the walking order, the material budget, the panel view, the Layout buttons and the messages) and need nothing from the game:
 
 ```
 dotnet test tests/DefenseManager.Tests

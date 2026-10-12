@@ -1,13 +1,16 @@
 // Defense Manager's web half. Runs in Root.html, the document every game page iframe sits in. Draws the panel over
 // all of them, styled like the other mod panels with the game's own colours and fonts, and puts a button in the HUD's
 // tool column (bottom left, above the phone and bag buttons), built like the game's own buttons there so it reads as
-// part of the game. Talks to the plugin through vuplex.postMessage("slmod|defensemanager|<verb>") and is driven by
-// window.__sldefense.
+// part of the game. While the game's Layout screen is up it also puts a bar of buttons at the top of that screen,
+// built like Layout's own buttons. Talks to the plugin through vuplex.postMessage("slmod|defensemanager|<verb>") and is
+// driven by window.__sldefense.
 (function () {
   if (window.__sldefense) return;
 
   var PREFIX = 'slmod|defensemanager|';
   var HUD_CLASS = 'dm-hud-btn';
+  var LAYOUT_ID = 'dm-layout';
+  var LAYOUT_STYLE_ID = 'dm-layout-style';
   var BUSY_TIMEOUT_MS = 5000;
   var TOAST_MS = 3500;
   var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -16,13 +19,15 @@
   var STATE_LABEL = { broken: 'Broken', damaged: 'Damaged', intact: 'Intact' };
   var QUEUED_LABEL = { repair: 'Repair queued', remove: 'Removal queued' };
 
-  var state = { data: emptyData(), isOpen: false, isLive: false, key: '' };
+  var state = { data: emptyData(), isOpen: false, isLive: false, key: '', layout: null };
   var ui = null;
   var toastTimer = 0;
   var isBusy = false;
   var busyTimer = 0;
-  var hasReportedHudAccess = false;
+  var layoutVersion = 0;
+  var hasReportedPageAccess = false;
   var hasReportedHudPlaced = false;
+  var hasReportedLayoutPlaced = false;
 
   function emptyData() {
     return { note: null, locked: null, repairAll: 0, clearAll: 0, materials: [], defenses: [] };
@@ -189,7 +194,8 @@
     var act = target.getAttribute('data-act');
     var args = target.getAttribute('data-args');
 
-    if (act === 'close') {
+    // Opening or shutting the panel gets no status line back, so it must not hold the buttons busy.
+    if (act === 'close' || act === 'toggle') {
       send(act);
 
       return;
@@ -398,19 +404,30 @@
   function live(isLive, key) {
     state.isLive = !!isLive;
     state.key = key || '';
+    layoutVersion++;
 
     if (ui && state.isOpen) renderKeys();
 
-    patchHudSafely();
+    patchPagesSafely();
   }
 
-  // The HUD is a same-origin iframe, so its document can be reached from here; polled because the game creates and
-  // drops that iframe whenever it likes.
-  function patchHud() {
+  // What the bar on the game's Layout screen draws from (the panel's own view), or null while Layout is not up.
+  function layout(data) {
+    state.layout = data || null;
+    layoutVersion++;
+    patchPagesSafely();
+  }
+
+  // The HUD and the Layout screen are same-origin iframes, so their documents can be reached from here; polled because
+  // the game creates and drops those iframes whenever it likes.
+  function patchPages() {
     var frames = document.querySelectorAll('iframe');
 
     for (var i = 0; i < frames.length; i++) {
-      if (!/CoreUI1\.html/.test(frames[i].src || '')) continue;
+      var src = frames[i].src || '';
+      var isHud = /CoreUI1\.html/.test(src);
+
+      if (!isHud && !/BuildTips\.html/.test(src)) continue;
 
       var doc = null;
 
@@ -419,18 +436,19 @@
       } catch (e) {}
 
       if (!doc) {
-        if (!hasReportedHudAccess) send('diag|cannot reach the HUD page document (root ' + location.protocol + ', iframe ' + frames[i].src + ')');
-        hasReportedHudAccess = true;
+        if (!hasReportedPageAccess) send('diag|cannot reach a game page document (root ' + location.protocol + ', iframe ' + src + ')');
+        hasReportedPageAccess = true;
         continue;
       }
 
-      placeHudButton(doc);
+      if (isHud) placeHudButton(doc);
+      else placeLayoutBar(doc);
     }
   }
 
-  function patchHudSafely() {
+  function patchPagesSafely() {
     try {
-      patchHud();
+      patchPages();
     } catch (e) {}
   }
 
@@ -508,8 +526,102 @@
     return tip;
   }
 
-  setInterval(patchHudSafely, 400);
+  // Layout's own button look (its cancel button: dark plate, amber text and border, amber corner marks), so the bar
+  // reads as part of that screen. The corner marks use the Layout page's own .corner rules.
+  var LAYOUT_CSS = [
+    '#dm-layout{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}',
+    '#dm-layout .dm-lb-row{display:flex;gap:12px}',
+    '#dm-layout .dm-lb-btn{position:relative;font-family:inherit;background-color:rgba(12,12,14,.8);border:1px solid rgba(235,163,8,.4);color:#EBA308;font-size:15px;font-weight:700;padding:10px 22px;cursor:pointer;letter-spacing:2px;white-space:nowrap;transition:background-color .15s,border-color .15s}',
+    '#dm-layout .dm-lb-btn:hover:not(:disabled){background-color:rgba(235,163,8,.15);border-color:rgba(235,163,8,.7)}',
+    '#dm-layout .dm-lb-btn:active:not(:disabled){background-color:rgba(235,163,8,.25)}',
+    '#dm-layout .dm-lb-btn.dm-lb-danger:hover:not(:disabled){background-color:rgba(229,57,53,.18);border-color:rgba(229,57,53,.75);color:#ff8a80}',
+    '#dm-layout .dm-lb-btn:disabled{opacity:.4;cursor:default}',
+    '#dm-layout .dm-lb-note{position:relative;max-width:640px;text-align:center;padding:8px 18px;background-color:rgba(12,12,14,.75);border:1px solid rgba(235,163,8,.35);color:#EBA308;font-size:13px;font-weight:700;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.6)}'
+  ].join('\n');
 
-  window.__sldefense = { open: open, setData: setData, close: close, status: status, live: live };
+  // The bar is drawn again only when its view or the panel key changed, so the game's hover and click state on it is
+  // not reset every poll. It goes away whenever Layout closes or the game is left.
+  function placeLayoutBar(doc) {
+    var existing = doc.getElementById(LAYOUT_ID);
+
+    if (!state.layout || !state.isLive || !doc.body) {
+      if (existing) existing.remove();
+
+      return;
+    }
+
+    if (existing && existing.getAttribute('data-version') === String(layoutVersion)) return;
+
+    addLayoutStyle(doc);
+
+    var bar = layoutBar(doc);
+
+    if (existing) existing.parentNode.replaceChild(bar, existing);
+    else doc.body.appendChild(bar);
+
+    if (!hasReportedLayoutPlaced) send('diag|Layout bar placed on the Layout screen');
+    hasReportedLayoutPlaced = true;
+  }
+
+  function addLayoutStyle(doc) {
+    if (doc.getElementById(LAYOUT_STYLE_ID)) return;
+
+    var style = doc.createElement('style');
+    style.id = LAYOUT_STYLE_ID;
+    style.textContent = LAYOUT_CSS;
+    (doc.head || doc.body).appendChild(style);
+  }
+
+  // The same two buttons as the panel's top bar, plus one that opens the panel for the per-defense list. The row is
+  // marked unity-interactive, as Layout marks its own buttons, so the page tells the game where it is and a click on
+  // it, greyed buttons included, never falls through to the world behind. A greyed bar says why underneath it.
+  function layoutBar(doc) {
+    var data = state.layout;
+    var isUnlocked = !data.locked;
+    var bar = doc.createElement('div');
+    var row = doc.createElement('div');
+    var why = data.locked || data.note;
+
+    bar.id = LAYOUT_ID;
+    bar.setAttribute('data-version', String(layoutVersion));
+    row.className = 'dm-lb-row unity-interactive';
+    row.appendChild(layoutButton(doc, 'Repair all (' + data.repairAll + ')', 'repairall', isUnlocked, ''));
+    row.appendChild(layoutButton(doc, 'Clear all broken (' + data.clearAll + ')', 'clearbroken', isUnlocked, 'dm-lb-danger'));
+    row.appendChild(layoutButton(doc, state.key ? 'Defense list (' + state.key + ')' : 'Defense list', 'toggle', true, ''));
+    row.addEventListener('click', onClick);
+    bar.appendChild(row);
+
+    if (why) {
+      var note = doc.createElement('div');
+      note.className = 'dm-lb-note';
+      note.textContent = why;
+      bar.appendChild(note);
+    }
+
+    return bar;
+  }
+
+  function layoutButton(doc, text, action, isEnabled, extraClass) {
+    var node = doc.createElement('button');
+    var corners = ['tl', 'tr', 'bl', 'br'];
+
+    node.className = 'dm-lb-btn' + (extraClass ? ' ' + extraClass : '');
+    node.setAttribute('data-act', action);
+
+    if (!isEnabled) node.disabled = true;
+
+    corners.forEach(function (corner) {
+      var mark = doc.createElement('div');
+      mark.className = 'corner ' + corner;
+      node.appendChild(mark);
+    });
+    node.appendChild(doc.createTextNode(text));
+
+    return node;
+  }
+
+  setInterval(patchPagesSafely, 400);
+
+  window.__sldefense = { open: open, setData: setData, close: close, status: status, live: live, layout: layout };
   send('ready');
 })();

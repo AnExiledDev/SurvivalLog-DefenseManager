@@ -153,4 +153,48 @@ public class OutcomeMessageTests
         Assert.Null(OutcomeMessage.WhyNotRemove(new RemoveVerdict.AlreadyQueued()));
         Assert.Equal("Repair queued: let it finish or cancel it first", OutcomeMessage.WhyNotRemove(new RemoveVerdict.QueuedForRepair()));
     }
+
+    [Fact]
+    public void A_press_in_Layout_that_lines_up_work_says_the_work_waits_for_Layout_to_close()
+    {
+        string? InLayout(DefenseOutcome outcome) => OutcomeMessage.Describe(outcome, isInLayout: true);
+
+        Assert.Equal("Repairing Sandbags. " + OutcomeMessage.InLayoutText, InLayout(new DefenseOutcome.Queued(Job.Repair, "Sandbags")));
+        Assert.Equal("Removing Sandbags. " + OutcomeMessage.InLayoutText, InLayout(new DefenseOutcome.Queued(Job.Remove, "Sandbags")));
+        Assert.Equal("Repairing 2 defenses. " + OutcomeMessage.InLayoutText, InLayout(new DefenseOutcome.Repaired(Tally(queued: 2))));
+        Assert.Equal("Removing 3 broken defenses. " + OutcomeMessage.InLayoutText, InLayout(new DefenseOutcome.Cleared(new ClearTally(3, 0, 0, 0))));
+    }
+
+    [Fact]
+    public void A_second_press_in_Layout_also_says_the_queued_work_is_waiting()
+    {
+        Assert.Equal("Already repairing: 2 repairs still queued. " + OutcomeMessage.InLayoutText, OutcomeMessage.Describe(new DefenseOutcome.Repaired(Tally(alreadyQueued: 2)), isInLayout: true));
+        Assert.Equal("Already clearing: 1 removal still queued. " + OutcomeMessage.InLayoutText, OutcomeMessage.Describe(new DefenseOutcome.Cleared(new ClearTally(0, 1, 0, 0)), isInLayout: true));
+    }
+
+    [Fact]
+    public void Outside_Layout_a_press_reads_exactly_as_before()
+    {
+        Assert.Equal("Repairing Sandbags.", OutcomeMessage.Describe(new DefenseOutcome.Queued(Job.Repair, "Sandbags"), isInLayout: false));
+        Assert.Equal("Repairing 2 defenses.", OutcomeMessage.Describe(new DefenseOutcome.Repaired(Tally(queued: 2)), isInLayout: false));
+        Assert.Equal("Removing 3 broken defenses.", OutcomeMessage.Describe(new DefenseOutcome.Cleared(new ClearTally(3, 0, 0, 0)), isInLayout: false));
+    }
+
+    [Fact]
+    public void A_press_in_Layout_that_lined_up_nothing_does_not_promise_any_work()
+    {
+        string? InLayout(DefenseOutcome outcome) => OutcomeMessage.Describe(outcome, isInLayout: true);
+
+        Assert.Null(InLayout(new DefenseOutcome.NoGame()));
+        Assert.Equal(OutcomeMessage.WaveLockedText, InLayout(new DefenseOutcome.WaveLocked()));
+        Assert.Equal(OutcomeMessage.AwayFromHomeText, InLayout(new DefenseOutcome.AwayFromHome()));
+        Assert.Equal("Finish or cancel your queued actions first.", InLayout(new DefenseOutcome.QueueBusy()));
+        Assert.Equal("Every defense is in full repair.", InLayout(new DefenseOutcome.NothingToDo(Job.Repair)));
+        Assert.Equal("That defense is gone.", InLayout(new DefenseOutcome.Gone()));
+        Assert.Equal("Sandbags needs no repair.", InLayout(new DefenseOutcome.RepairRefused("Sandbags", new RepairVerdict.Undamaged())));
+        Assert.Equal("The game would not queue the removal of Sandbags.", InLayout(new DefenseOutcome.NotQueued(Job.Remove, "Sandbags")));
+        Assert.Equal("Could not start the repair, see BepInEx/defense-manager.log.", InLayout(new DefenseOutcome.StartFailed(Job.Repair, 1)));
+        Assert.Equal("Nothing repaired. 2 can't be repaired right now.", InLayout(new DefenseOutcome.Repaired(Tally(blocked: 2))));
+        Assert.Equal("Nothing cleared. 1 queued for repair, so kept.", InLayout(new DefenseOutcome.Cleared(new ClearTally(0, 0, 1, 0))));
+    }
 }

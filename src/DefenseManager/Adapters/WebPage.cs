@@ -9,8 +9,9 @@ namespace DefenseManager.Adapters;
 
 /// <summary>
 /// The mod's half that lives in the game's web UI: page.js, run in the root document the game's own pages sit in. It
-/// draws the panel and puts the Defense Manager button in the HUD's tool column. The web view can reload at any time
-/// and lose the script, so it is checked for every couple of seconds and put back when the page says it is missing.
+/// draws the panel, puts the Defense Manager button in the HUD's tool column and a bar of buttons on the game's
+/// Layout screen. The web view can reload at any time and lose the script, so it is checked for every couple of
+/// seconds and put back when the page says it is missing.
 /// </summary>
 internal sealed class WebPage
 {
@@ -52,6 +53,9 @@ internal sealed class WebPage
 
     /// <summary>Whether a game is loaded (the HUD button shows only then) and the panel key's name, "" for none.</summary>
     public bool Live(bool isLive, string keyName) => Call($"live({(isLive ? "true" : "false")},{JsText.Literal(keyName)})");
+
+    /// <summary>The view the bar on the game's Layout screen draws from, or null to take the bar away.</summary>
+    public bool Layout(string? viewJson) => Call($"layout({viewJson ?? "null"})");
 
     private bool Call(string expression) => Run($"window.__sldefense?window.__sldefense.{expression}:{NoScriptReply}");
 
