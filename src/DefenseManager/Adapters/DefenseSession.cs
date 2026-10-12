@@ -27,6 +27,7 @@ internal sealed class DefenseSession
     private bool _isOpen;
     private bool _hasSentLayout;
     private string? _sentLayout;
+    private bool _wasInLayout;
     private bool _hasReportedLayoutFailure;
 
     public DefenseSession(GameDefenses game, WebPage page, KeyCode panelKey, bool isLayoutBarEnabled, Action<string> log)
@@ -48,6 +49,10 @@ internal sealed class DefenseSession
         if (now >= _nextLiveCheckAt)
         {
             SendLive(now);
+            SyncLayout();
+        }
+        else if (HasLayoutOpenedOrClosed())
+        {
             SyncLayout();
         }
 
@@ -152,11 +157,19 @@ internal sealed class DefenseSession
         _sentLayout = view;
     }
 
+    /// <summary>
+    /// Checked every frame, so the bar shows, with fresh counts, the frame Layout opens, and goes the frame it closes,
+    /// rather than on the next one-second check.
+    /// </summary>
+    private bool HasLayoutOpenedOrClosed() => _isLayoutBarEnabled && _game.IsInLayout() != _wasInLayout;
+
     private string? ReadLayoutView()
     {
         try
         {
-            return LayoutBar.View(_isLayoutBarEnabled, _game.IsInLayout(), _game.Read);
+            _wasInLayout = _game.IsInLayout();
+
+            return LayoutBar.View(_isLayoutBarEnabled, _wasInLayout, _game.Read);
         }
         catch (Exception ex)
         {
