@@ -27,7 +27,7 @@ Defense Manager adds no data of its own to your save. The repairs and removals i
 
 | Key | What it does |
 | --- | --- |
-| `F7` | Opens and closes the panel (in a loaded game, past the prologue). |
+| `F7` | Opens and closes the panel (at home in a loaded game, past the prologue). |
 | `Esc` | Closes the panel. |
 
 `F7` can be changed or turned off in the config. The HUD button works either way.
@@ -88,7 +88,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
-- 0.2.1: the Defense Manager button hides on expeditions.
+- 0.2.1: the panel, HUD button, Layout buttons and F7 are off on expeditions.
 
 ## Feedback and bug reports
 
