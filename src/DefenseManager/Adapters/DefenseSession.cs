@@ -5,8 +5,9 @@ using UnityEngine;
 namespace DefenseManager.Adapters;
 
 /// <summary>
-/// The panel's game side, run once a frame: its open state, the view it sends to page.js, and the presses the page
-/// asks for. Page messages arrive on the web view's thread, so they are queued and handled here, in this frame.
+/// The panel's game side, run once a frame: its open state, the view it sends to page.js, the bar on the game's Layout
+/// screen, and the presses the page asks for. Page messages arrive on the web view's thread, so they are queued and
+/// handled here, in this frame.
 /// </summary>
 internal sealed class DefenseSession
 {
@@ -16,6 +17,7 @@ internal sealed class DefenseSession
     private readonly GameDefenses _game;
     private readonly WebPage _page;
     private readonly KeyCode _panelKey;
+    private readonly bool _isLayoutBarEnabled;
     private readonly Action<string> _log;
 
     private string _shownView = "";
@@ -23,12 +25,16 @@ internal sealed class DefenseSession
     private float _nextLiveCheckAt;
     private bool? _sentLive;
     private bool _isOpen;
+    private bool _hasSentLayout;
+    private string? _sentLayout;
+    private bool _hasReportedLayoutFailure;
 
-    public DefenseSession(GameDefenses game, WebPage page, KeyCode panelKey, Action<string> log)
+    public DefenseSession(GameDefenses game, WebPage page, KeyCode panelKey, bool isLayoutBarEnabled, Action<string> log)
     {
         _game = game;
         _page = page;
         _panelKey = panelKey;
+        _isLayoutBarEnabled = isLayoutBarEnabled;
         _log = log;
     }
 
@@ -39,7 +45,11 @@ internal sealed class DefenseSession
 
         while (PageMessages.TryTake(out var command)) HandleSafely(command);
 
-        if (now >= _nextLiveCheckAt) SendLive(now);
+        if (now >= _nextLiveCheckAt)
+        {
+            SendLive(now);
+            SyncLayout();
+        }
 
         if (_panelKey != KeyCode.None && Input.GetKeyDown(_panelKey))
         {
@@ -98,6 +108,7 @@ internal sealed class DefenseSession
             case PageCommand.Ready:
                 _log("page script ready");
                 _sentLive = null;
+                _hasSentLayout = false;
                 _nextLiveCheckAt = 0f;
                 ReopenAfterReload();
                 break;
@@ -124,6 +135,37 @@ internal sealed class DefenseSession
         if (isLive == _sentLive) return;
 
         if (_page.Live(isLive, KeyName())) _sentLive = isLive;
+    }
+
+    /// <summary>
+    /// Puts the bar on the game's Layout screen while that screen is up and takes it away after. Sent only when its view
+    /// changed; a read that throws takes the bar away rather than leave it showing stale counts.
+    /// </summary>
+    private void SyncLayout()
+    {
+        var view = ReadLayoutView();
+
+        if (_hasSentLayout && view == _sentLayout) return;
+        if (!_page.Layout(view)) return;
+
+        _hasSentLayout = true;
+        _sentLayout = view;
+    }
+
+    private string? ReadLayoutView()
+    {
+        try
+        {
+            return LayoutBar.View(_isLayoutBarEnabled, _game.IsInLayout(), _game.Read);
+        }
+        catch (Exception ex)
+        {
+            if (!_hasReportedLayoutFailure) _log($"reading the defenses for the Layout bar failed (reported once): {ex}");
+
+            _hasReportedLayoutFailure = true;
+
+            return null;
+        }
     }
 
     private string KeyName() => _panelKey == KeyCode.None ? "" : _panelKey.ToString();
@@ -243,20 +285,14 @@ internal sealed class DefenseSession
     private string? ReadView()
     {
         _nextRefreshAt = Time.unscaledTime + RefreshSeconds;
-        var read = _game.Read();
 
-        return read switch
-        {
-            DefenseRead.Ready ready => DefenseView.Build(ready.Survey),
-            DefenseRead.NotReady notReady => DefenseView.Empty(OutcomeMessage.Describe(new DefenseOutcome.NotReady(notReady.Reason)) ?? notReady.Reason),
-            DefenseRead.NoGame => null,
-            _ => throw new InvalidOperationException("unknown defense read " + read),
-        };
+        return DefenseView.Of(_game.Read());
     }
 
     /// <summary>
     /// Runs one button press and shows what it did: in the panel's status line while it is open, as a toast otherwise.
-    /// The panel is redrawn straight after, so a queued badge shows without waiting for the next refresh.
+    /// The panel and the Layout bar are redrawn straight after, so a queued badge or a new count shows without waiting
+    /// for the next refresh.
     /// </summary>
     private void Press(string name, Func<DefenseOutcome> press)
     {
@@ -265,7 +301,7 @@ internal sealed class DefenseSession
         try
         {
             var outcome = press();
-            message = OutcomeMessage.Describe(outcome);
+            message = OutcomeMessage.Describe(outcome, _game.IsInLayout());
             _log($"{name}: {outcome} -> {message ?? "(no message)"}");
         }
         catch (Exception ex)
@@ -276,5 +312,7 @@ internal sealed class DefenseSession
 
         if (message != null) _page.Status(message);
         if (_isOpen) PushView();
+
+        SyncLayout();
     }
 }

@@ -13,6 +13,7 @@ public static class OutcomeMessage
 {
     public const string WaveLockedText = "A zombie wave is on: defenses can't be repaired or removed until it ends.";
     public const string AwayFromHomeText = "Go home first: your defenses are there.";
+    public const string InLayoutText = "Work starts when you leave Layout.";
 
     private const int NamedShortfalls = 3;
 
@@ -43,6 +44,17 @@ public static class OutcomeMessage
         _ => throw new InvalidOperationException("unknown defense outcome " + outcome),
     };
 
+    /// <summary>
+    /// The status line for a press made while the game's Layout screen is up. Layout pauses the game, so work it lines
+    /// up waits there: the line says so whenever the press left anything in the queue, new or already there.
+    /// </summary>
+    public static string? Describe(DefenseOutcome outcome, bool isInLayout)
+    {
+        var message = Describe(outcome);
+
+        return isInLayout && message != null && LeavesWorkQueued(outcome) ? message + " " + InLayoutText : message;
+    }
+
     /// <summary>Why a row's Repair button is off, or null when the row already says it (allowed, intact, or queued).</summary>
     public static string? WhyNot(RepairVerdict verdict) => verdict switch
     {
@@ -58,6 +70,17 @@ public static class OutcomeMessage
         RemoveVerdict.Allowed or RemoveVerdict.AlreadyQueued => null,
         RemoveVerdict.QueuedForRepair => "Repair queued: let it finish or cancel it first",
         _ => throw new InvalidOperationException("unknown remove verdict " + verdict),
+    };
+
+    private static bool LeavesWorkQueued(DefenseOutcome outcome) => outcome switch
+    {
+        DefenseOutcome.Queued => true,
+        DefenseOutcome.Repaired repaired => repaired.Tally.Queued + repaired.Tally.AlreadyQueued > 0,
+        DefenseOutcome.Cleared cleared => cleared.Tally.Queued + cleared.Tally.AlreadyQueued > 0,
+        DefenseOutcome.NoGame or DefenseOutcome.NotReady or DefenseOutcome.WaveLocked or DefenseOutcome.AwayFromHome or DefenseOutcome.QueueBusy
+            or DefenseOutcome.NothingToDo or DefenseOutcome.Gone or DefenseOutcome.RepairRefused or DefenseOutcome.RemoveRefused
+            or DefenseOutcome.NotQueued or DefenseOutcome.StartFailed => false,
+        _ => throw new InvalidOperationException("unknown defense outcome " + outcome),
     };
 
     private static string Describe(RepairTally tally)
