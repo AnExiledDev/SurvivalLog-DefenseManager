@@ -136,6 +136,42 @@ public class DefenseRunTests
     }
 
     [Fact]
+    public void Repair_all_lines_up_only_the_repairs_the_stamina_covers()
+    {
+        var game = new FakeGame { Stamina = new RepairStamina(25, 10), Defenses = { Def(1, x: 1), Def(2, x: 2), Def(3, x: 3), Def(4, x: 4) } };
+
+        var tally = Repaired(DefenseRun.RepairAll(game));
+
+        Assert.Equal(new long[] { 1, 2 }, game.Repairing);
+        Assert.Empty(game.FailingRepairs);
+        Assert.Equal(2, tally.Blocked);
+        Assert.Equal(RepairCheck.OutStaminaReason(10), tally.BlockedReason);
+    }
+
+    [Fact]
+    public void Repair_all_leaves_the_stamina_of_repairs_already_queued_to_them()
+    {
+        var game = new FakeGame { Stamina = new RepairStamina(30, 10), Defenses = { Def(1, x: 1), Def(2, x: 2), Def(3, x: 3), Def(4, x: 4) } };
+
+        DefenseRun.Repair(game, 4);
+        DefenseRun.Repair(game, 3);
+        DefenseRun.RepairAll(game);
+
+        Assert.Equal(new long[] { 4, 3, 1 }, game.Repairing);
+        Assert.Empty(game.FailingRepairs);
+    }
+
+    [Fact]
+    public void Repair_all_is_not_capped_when_the_stamina_could_not_be_read()
+    {
+        var game = new FakeGame { Stamina = null, Defenses = { Def(1, x: 1), Def(2, x: 2), Def(3, x: 3) } };
+
+        DefenseRun.RepairAll(game);
+
+        Assert.Equal(new long[] { 1, 2, 3 }, game.Repairing);
+    }
+
+    [Fact]
     public void A_second_press_reports_progress_and_queues_nothing_twice()
     {
         var game = new FakeGame { Defenses = { Def(1, x: 1), Def(2, x: 2), Def(3, x: 3) } };
@@ -345,6 +381,19 @@ public class DefenseRunTests
         var refused = Assert.IsType<DefenseOutcome.RepairRefused>(DefenseRun.Repair(game, 2));
 
         Assert.IsType<RepairVerdict.Short>(refused.Verdict);
+        Assert.Empty(game.FailingRepairs);
+    }
+
+    [Fact]
+    public void A_row_repair_is_refused_when_repairs_already_queued_use_the_stamina()
+    {
+        var game = new FakeGame { Stamina = new RepairStamina(19, 10), Defenses = { Def(1), Def(2) } };
+
+        DefenseRun.Repair(game, 1);
+
+        var refused = Assert.IsType<DefenseOutcome.RepairRefused>(DefenseRun.Repair(game, 2));
+
+        Assert.Equal(new RepairVerdict.Blocked(RepairCheck.OutStaminaReason(10)), refused.Verdict);
         Assert.Empty(game.FailingRepairs);
     }
 

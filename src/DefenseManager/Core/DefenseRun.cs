@@ -8,7 +8,7 @@ namespace DefenseManager.Core;
 /// The four panel buttons. Each reads the game once, decides everything from that read, and only then lines up real
 /// repairs or removals, the same ones the defense's own menu queues. Nothing is lined up during a zombie wave, away
 /// from home, or when starting would throw away actions the player queued; a repair is only lined up when the game's
-/// own check allows it and the materials left after earlier repairs cover it.
+/// own check allows it and the stamina and materials left after earlier repairs cover it.
 /// </summary>
 public static class DefenseRun
 {
@@ -93,7 +93,7 @@ public static class DefenseRun
 
         if (defense is null) return new DefenseOutcome.Gone();
 
-        var verdict = RepairCheck.Judge(defense, MaterialBudget.Of(survey), survey);
+        var verdict = RepairCheck.Judge(defense, MaterialBudget.Of(survey), StaminaBudget.Of(survey), survey);
 
         if (verdict is not RepairVerdict.Allowed) return new DefenseOutcome.RepairRefused(defense.Name, verdict);
         if (survey.QueueOnStart == QueueOnStart.ReplacesPlayerActions) return new DefenseOutcome.QueueBusy();
@@ -147,11 +147,12 @@ public static class DefenseRun
         return game.TryStart() ? done : new DefenseOutcome.StartFailed(job, queued);
     }
 
-    /// <summary>The materials one Repair all may still hand out, and every damaged defense it had to leave and why.</summary>
+    /// <summary>The stamina and materials one Repair all may still hand out, and every damaged defense it had to leave and why.</summary>
     private sealed class RepairPlan
     {
         private readonly Survey _survey;
         private readonly MaterialBudget _budget;
+        private readonly StaminaBudget _stamina;
         private readonly List<Shortfall> _short = new();
         private int _blocked;
         private string? _blockedReason;
@@ -160,17 +161,19 @@ public static class DefenseRun
         {
             _survey = survey;
             _budget = MaterialBudget.Of(survey);
+            _stamina = StaminaBudget.Of(survey);
         }
 
-        /// <summary>Takes the defense into the round when the game allows its repair and the materials left cover it, setting them aside.</summary>
+        /// <summary>Takes the defense into the round when the game allows its repair and the stamina and materials left cover it, setting them aside.</summary>
         public bool TryTake(Defense defense)
         {
-            var verdict = RepairCheck.Judge(defense, _budget, _survey);
+            var verdict = RepairCheck.Judge(defense, _budget, _stamina, _survey);
 
             switch (verdict)
             {
                 case RepairVerdict.Allowed:
                     _budget.Reserve(defense.Cost);
+                    _stamina.Reserve();
 
                     return true;
                 case RepairVerdict.Short shortOf:

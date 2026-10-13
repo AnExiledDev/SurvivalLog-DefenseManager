@@ -5,10 +5,13 @@ namespace DefenseManager.Core;
 /// <summary>A repair material: its name, its picture (page-relative path or null) and how many the player has.</summary>
 public sealed record Material(string Name, string? Icon, int Stock);
 
+/// <summary>The character's stamina and what each repair needs of it; the game spends that much when a repair starts.</summary>
+public sealed record RepairStamina(float Have, int PerRepair);
+
 /// <summary>
 /// Everything one press decides from: the home's outdoor defenses, where the character stands, the materials their
-/// repairs use, what starting a batch does to the character's queue, whether a zombie wave has defenses locked, and
-/// whether the character is at home where the defenses are.
+/// repairs use, what starting a batch does to the character's queue, whether a zombie wave has defenses locked,
+/// whether the character is at home where the defenses are, and their stamina (null when it could not be read).
 /// </summary>
 public sealed record Survey(
     IReadOnlyList<Defense> Defenses,
@@ -16,7 +19,8 @@ public sealed record Survey(
     IReadOnlyDictionary<int, Material> Materials,
     QueueOnStart QueueOnStart,
     bool IsWaveLocked,
-    bool IsHome)
+    bool IsHome,
+    RepairStamina? Stamina = null)
 {
     /// <summary>A material the game did not describe is still named, so a message never shows a bare id alone.</summary>
     public string MaterialName(int itemId) => Materials.TryGetValue(itemId, out var material) ? material.Name : $"Item {itemId}";

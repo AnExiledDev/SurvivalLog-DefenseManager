@@ -117,7 +117,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
-- 0.3.1: Repair and Repair all now work. Before, every repair was refused as "can't be repaired right now" even when the game would allow the repair.
+- 0.3.1: Repair and Repair all now work. Before, every repair was refused as "can't be repaired right now" even when the game would allow the repair. Repair all also lines up only as many repairs as your stamina covers (each needs 10), so none are refused partway through.
 - 0.3.0: power modes for electrical defenses (Wave only, Proximity, Always on, Default), set for each defense, for each type, or for all in the config. New config settings `DefaultMode` and `ProximityRange`.
 - 0.2.2: plainer setting descriptions in the config file, now also in Simplified Chinese.
 - 0.2.1: the panel, HUD button, Layout buttons and F7 are off on expeditions.

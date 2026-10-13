@@ -45,6 +45,9 @@ internal sealed class FakeGame : IDefenseGame
     /// <summary>The defenses as they stand; their queued flags are ignored, the queue below says what is queued.</summary>
     public List<Defense> Defenses { get; } = new();
 
+    /// <summary>The character's stamina and each repair's share of it; null when the game could not report it.</summary>
+    public RepairStamina? Stamina { get; set; }
+
     /// <summary>Material stock by item id.</summary>
     public Dictionary<int, int> Stock { get; } = new();
 
@@ -59,26 +62,30 @@ internal sealed class FakeGame : IDefenseGame
 
     /// <summary>
     /// Repairs in the queue the game will refuse when their turn comes: blocked by its own check, or beyond the
-    /// materials once the repairs ahead of them have taken theirs.
+    /// stamina or materials once the repairs ahead of them have taken theirs.
     /// </summary>
     public IEnumerable<long> FailingRepairs
     {
         get
         {
             var left = new Dictionary<int, int>(Stock);
+            var staminaLeft = Stamina?.Have ?? float.PositiveInfinity;
+            var perRepair = Stamina?.PerRepair ?? 0;
 
             foreach (var act in LinedUp.Concat(Running).Where(act => act.Job == Job.Repair))
             {
                 var defense = Defenses.Single(candidate => candidate.Id == act.Target);
                 var isAffordable = defense.Cost.All(entry => left.GetValueOrDefault(entry.Key) >= entry.Value);
 
-                if (defense.RepairBlockedReason is not null || !isAffordable)
+                if (defense.RepairBlockedReason is not null || !isAffordable || staminaLeft < perRepair)
                 {
                     yield return defense.Id;
                     continue;
                 }
 
                 foreach (var (itemId, count) in defense.Cost) left[itemId] = left.GetValueOrDefault(itemId) - count;
+
+                staminaLeft -= perRepair;
             }
         }
     }
@@ -105,7 +112,7 @@ internal sealed class FakeGame : IDefenseGame
         var defenses = Defenses.Select(defense => defense with { IsRepairQueued = queue.Contains(new Act(Job.Repair, defense.Id)), IsRemovalQueued = queue.Contains(new Act(Job.Remove, defense.Id)) }).ToList();
         var materials = Stock.ToDictionary(entry => entry.Key, entry => new Material(NameOf(entry.Key), null, entry.Value));
 
-        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome));
+        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina));
     }
 
     /// <summary>Like the game's own queue, this takes any job it is handed, whatever the materials or the repair check say.</summary>

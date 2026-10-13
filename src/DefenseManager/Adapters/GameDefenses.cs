@@ -178,7 +178,7 @@ internal sealed class GameDefenses : IDefenseGame
         var defenses = ReadDefenses(agents, config, actions, conditions, world._PowerManager, role.InstanceId);
         var materials = ReadMaterials(config, defenses);
         var isWaveLocked = world._TowerWaveManager?.IsWaveOperationLocked() ?? false;
-        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents));
+        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role));
 
         LogDefenseCount(defenses.Count);
 
@@ -347,7 +347,8 @@ internal sealed class GameDefenses : IDefenseGame
     /// <summary>
     /// The condition set behind the Repair button, run the way the game's action check runs it: CheckConditionSet
     /// decides, and CheckFurnitureFuncCondition only supplies the line to show. The flag in that second call's result
-    /// read as "blocked" on every repair, so it is never used; a block without a line comes back as an empty reason.
+    /// read as "blocked" on every repair (Il2CppInterop misreads a bool field of a generic struct), so it is never
+    /// used; a block without a line comes back as an empty reason.
     /// </summary>
     private string? WhyRepairRefused(ConfigManager config, ConditionSetManager conditions, int conditionSetId, long defenseId)
     {
@@ -367,6 +368,47 @@ internal sealed class GameDefenses : IDefenseGame
 
             return CheckFailed;
         }
+    }
+
+    /// <summary>
+    /// The character's stamina, read the way the game's condition check reads it (ConditionSetManager.c:935-990), and
+    /// the stamina rule in the repair's condition set. Null when either cannot be read, so Repair all is capped only by
+    /// the game's own check, as before.
+    /// </summary>
+    private RepairStamina? ReadStamina(ConfigManager config, LeadingRole role)
+    {
+        try
+        {
+            var conditionSetId = config.Get_Config_FurnitureFunc(RepairFunc)?.ConditionSetId ?? 0;
+            var perRepair = conditionSetId > 0 ? StaminaRule(config.Get_Config_ConditionSet(conditionSetId)) : 0;
+            var attributes = AgentTools.GetAgentComponent<AttributeComponent>(role);
+
+            if (perRepair <= 0 || attributes == null) return null;
+
+            var have = attributes.IsSingle(AttrName.Stamina) ? attributes.GetTotalValue_Float(AttrName.Stamina) : attributes.GetTotalValue_Int(AttrName.Stamina);
+
+            return new RepairStamina(have, perRepair);
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("stamina", ex);
+
+            return null;
+        }
+    }
+
+    /// <summary>The stamina the condition set asks for; the repair's effect spends the same amount when it starts.</summary>
+    private static int StaminaRule(Config_ConditionSet? conditionSet)
+    {
+        var keys = conditionSet?.AttriKey;
+        var numbers = conditionSet?.Number;
+
+        for (var i = 0; keys != null && numbers != null && i < keys.Count && i < numbers.Count; i++)
+        {
+            if (keys[i] == (int)AttrName.Stamina) return numbers[i];
+        }
+
+        return 0;
     }
 
     /// <summary>The materials the defenses' repairs use, with what the game counts as available for a tower repair.</summary>
