@@ -80,7 +80,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, create
 
 Tested on Survival Log 1.1.18317 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.2.1 started, key F7, Layout controls on`. The same line, plus one line for every press saying what was queued and why anything was left, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.2.2 started, key F7, Layout controls on`. The same line, plus one line for every press saying what was queued and why anything was left, is in `BepInEx\defense-manager.log`, which survives restarts.
 
 If `F7` does nothing, check that you are at home in a loaded game past the prologue, and that no other mod uses the same key. You can pick another key in the config, or use the HUD button.
 
@@ -88,6 +88,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
+- 0.2.2: plainer setting descriptions in the config file, now also in Simplified Chinese.
 - 0.2.1: the panel, HUD button, Layout buttons and F7 are off on expeditions.
 
 ## Feedback and bug reports
