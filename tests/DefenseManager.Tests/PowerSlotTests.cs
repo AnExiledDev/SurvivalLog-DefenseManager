@@ -100,6 +100,26 @@ public class PowerSlotTests
         Assert.Equal(PowerMode.Proximity, slot.Settings.DefenseSetting(CoilAtGate));
     }
 
+    /// <summary>A mode from a newer version, or a hand edit, must survive this version writing the file.</summary>
+    [Fact]
+    public void Lines_the_mod_cannot_read_are_kept_when_it_writes_the_file_and_the_ones_it_read_are_replaced()
+    {
+        const string turboType = "Save_01\ttype\t36101\tTurbo\n";
+        const string unknownKind = "Save_01\tzone\t7\tAlwaysOn\n";
+        const string badKey = "Save_01\tdefense\tnot-a-key\tAlwaysOn\n";
+        var otherSaveTurbo = "Save_02\tdefense\t" + CoilAtGate + "\tTurbo\n";
+        var file = new FakePowerFile { Text = turboType + unknownKind + badKey + otherSaveTurbo + "Save_01\tdefense\t" + CoilAtGate + "\tProximity\n" };
+
+        Assert.Equal(SettingsEdit.Saved, Loaded(file, "Save_01").SetDefense(CoilAtGate, PowerMode.AlwaysOn));
+
+        Assert.Contains(turboType, file.Text);
+        Assert.Contains(unknownKind, file.Text);
+        Assert.Contains(badKey, file.Text);
+        Assert.Contains(otherSaveTurbo, file.Text);
+        Assert.DoesNotContain("\tProximity\n", file.Text);
+        Assert.Equal(PowerMode.AlwaysOn, Loaded(file, "Save_01").Settings.DefenseSetting(CoilAtGate));
+    }
+
     /// <summary>The file holds every save's settings, so writing over one that could not be read would wipe them all.</summary>
     [Fact]
     public void A_file_that_cannot_be_read_is_never_written_over()

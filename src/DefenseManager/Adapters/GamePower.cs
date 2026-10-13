@@ -73,7 +73,18 @@ internal sealed class GamePower : IPowerGame
 
         if (power == null || clock == null) return null;
 
-        return new PowerScene(ReadUnits(agents, config, power), waves?.IsWaveActive() ?? false, ReadZombies(agents, waves), clock.GetTotalSeconds(), power.IsLocked);
+        return new PowerScene(ReadUnits(agents, config, power), waves?.IsWaveActive() ?? false, ReadZombies(agents, waves), clock.GetTotalSeconds(), power.IsLocked, ReadLoad(world));
+    }
+
+    /// <summary>
+    /// The load, by the addresses of the game objects behind it. The world and the save data are both taken because it
+    /// is not known whether the game builds a new world for every load, while a load reads its save into new save data.
+    /// </summary>
+    private static GameLoad ReadLoad(BattleLogicWorld world)
+    {
+        var save = GameSingleton.Existing<GameSaveManager>()?.gameSave;
+
+        return new GameLoad(world.Pointer.ToInt64(), save?.Pointer.ToInt64() ?? 0);
     }
 
     private List<PowerUnit> ReadUnits(AgentManager agents, ConfigManager config, PowerManager power)
@@ -119,7 +130,8 @@ internal sealed class GamePower : IPowerGame
     }
 
     /// <summary>
-    /// The wave's living zombies, read from the id list the wave keeps of them (GetAliveZombieIds hands a list out as
+    /// The living zombies at the base, read from the id list the wave manager keeps of them, which takes in stray
+    /// zombies spawned between waves as well as a wave's (GetAliveZombieIds hands a list out as
     /// an IL2CPP IReadOnlyList, which is clumsier to walk from here). A zombie that is gone, dead or has no position is
     /// skipped, never put at the map's origin where it would wake the defenses there.
     /// </summary>

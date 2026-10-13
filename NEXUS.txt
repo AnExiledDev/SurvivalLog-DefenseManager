@@ -1,5 +1,5 @@
 Name: Defense Manager
-Summary: One panel for the traps and barricades outside your home. Repair all damaged defenses in one press, clear the broken ones, or repair and remove them one by one. Opens with F7 or a HUD button, with Repair all and Clear all broken also on the game's Layout screen. Switches electrical defenses on only during waves, only when zombies come near, or always.
+Summary: One panel for the traps and barricades outside your home. Repair all damaged defenses in one press, clear the broken ones, or repair and remove them one by one. Opens with F7 or a HUD button, with Repair all and Clear all broken also on the game's Layout screen. Switches electrical defenses on only while zombies are at the base, only when zombies come near, or always.
 
 Description (BBCode):
 Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel, so you can repair or clear them in one press.
@@ -15,7 +15,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]HUD button[/b]: a shield at the top of the bottom-left tool column opens the panel.[/*]
 [*][b]Layout screen buttons[/b]: while the game's Layout screen is open, Repair all, Clear all broken and Defense list sit at the top middle of the screen, styled like Layout's own buttons. Defense list opens the panel. Can be turned off in the config.[/*]
 [*][b]Game's own actions[/b]: repairs and removals join the end of your action queue, so your own queued actions run first.[/*]
-[*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them off between waves and on during them, [b]Proximity[/b] turns them on while a zombie is in range (15 m by default) and off after 10 game minutes with none, [b]Always on[/b] keeps them on, and [b]Default[/b] leaves them to the game's own switch.[/*]
+[*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them on during waves and while zombies are at the base, and off otherwise, [b]Proximity[/b] turns them on while a zombie is in range (15 m by default) and off after 10 game minutes with none, [b]Always on[/b] keeps them on, and [b]Default[/b] leaves them to the game's own switch.[/*]
 [*][b]Per defense, per type, or for all[/b]: each electrical row has a [b]This one[/b] button for that defense and an [b]Every (name)[/b] button for all of its type. Anything without a setting follows its type, and a type without one follows the mode in the config (Wave only unless you change it).[/*]
 [/list]
 
@@ -41,7 +41,8 @@ The mod writes nothing into your save file; its power settings are its own data,
 [*]The game's own refusal reasons can show in Chinese.[/*]
 [*]A defense in any mode but Default is switched back if you flip its power by hand. Set it to Default to switch it yourself.[/*]
 [*]Nothing is switched while the Layout screen is open. Power settings are kept per save, so a new game is only switched once it has been saved.[/*]
-[*]Proximity reacts to the zombies of a zombie wave. Zombies that wander in outside a wave may not count.[/*]
+[*]Repairing an electrical defense makes the game switch it on, which costs one tick of power even when its mode has the mod switch it off again straight after.[/*]
+[*]Power settings belong to a save file. A game that carries on under a new save file name, such as after an ending or in endless mode, starts with no defense or type settings of its own.[/*]
 [/list]
 If you run into anything strange, please tell me (see Feedback below).
 

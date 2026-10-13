@@ -25,8 +25,8 @@ public sealed class Plugin : BasePlugin
             "Show Repair all, Clear all broken and Defense list buttons at the top middle of the game's Layout screen. Set to false to hide them; the panel key and the shield button still work.\n" +
             "在游戏「规划模式」界面的顶部中间显示「Repair all」「Clear all broken」「Defense list」三个按钮。设为 false 则隐藏这些按钮，面板按键和盾牌按钮照常可用。").Value;
         var defaultModeName = Config.Bind("Power", "DefaultMode", PowerModes.ConfigName(PowerMode.WaveOnly), new ConfigDescription(
-            "How electrical defenses are powered when neither the defense nor its type has a setting of its own in the Defense Manager panel. WaveOnly: off between waves, on during a wave. AlwaysOn: always on. Proximity: on while a living zombie is within ProximityRange, off once none has been in range for 10 game minutes. Default: the mod leaves the defense alone and the game's own power switch decides.\n" +
-            "电力防御设施在该设施及其类型都没有单独设置（在 Defense Manager 面板中设置）时的供电方式。WaveOnly：尸潮之间关闭，尸潮期间开启。AlwaysOn：始终开启。Proximity：有活着的僵尸进入 ProximityRange 范围内时开启，范围内连续 10 分钟游戏时间没有僵尸后关闭。Default：本模组不干预，由游戏自身的电源开关决定。",
+            "How electrical defenses are powered when neither the defense nor its type has a setting of its own in the Defense Manager panel. WaveOnly: on during waves and while zombies are at the base, off otherwise. AlwaysOn: always on. Proximity: on while a living zombie is within ProximityRange, off once none has been in range for 10 game minutes. Default: the mod leaves the defense alone and the game's own power switch decides.\n" +
+            "电力防御设施在该设施及其类型都没有单独设置（在 Defense Manager 面板中设置）时的供电方式。WaveOnly：尸潮期间以及基地有僵尸时开启，其余时间关闭。AlwaysOn：始终开启。Proximity：有活着的僵尸进入 ProximityRange 范围内时开启，范围内连续 10 分钟游戏时间没有僵尸后关闭。Default：本模组不干预，由游戏自身的电源开关决定。",
             new AcceptableValueList<string>(PowerModes.ConfigNames))).Value;
         var proximityRange = Config.Bind("Power", "ProximityRange", 15f, new ConfigDescription(
             "How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground; height does not count. 15 by default, from 1 to 100.\n" +

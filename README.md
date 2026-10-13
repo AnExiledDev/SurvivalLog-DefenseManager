@@ -2,7 +2,7 @@
 
 One panel for the traps and barricades outside your home.
 
-Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel: repair every damaged one in one press, clear away the broken ones, or repair and remove them one by one. It can also switch your electrical defenses on and off for you: off between waves and on during them, on only when a zombie comes near, or always on.
+Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel: repair every damaged one in one press, clear away the broken ones, or repair and remove them one by one. It can also switch your electrical defenses on and off for you: on during waves and while zombies are at the base, on only when a zombie comes near, or always on.
 
 ## Features
 
@@ -45,7 +45,7 @@ Costs, the materials you have, and the game's own repair check are all read at t
 
 Each electrical defense runs in one of four modes:
 
-- **Wave only**: off between zombie waves, on while a wave is running.
+- **Wave only**: on during zombie waves and while zombies are at the base, such as a stray one between waves, off otherwise.
 - **Proximity**: on while a living zombie is within `ProximityRange` (15 m by default, measured along the ground), and off once no zombie has been in range for 10 minutes of game time.
 - **Always on**: always on.
 - **Default**: the mod leaves the defense alone, and the game's own power switch decides, as if the mod were not installed.
@@ -76,7 +76,8 @@ This mod repairs and removes defenses and uses your materials. Back up your save
 - Colour and other formatting tags in the game's refusal reasons are removed.
 - A defense in any mode but Default is switched back to what its mode wants within a second if you flip its power by hand from its own menu. Set it to Default to switch it yourself.
 - Nothing is switched while the Layout screen is open or while the game locks its power switches.
-- Proximity reacts to the zombies of a zombie wave. Zombies that wander in outside a wave may not count.
+- Repairing an electrical defense makes the game switch it on, which costs one tick of power even when its mode has the mod switch it off again straight after.
+- Power settings belong to a save file. A game that carries on under a new save file name, such as after an ending or in endless mode, starts with no defense or type settings of its own.
 - The power buttons do not show, and nothing is switched, in a new game until it has been saved once, or while the power settings file cannot be read. The log says which. A file that cannot be read is never written over.
 - `BepInEx\defense-manager.log` is never trimmed. Delete it while the game is closed if it gets large.
 

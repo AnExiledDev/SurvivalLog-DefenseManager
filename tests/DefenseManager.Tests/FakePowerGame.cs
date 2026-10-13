@@ -27,6 +27,9 @@ internal sealed class FakePowerGame : IPowerGame
 
     public bool IsNoGame { get; set; }
 
+    /// <summary>Which load of the game this is; a test loads the game again by changing it.</summary>
+    public GameLoad Load { get; set; } = new(1, 1);
+
     /// <summary>Defenses whose switch the game will not move, whatever it is asked.</summary>
     public HashSet<long> Refuses { get; } = new();
 
@@ -41,7 +44,7 @@ internal sealed class FakePowerGame : IPowerGame
 
     public int PowerUpsOf(long id) => PowerUps.GetValueOrDefault(id);
 
-    public PowerScene? ReadPower() => IsNoGame ? null : new PowerScene(Defenses.ToList(), IsWaveRunning, Zombies.ToList(), Clock, IsLocked);
+    public PowerScene? ReadPower() => IsNoGame ? null : new PowerScene(Defenses.ToList(), IsWaveRunning, Zombies.ToList(), Clock, IsLocked, Load);
 
     public bool? TrySwitch(long defenseId, bool isOn)
     {

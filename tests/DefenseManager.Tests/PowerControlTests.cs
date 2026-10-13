@@ -49,6 +49,34 @@ public class PowerControlTests
         Assert.False(game.IsOn(1));
     }
 
+    /// <summary>A stray zombie between waves is as much a threat as a wave's, wherever it is at the base.</summary>
+    [Fact]
+    public void Wave_only_turns_defenses_on_with_no_wave_while_a_zombie_is_alive_at_the_base()
+    {
+        var game = Home(Unit(1), Unit(2, x: 100));
+        game.Zombies.Add(new Spot(200, 0, 0));
+
+        var made = new PowerControl().Run(game, Everywhere(PowerMode.WaveOnly), Range);
+
+        Assert.True(game.IsOn(1));
+        Assert.True(game.IsOn(2));
+        Assert.Equal("Wave only, zombies are at the base", made[0].Reason);
+    }
+
+    [Fact]
+    public void Wave_only_turns_defenses_off_once_the_last_zombie_at_the_base_is_gone_and_no_wave_runs()
+    {
+        var game = Home(Unit(1));
+        var control = new PowerControl();
+        game.Zombies.Add(new Spot(200, 0, 0));
+
+        control.Run(game, Everywhere(PowerMode.WaveOnly), Range);
+        game.Zombies.Clear();
+        control.Run(game, Everywhere(PowerMode.WaveOnly), Range);
+
+        Assert.False(game.IsOn(1));
+    }
+
     // ===== Proximity =====
 
     [Fact]
@@ -176,6 +204,32 @@ public class PowerControlTests
         game.Zombies.Add(new Spot(5, 0, 0));
         control.Run(game, Everywhere(PowerMode.Proximity), Range);
         control.Forget();
+        game.Zombies.Clear();
+        game.Clock = 1100;
+        control.Run(game, Everywhere(PowerMode.Proximity), Range);
+
+        Assert.False(game.IsOn(1));
+    }
+
+    /// <summary>
+    /// Loading the same save file again is no move to another save, but the new load hands its instance ids out
+    /// afresh, so a hold kept by id would switch on whichever defense now has that id.
+    /// </summary>
+    [Fact]
+    public void Loading_the_game_again_drops_every_hold_even_from_the_same_save_file()
+    {
+        var game = Home(Unit(1));
+        var control = new PowerControl();
+
+        game.Clock = 1000;
+        game.Zombies.Add(new Spot(5, 0, 0));
+        control.Run(game, Everywhere(PowerMode.Proximity), Range);
+
+        Assert.True(game.IsOn(1));
+
+        game.Load = new GameLoad(2, 2);
+        game.Defenses.Clear();
+        game.Defenses.Add(Unit(1, x: 50));
         game.Zombies.Clear();
         game.Clock = 1100;
         control.Run(game, Everywhere(PowerMode.Proximity), Range);
