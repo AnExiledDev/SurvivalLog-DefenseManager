@@ -6,8 +6,8 @@ namespace DefenseManager.Adapters;
 
 /// <summary>
 /// The panel's game side, run once a frame: its open state, the view it sends to page.js, the bar on the game's Layout
-/// screen, and the presses the page asks for. Page messages arrive on the web view's thread, so they are queued and
-/// handled here, in this frame.
+/// screen, the presses the page asks for, and the power pass. Page messages arrive on the web view's thread, so they
+/// are queued and handled here, in this frame.
 /// </summary>
 internal sealed class DefenseSession
 {
@@ -15,6 +15,7 @@ internal sealed class DefenseSession
     private const string FailedStatus = "Defense Manager failed, see BepInEx/defense-manager.log.";
 
     private readonly GameDefenses _game;
+    private readonly PowerSession _power;
     private readonly WebPage _page;
     private readonly KeyCode _panelKey;
     private readonly bool _isLayoutBarEnabled;
@@ -30,10 +31,12 @@ internal sealed class DefenseSession
     private string? _sentLayout;
     private bool _wasInLayout;
     private bool _hasReportedLayoutFailure;
+    private bool _hasReportedPowerFailure;
 
-    public DefenseSession(GameDefenses game, WebPage page, KeyCode panelKey, bool isLayoutBarEnabled, Action<string> log)
+    public DefenseSession(GameDefenses game, PowerSession power, WebPage page, KeyCode panelKey, bool isLayoutBarEnabled, Action<string> log)
     {
         _game = game;
+        _power = power;
         _page = page;
         _panelKey = panelKey;
         _isLayoutBarEnabled = isLayoutBarEnabled;
@@ -46,6 +49,8 @@ internal sealed class DefenseSession
         _page.KeepInstalled(now);
 
         while (PageMessages.TryTake(out var command)) HandleSafely(command);
+
+        UpdatePower(now);
 
         if (now >= _nextLiveCheckAt)
         {
@@ -74,6 +79,21 @@ internal sealed class DefenseSession
         }
 
         if (now >= _nextRefreshAt) PushView();
+    }
+
+    /// <summary>A power pass that throws must not cost the panel its frame; the failure is logged once.</summary>
+    private void UpdatePower(float now)
+    {
+        try
+        {
+            _power.Update(now, _game.IsInLayout);
+        }
+        catch (Exception ex)
+        {
+            if (!_hasReportedPowerFailure) _log($"power pass failed (reported once): {ex}");
+
+            _hasReportedPowerFailure = true;
+        }
     }
 
     /// <summary>One command that throws must not cost the rest of the frame its commands or the key checks.</summary>
@@ -110,6 +130,12 @@ internal sealed class DefenseSession
                 break;
             case PageCommand.Remove remove:
                 Press($"remove {remove.DefenseId}", () => DefenseRun.Remove(_game, remove.DefenseId));
+                break;
+            case PageCommand.Power power:
+                PressPower(PowerTarget.Defense, power.DefenseId);
+                break;
+            case PageCommand.PowerType powerType:
+                PressPower(PowerTarget.Type, powerType.DefenseId);
                 break;
             case PageCommand.Ready:
                 _log("page script ready");
@@ -316,7 +342,31 @@ internal sealed class DefenseSession
     {
         _nextRefreshAt = Time.unscaledTime + RefreshSeconds;
 
-        return Presence.PanelView(_game.Locate(), _game.Read);
+        return Presence.PanelView(_game.Locate(), _game.Read, _power.Policy());
+    }
+
+    /// <summary>
+    /// A power button: its reply goes to the status line, which also frees the page's buttons, and the panel is
+    /// redrawn so the button shows its new setting at once. The switch itself follows on the next power pass.
+    /// </summary>
+    private void PressPower(PowerTarget target, long defenseId)
+    {
+        string message;
+
+        try
+        {
+            message = _power.Press(target, defenseId);
+            _log($"power {target} {defenseId}: {message}");
+        }
+        catch (Exception ex)
+        {
+            message = FailedStatus;
+            _log($"power {target} {defenseId} failed: {ex}");
+        }
+
+        _page.Status(message);
+
+        if (_isOpen) PushView();
     }
 
     /// <summary>

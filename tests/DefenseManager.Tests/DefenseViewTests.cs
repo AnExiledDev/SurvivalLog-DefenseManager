@@ -175,4 +175,70 @@ public class DefenseViewTests
         Assert.Empty(view.GetProperty("materials").EnumerateArray());
         Assert.Empty(view.GetProperty("defenses").EnumerateArray());
     }
+
+    // ===== Power =====
+
+    private const int DefType = 36001;
+
+    private static Defense Electrical(Defense defense, bool isOn = true, bool isOperational = true) => defense with { Power = new DefensePower(isOn, isOperational) };
+
+    private static JsonElement Power(JsonElement view, long id) => Row(view, id).GetProperty("power");
+
+    private static JsonElement View(Survey survey, PowerPolicy policy) => JsonDocument.Parse(DefenseView.Build(survey, policy)).RootElement;
+
+    [Fact]
+    public void Only_a_defense_that_runs_on_electricity_gets_power_controls()
+    {
+        var view = View(SurveyOf(new[] { Electrical(Def(1)), Def(2) }), new PowerPolicy(PowerSettings.None, PowerMode.WaveOnly));
+
+        Assert.Equal(JsonValueKind.Object, Power(view, 1).ValueKind);
+        Assert.Equal(JsonValueKind.Null, Power(view, 2).ValueKind);
+    }
+
+    [Fact]
+    public void An_electrical_row_shows_its_switch_its_mode_and_what_each_power_button_is_set_to()
+    {
+        var own = Electrical(Def(1, x: 5), isOn: true);
+        var following = Electrical(Def(2, x: 30), isOn: false);
+        var settings = PowerSettings.None.WithType(DefType, PowerMode.Proximity).WithDefense(DefenseKey.Of(DefType, own.Position), PowerMode.AlwaysOn);
+
+        var view = View(SurveyOf(new[] { own, following }), new PowerPolicy(settings, PowerMode.WaveOnly));
+
+        Assert.True(Power(view, 1).GetProperty("on").GetBoolean());
+        Assert.Equal("Always on", Power(view, 1).GetProperty("mode").GetString());
+        Assert.Equal("Always on", Power(view, 1).GetProperty("label").GetString());
+        Assert.Equal("Proximity", Power(view, 1).GetProperty("typeLabel").GetString());
+        Assert.False(Power(view, 2).GetProperty("on").GetBoolean());
+        Assert.Equal("Proximity", Power(view, 2).GetProperty("mode").GetString());
+        Assert.Equal("Type setting (Proximity)", Power(view, 2).GetProperty("label").GetString());
+    }
+
+    [Fact]
+    public void A_type_with_no_setting_shows_the_global_default_it_follows()
+    {
+        var view = View(SurveyOf(new[] { Electrical(Def(1)) }), new PowerPolicy(PowerSettings.None, PowerMode.GameDefault));
+
+        Assert.Equal("Default", Power(view, 1).GetProperty("mode").GetString());
+        Assert.Equal("Type setting (Default)", Power(view, 1).GetProperty("label").GetString());
+        Assert.Equal("Global setting (Default)", Power(view, 1).GetProperty("typeLabel").GetString());
+    }
+
+    [Fact]
+    public void A_broken_or_not_working_defense_shows_the_mod_is_not_switching_it()
+    {
+        var view = View(SurveyOf(new[] { Electrical(Def(1)), Electrical(Def(2, cur: 0, broken: true)), Electrical(Def(3), isOperational: false) }), new PowerPolicy(PowerSettings.None, PowerMode.WaveOnly));
+
+        Assert.True(Power(view, 1).GetProperty("managed").GetBoolean());
+        Assert.False(Power(view, 2).GetProperty("managed").GetBoolean());
+        Assert.False(Power(view, 3).GetProperty("managed").GetBoolean());
+    }
+
+    /// <summary>Without settings (none loaded, or a file that cannot be read) a button would show a mode the pass is not using.</summary>
+    [Fact]
+    public void Without_power_settings_no_row_offers_power_controls()
+    {
+        var view = View(SurveyOf(new[] { Electrical(Def(1)) }));
+
+        Assert.Equal(JsonValueKind.Null, Power(view, 1).ValueKind);
+    }
 }

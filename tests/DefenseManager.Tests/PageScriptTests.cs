@@ -193,4 +193,42 @@ public class PageScriptTests
 
         Assert.Equal(new PageCommand[] { new PageCommand.RepairAll(), new PageCommand.Close() }, page.Sent);
     }
+
+    // ===== Power controls in the panel =====
+
+    /// <summary>A home with one electrical defense, switched on, and one barricade.</summary>
+    private static string PowerView()
+    {
+        var game = new FakeGame { Defenses = { Def(1, name: "Tesla coil") with { Power = new DefensePower(IsOn: true, IsOperational: true) }, Def(2, name: "Barricade") } };
+
+        return DefenseView.Of(game.Read(), new PowerPolicy(PowerSettings.None, PowerMode.WaveOnly)) ?? throw new InvalidOperationException("no panel view");
+    }
+
+    private static string PowerButtonCount(PageScript page) => page.Text("document.querySelectorAll('[data-act]').filter(function (node) { return /^power/.test(node.getAttribute('data-act')); }).length");
+
+    [Fact]
+    public void An_electrical_row_names_which_button_changes_this_defense_and_which_changes_its_whole_type()
+    {
+        var page = new PageScript();
+
+        page.Open(PowerView());
+
+        Assert.Equal("This one: Type setting (Wave only)", page.Text("panelButton('power').textContent"));
+        Assert.Equal("Every Tesla coil: Global setting (Wave only)", page.Text("panelButton('powertype').textContent"));
+        Assert.Equal("Power on", page.Text("document.querySelector('.dm-badge-on').textContent"));
+        Assert.Equal("2", PowerButtonCount(page));
+    }
+
+    [Fact]
+    public void The_two_power_buttons_send_their_own_commands_for_that_defense()
+    {
+        var page = new PageScript();
+
+        page.Open(PowerView());
+        page.Click("panelButton('power')");
+        page.Status("Tesla coil set to Always on.");
+        page.Click("panelButton('powertype')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.Power(1), new PageCommand.PowerType(1) }, page.Sent);
+    }
 }

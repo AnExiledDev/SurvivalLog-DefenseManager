@@ -7,7 +7,8 @@ namespace DefenseManager.Core;
 /// path of its picture, or null. Cost is what a full repair takes right now, item id to count, and is empty when the
 /// repair is free or none is needed. RepairBlockedReason is the game's own reason for refusing the repair (the check
 /// behind the Repair button in its menu), null when the game would allow it. The two queued flags say whether the
-/// character already has a repair or a removal of this defense lined up.
+/// character already has a repair or a removal of this defense lined up. Power is null for a defense that runs on no
+/// electricity.
 /// </summary>
 public sealed record Defense(
     long Id,
@@ -21,7 +22,14 @@ public sealed record Defense(
     IReadOnlyDictionary<int, int> Cost,
     string? RepairBlockedReason,
     bool IsRepairQueued,
-    bool IsRemovalQueued)
+    bool IsRemovalQueued,
+    DefensePower? Power = null)
 {
     public bool IsDamaged => Max > 0 && Current < Max;
+
+    /// <summary>Whether the mod switches this defense's power: it runs on electricity and is whole and working.</summary>
+    public bool IsPowerManaged => PowerPlanner.IsManaged(Power != null, IsBroken, Power?.IsOperational ?? false);
 }
+
+/// <summary>An electrical defense's power switch as the game has it now, and whether the game counts the defense as working.</summary>
+public sealed record DefensePower(bool IsOn, bool IsOperational);

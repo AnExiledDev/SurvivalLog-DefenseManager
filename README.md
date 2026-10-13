@@ -2,7 +2,7 @@
 
 One panel for the traps and barricades outside your home.
 
-Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel: repair every damaged one in one press, clear away the broken ones, or repair and remove them one by one.
+Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel: repair every damaged one in one press, clear away the broken ones, or repair and remove them one by one. It can also switch your electrical defenses on and off for you: off between waves and on during them, on only when a zombie comes near, or always on.
 
 ## Features
 
@@ -16,12 +16,13 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 - **Remove without the are-you-sure box**: Remove queues the same removal action as the defense's own menu, without the confirmation box.
 - **Materials bar**: each repair material shows as free / needed: what is left after the repairs already queued, against what the repairs not yet queued would take. A material you are short of is outlined in red.
 - **Clear messages**: after each press a line says what was queued and what was left and why. Repair all names up to three defenses that are short of materials and exactly what each is missing. When the panel is closed, the message shows as a short pop-up instead.
+- **Power modes for electrical defenses**: the mod switches each electrical defense's power for you, in one of four modes (see [Power modes](#power-modes)). Its row shows whether the power is on, the mode it runs in, and two buttons: **This one: ...** changes the mode of that one defense, and **Every (name): ...** changes it for every defense of that type. Each button shows its current setting.
 - **Game hotkeys paused**: the game's own hotkeys are off while the panel is open and come back when it closes, so keys you press in the panel do not reach the game.
 - **Log file**: every press and what came of it is written to `BepInEx\defense-manager.log`.
 
 Every repair and removal is the game's own action, the same one the defense's menu lines up, so the game's own walking, timing and material use apply. Only defenses outside your home are listed; doors and windows are not touched.
 
-Defense Manager adds no data of its own to your save. The repairs and removals it queues are real: they use your materials and take defenses down, exactly as if you had used each defense's menu. You can remove the mod at any time; your defenses stay as they are.
+Defense Manager writes nothing into your save file. Its power settings are its own data, kept for each save in `BepInEx\config\com.dev.survivallog.defensemanager.power.txt`. The repairs and removals it queues are real: they use your materials and take defenses down, exactly as if you had used each defense's menu. You can remove the mod at any time; your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
 
 ## Hotkeys
 
@@ -40,6 +41,25 @@ Repairs and removals join the end of your character's action queue, so actions y
 
 Costs, the materials you have, and the game's own repair check are all read at the moment you press. Repair all keeps back the materials the repairs already queued will need.
 
+### Power modes
+
+Each electrical defense runs in one of four modes:
+
+- **Wave only**: off between zombie waves, on while a wave is running.
+- **Proximity**: on while a living zombie is within `ProximityRange` (15 m by default, measured along the ground), and off once no zombie has been in range for 10 minutes of game time.
+- **Always on**: always on.
+- **Default**: the mod leaves the defense alone, and the game's own power switch decides, as if the mod were not installed.
+
+The mode comes from three levels, and the first one that has a setting wins:
+
+1. **This defense**: set with the row's **This one** button. A defense with no setting of its own shows **Type setting (mode)**, with the mode it gets from its type.
+2. **Its type**: set with the row's **Every (name)** button, and shared by every defense of that type in this save. A type with no setting shows **Global setting (mode)**, with the mode from the config.
+3. **Global**: `DefaultMode` in the config, **Wave only** unless you change it.
+
+Each button steps through its own setting: This one goes Type setting, Always on, Wave only, Proximity, Default, then back to Type setting. Every (name) goes Global setting, Always on, Wave only, Proximity, Default, then back to Global setting. A setting belongs to the defense's type and the spot it stands on, so a defense you take down and build again in the same place keeps it.
+
+The mod checks the defenses about twice a second whenever a game is loaded, with the panel open or closed and while you are away from home. It only switches a defense when its power is not already where the mode wants it, and each switch is written to the log with the reason. Only electrical defenses that are whole and working are switched: a broken one, or one the game counts as not working, is left as it is, and its row says so. Settings are kept for each save, so a game is only switched once it has been saved.
+
 ## Known issues and limits
 
 This mod repairs and removes defenses and uses your materials. Back up your save before trying it for the first time.
@@ -54,6 +74,10 @@ This mod repairs and removes defenses and uses your materials. Back up your save
 - Robot repair is not included.
 - A removal you did not mean can be cancelled from the action queue before the character gets to it, like any other queued action. There is no confirmation box.
 - Colour and other formatting tags in the game's refusal reasons are removed.
+- A defense in any mode but Default is switched back to what its mode wants within a second if you flip its power by hand from its own menu. Set it to Default to switch it yourself.
+- Nothing is switched while the Layout screen is open or while the game locks its power switches.
+- Proximity reacts to the zombies of a zombie wave. Zombies that wander in outside a wave may not count.
+- The power buttons do not show, and nothing is switched, in a new game until it has been saved once, or while the power settings file cannot be read. The log says which. A file that cannot be read is never written over.
 - `BepInEx\defense-manager.log` is never trimmed. Delete it while the game is closed if it gets large.
 
 If a defense is missing from the list, a repair uses the wrong materials, or a press does something you did not expect, please tell me (see [Feedback](#feedback-and-bug-reports)).
@@ -70,7 +94,9 @@ If a defense is missing from the list, a repair uses the wrong materials, or a p
 
 ## Uninstall
 
-Delete `DefenseManager.dll` from the `BepInEx\plugins` folder. For a clean slate, also delete `BepInEx\config\com.dev.survivallog.defensemanager.cfg` and `BepInEx\defense-manager.log`.
+Delete `DefenseManager.dll` from the `BepInEx\plugins` folder. For a clean slate, also delete `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, `BepInEx\config\com.dev.survivallog.defensemanager.power.txt` and `BepInEx\defense-manager.log`.
+
+Each electrical defense stays in the power state the mod last switched it to, because the game saves that switch. Switch any you want changed from the defense's own menu.
 
 ## Configuration
 
@@ -80,7 +106,9 @@ Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, create
 
 Tested on Survival Log 1.1.18317 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.2.2 started, key F7, Layout controls on`. The same line, plus one line for every press saying what was queued and why anything was left, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.3.0 started, key F7, Layout controls on, power default WaveOnly, proximity range 15 m`. The same line, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
+
+If an electrical defense is not switched, check its row in the panel: a broken or not working defense is left alone, and a defense in Default mode is left to the game. If no row has power buttons, look in `BepInEx\defense-manager.log` for a line about the power settings.
 
 If `F7` does nothing, check that you are at home in a loaded game past the prologue, and that no other mod uses the same key. You can pick another key in the config, or use the HUD button.
 
@@ -88,6 +116,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
+- 0.3.0: power modes for electrical defenses (Wave only, Proximity, Always on, Default), set for each defense, for each type, or for all in the config. New config settings `DefaultMode` and `ProximityRange`.
 - 0.2.2: plainer setting descriptions in the config file, now also in Simplified Chinese.
 - 0.2.1: the panel, HUD button, Layout buttons and F7 are off on expeditions.
 
@@ -105,7 +134,7 @@ dotnet build src/DefenseManager -c Release -p:GameDir="C:\path\to\Survival Log"
 
 `GameDir` is the game folder. The default in the project file is a local path you will almost certainly need to override. The output DLL is at `src\DefenseManager\bin\Release\DefenseManager.dll`.
 
-The unit tests cover the pure rules (which defenses each button acts on, the walking order, the material budget, the panel view, the Layout buttons and the messages) and need nothing from the game:
+The unit tests cover the pure rules (which defenses each button acts on, the walking order, the material budget, the panel view, the Layout buttons, the messages, and the power modes and settings) and need nothing from the game:
 
 ```
 dotnet test tests/DefenseManager.Tests

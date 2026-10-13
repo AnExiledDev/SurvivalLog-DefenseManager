@@ -24,7 +24,7 @@ public static class Presence
     public static bool ShowsButton(Where where) => IsAtDefenses(where);
 
     /// <summary>The panel's view, or null when the panel must stay shut or close: anywhere but home. Away, nothing is read.</summary>
-    public static string? PanelView(Where where, Func<DefenseRead> read) => IsAtDefenses(where) ? DefenseView.Of(read()) : null;
+    public static string? PanelView(Where where, Func<DefenseRead> read, PowerPolicy? power = null) => IsAtDefenses(where) ? DefenseView.Of(read(), power) : null;
 
     private static bool IsAtDefenses(Where where) => where switch
     {

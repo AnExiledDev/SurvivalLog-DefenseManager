@@ -12,3 +12,14 @@ Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, create
 For `PanelKey`, the value is a Unity key name, for example `F7`, `F11`, `Insert` or `Keypad5`. `None` turns the key off. `Esc` always closes the open panel and cannot be changed. The panel, the shield button and the Layout screen's Defense list button show the key you pick.
 
 The game is paused while the Layout screen is open, so anything queued from its buttons starts when you leave Layout.
+
+## Power
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `DefaultMode` | `WaveOnly` | How electrical defenses are powered when neither the defense nor its type has a setting of its own in the panel. `WaveOnly`: off between waves, on during a wave. `AlwaysOn`: always on. `Proximity`: on while a living zombie is within `ProximityRange`, off once none has been in range for 10 minutes of game time. `Default`: the mod leaves the defense alone and the game's own power switch decides. |
+| `ProximityRange` | `15` | How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground; height does not count. Any number from 1 to 100. |
+
+A defense's own setting wins over its type's, and a type's setting wins over `DefaultMode`. Those two are set with the buttons on each electrical defense's row in the panel, not in this file. They are kept for each save in `BepInEx\config\com.dev.survivallog.defensemanager.power.txt`, which the mod writes itself; edit it only while the game is closed, or delete it to clear every defense and type setting.
+
+Changing `DefaultMode` here changes every defense and type that has no setting of its own.

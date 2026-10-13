@@ -24,6 +24,13 @@ public class PageCommandTests
         Assert.Equal(new PageCommand.Remove(-42), PageCommand.Parse("slmod|defensemanager|remove|-42"));
     }
 
+    [Fact]
+    public void The_power_buttons_carry_the_whole_defense_id_and_say_which_of_the_two_was_pressed()
+    {
+        Assert.Equal(new PageCommand.Power(9007199254740993), PageCommand.Parse("slmod|defensemanager|power|9007199254740993"));
+        Assert.Equal(new PageCommand.PowerType(-42), PageCommand.Parse("slmod|defensemanager|powertype|-42"));
+    }
+
     [Theory]
     [InlineData("slmod|defensemanager|")]
     [InlineData("slmod|defensemanager|Toggle")]
@@ -33,6 +40,11 @@ public class PageCommandTests
     [InlineData("slmod|defensemanager|repair|12x")]
     [InlineData("slmod|defensemanager|remove|1.5")]
     [InlineData("slmod|defensemanager|remove|1|2")]
+    [InlineData("slmod|defensemanager|power")]
+    [InlineData("slmod|defensemanager|power|x")]
+    [InlineData("slmod|defensemanager|Power|1")]
+    [InlineData("slmod|defensemanager|powertype")]
+    [InlineData("slmod|defensemanager|powertype|1|2")]
     [InlineData("slmod|defensemanager|diag|hud button placed")]
     [InlineData("slmod|unpackall|toggle")]
     public void Anything_else_is_unknown_and_kept_whole_for_the_log(string message)

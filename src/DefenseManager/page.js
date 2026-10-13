@@ -106,6 +106,10 @@
     '.dm-damaged .dm-fill{background:#EBA308}',
     '.dm-broken .dm-fill{background:#e53935}',
     '.dm-cost{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:rgba(238,238,238,.7)}',
+    '.dm-power{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:rgba(238,238,238,.7)}',
+    '.dm-power .dm-btn{font-size:12px;padding:4px 9px}',
+    '.dm-badge-on{background:rgba(124,179,66,.24);color:#aed581}',
+    '.dm-badge-off{background:rgba(255,255,255,.08);color:rgba(238,238,238,.6)}',
     '.dm-acts{flex:none;width:250px;display:flex;flex-direction:column;align-items:flex-end;gap:5px}',
     '.dm-btns{display:flex;gap:8px}',
     '.dm-why{font-size:12px;color:rgba(238,238,238,.55);text-align:right}',
@@ -297,6 +301,7 @@
     main.appendChild(condition(defense));
 
     if (defense.cost.length > 0) main.appendChild(cost(defense.cost));
+    if (defense.power) main.appendChild(power(defense));
 
     node.appendChild(icon(defense, 'dm-i44'));
     node.appendChild(main);
@@ -332,6 +337,22 @@
 
       box.appendChild(chip);
     });
+
+    return box;
+  }
+
+  // An electrical defense's power: its switch as the game has it, the mode it runs in, and two buttons. Each button
+  // names what it changes, this one defense or every defense of its type, and shows that setting as it stands.
+  function power(defense) {
+    var p = defense.power;
+    var box = el('div', 'dm-power');
+    box.appendChild(el('span', 'dm-badge ' + (p.on ? 'dm-badge-on' : 'dm-badge-off'), p.on ? 'Power on' : 'Power off'));
+    box.appendChild(el('span', 'dm-mode', 'Mode: ' + p.mode));
+
+    if (!p.managed) box.appendChild(el('span', 'dm-miss', 'Not switched while broken or not working'));
+
+    box.appendChild(button('This one: ' + p.label, 'power', defense.id, true));
+    box.appendChild(button('Every ' + defense.name + ': ' + p.typeLabel, 'powertype', defense.id, true));
 
     return box;
   }

@@ -10,27 +10,28 @@ namespace DefenseManager.Core;
 /// The JSON the panel draws from: what the two top buttons would act on, the repair materials, and one row per
 /// defense with its condition, its repair cost and whether each of its buttons would be taken. A button that would be
 /// refused carries the reason as visible text, since the web view draws no hover tips. Ids are sent as strings because
-/// a JavaScript number cannot hold every long.
+/// a JavaScript number cannot hold every long. An electrical defense's row also carries its power: the switch as it
+/// stands and the labels of its two power buttons, when there are power settings to show.
 /// </summary>
 public static class DefenseView
 {
     /// <summary>The view for a read: the defenses, an empty view saying why they could not be read, or null outside a game.</summary>
-    public static string? Of(DefenseRead read) => read switch
+    public static string? Of(DefenseRead read, PowerPolicy? power = null) => read switch
     {
-        DefenseRead.Ready ready => Build(ready.Survey),
+        DefenseRead.Ready ready => Build(ready.Survey, power),
         DefenseRead.NotReady notReady => Empty(OutcomeMessage.Describe(new DefenseOutcome.NotReady(notReady.Reason)) ?? notReady.Reason),
         DefenseRead.NoGame => null,
         _ => throw new InvalidOperationException("unknown defense read " + read),
     };
 
-    public static string Build(Survey survey)
+    public static string Build(Survey survey, PowerPolicy? power = null)
     {
         var budget = MaterialBudget.Of(survey);
         var locked = LockedText(survey);
         var toRepair = survey.Defenses.Where(defense => defense.IsDamaged && !defense.IsRepairQueued && !defense.IsRemovalQueued).ToList();
         var toClear = survey.Defenses.Count(defense => defense.IsBroken && RemoveCheck.Judge(defense) is RemoveVerdict.Allowed);
         var materials = survey.Materials.OrderBy(entry => entry.Key).Select(entry => MaterialJson(entry.Value, budget.Left(entry.Key), NeededBy(toRepair, entry.Key)));
-        var rows = survey.Defenses.OrderBy(defense => defense.Name, StringComparer.Ordinal).ThenBy(defense => defense.Id).Select(defense => RowJson(defense, survey, budget, locked is null));
+        var rows = survey.Defenses.OrderBy(defense => defense.Name, StringComparer.Ordinal).ThenBy(defense => defense.Id).Select(defense => RowJson(defense, survey, budget, locked is null, power));
 
         return Json(note: null, locked, toRepair.Count, toClear, materials, rows);
     }
@@ -68,7 +69,7 @@ public static class DefenseView
     /// One defense, judged on its own against the materials left after repairs already queued: the row says whether
     /// this one repair would be taken now, not whether it fits in a Repair all round.
     /// </summary>
-    private static string RowJson(Defense defense, Survey survey, MaterialBudget budget, bool isUnlocked)
+    private static string RowJson(Defense defense, Survey survey, MaterialBudget budget, bool isUnlocked, PowerPolicy? power)
     {
         var repair = RepairCheck.Judge(defense, budget, survey);
         var remove = RemoveCheck.Judge(defense);
@@ -79,7 +80,23 @@ public static class DefenseView
             + $",\"cur\":{Num(defense.Current)},\"max\":{Num(defense.Max)},\"state\":{Str(State(defense))},\"queued\":{Str(Queued(defense))}"
             + $",\"cost\":[{string.Join(",", cost)}]"
             + $",\"canRepair\":{Bool(isUnlocked && repair is RepairVerdict.Allowed)},\"why\":{Str(OutcomeMessage.WhyNot(repair))}"
-            + $",\"canRemove\":{Bool(isUnlocked && remove is RemoveVerdict.Allowed)},\"removeWhy\":{Str(OutcomeMessage.WhyNotRemove(remove))}}}";
+            + $",\"canRemove\":{Bool(isUnlocked && remove is RemoveVerdict.Allowed)},\"removeWhy\":{Str(OutcomeMessage.WhyNotRemove(remove))}"
+            + $",\"power\":{PowerJson(defense, power)}}}";
+    }
+
+    /// <summary>
+    /// Null for a defense with no power switch, or with no power settings to show (while they cannot be read). "label"
+    /// is what the row's own button shows (the defense's setting) and "typeLabel" what its type's button shows;
+    /// "managed" is false while the mod leaves the defense alone because it is broken or not working.
+    /// </summary>
+    private static string PowerJson(Defense defense, PowerPolicy? power)
+    {
+        if (defense.Power is not { } state || power is null) return "null";
+
+        var key = DefenseKey.Of(defense.ConfigId, defense.Position);
+
+        return $"{{\"on\":{Bool(state.IsOn)},\"managed\":{Bool(defense.IsPowerManaged)},\"mode\":{Str(PowerModes.Label(power.ModeOf(key)))}"
+            + $",\"label\":{Str(power.DefenseLabel(key))},\"typeLabel\":{Str(power.TypeLabel(defense.ConfigId))}}}";
     }
 
     private static string CostJson(Survey survey, int itemId, int count, int shortBy)

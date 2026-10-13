@@ -18,7 +18,7 @@ namespace DefenseManager.Adapters;
 /// </summary>
 internal sealed class GameDefenses : IDefenseGame
 {
-    private const int DefenseSlot = 10;
+    internal const int DefenseSlot = 10;
     private const int RepairFunc = 9121;
     private const int DefaultRemoveFunc = 299;
     private const int DefaultRepairAction = 9121;
@@ -175,7 +175,7 @@ internal sealed class GameDefenses : IDefenseGame
 
         _actions.Clear();
 
-        var defenses = ReadDefenses(agents, config, actions, conditions, role.InstanceId);
+        var defenses = ReadDefenses(agents, config, actions, conditions, world._PowerManager, role.InstanceId);
         var materials = ReadMaterials(config, defenses);
         var isWaveLocked = world._TowerWaveManager?.IsWaveOperationLocked() ?? false;
         var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents));
@@ -186,7 +186,7 @@ internal sealed class GameDefenses : IDefenseGame
     }
 
     /// <summary>Null on the title screen, while a save loads and in the prologue.</summary>
-    private static (BattleLogicWorld World, ConfigManager Config, AgentManager Agents, LeadingRole Role)? LoadedGame()
+    internal static (BattleLogicWorld World, ConfigManager Config, AgentManager Agents, LeadingRole Role)? LoadedGame()
     {
         var world = GameSingleton.Existing<BattleLogicWorld>();
         var config = GameSingleton.Existing<ConfigManager>();
@@ -205,7 +205,7 @@ internal sealed class GameDefenses : IDefenseGame
     private static bool IsAfterDisaster(BattleLogicWorld world) => world._GameTimeManager?.WorldStateType == WorldStateType.PostDisaster;
 
     /// <summary>One defense that cannot be read is left out of the panel; the rest still are.</summary>
-    private List<Defense> ReadDefenses(AgentManager agents, ConfigManager config, ActionManager actions, ConditionSetManager conditions, long roleId)
+    private List<Defense> ReadDefenses(AgentManager agents, ConfigManager config, ActionManager actions, ConditionSetManager conditions, PowerManager? power, long roleId)
     {
         var found = agents.GetHomeFurnituresBySlotType(DefenseSlot);
         var defenses = new List<Defense>();
@@ -218,7 +218,7 @@ internal sealed class GameDefenses : IDefenseGame
 
             try
             {
-                if (ReadDefense(furniture, config, actions, conditions, roleId) is { } defense) defenses.Add(defense);
+                if (ReadDefense(furniture, config, actions, conditions, power, roleId) is { } defense) defenses.Add(defense);
             }
             catch (Exception ex)
             {
@@ -233,7 +233,7 @@ internal sealed class GameDefenses : IDefenseGame
     /// The slot is checked against the furniture table too: the game's own Repair button test
     /// (Furniture.ShouldShowTowerRepairBtn) does the same before it reads the durability.
     /// </summary>
-    private Defense? ReadDefense(Furniture furniture, ConfigManager config, ActionManager actions, ConditionSetManager conditions, long roleId)
+    private Defense? ReadDefense(Furniture furniture, ConfigManager config, ActionManager actions, ConditionSetManager conditions, PowerManager? power, long roleId)
     {
         var configId = furniture.AgentConfigId;
         var row = config.Get_Config_Furniture(configId);
@@ -253,7 +253,7 @@ internal sealed class GameDefenses : IDefenseGame
         return new Defense(
             id,
             configId,
-            Translate(config, row.Name) ?? NonEmpty(row.Name_Local) ?? NonEmpty(row.Name) ?? $"Defense {configId}",
+            NameOf(config, row, configId),
             Icons().Resolve(row.ICON),
             current,
             max,
@@ -262,7 +262,32 @@ internal sealed class GameDefenses : IDefenseGame
             cost,
             blockedReason,
             actions.HasActionInQueue(roleId, repairAction, id),
-            IsRemovalQueued(actions, roleId, id, removeAction));
+            IsRemovalQueued(actions, roleId, id, removeAction),
+            row.IsElectrical ? ReadPower(furniture, power) : null);
+    }
+
+    /// <summary>The defense's name in the player's language, falling back to the table's own text, then to its furniture id.</summary>
+    internal static string NameOf(ConfigManager config, Config_Furniture row, int configId) =>
+        Translate(config, row.Name) ?? NonEmpty(row.Name_Local) ?? NonEmpty(row.Name) ?? $"Defense {configId}";
+
+    /// <summary>
+    /// The switch as the game has it and whether the game counts the defense as working. A read that throws shows the
+    /// defense as switched off and not working, so the panel offers its settings but never claims the mod runs it.
+    /// </summary>
+    private DefensePower ReadPower(Furniture furniture, PowerManager? power)
+    {
+        try
+        {
+            var device = AgentTools.GetAgentComponent<TowerDeviceComponent>(furniture);
+
+            return new DefensePower(power?.IsConsumerOn(furniture.InstanceId) ?? false, device?.IsOperational() ?? false);
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("power state", ex);
+
+            return new DefensePower(IsOn: false, IsOperational: false);
+        }
     }
 
     /// <summary>The game files a removal under its own id or the one it maps it to for the time of day, so either counts.</summary>
@@ -391,7 +416,7 @@ internal sealed class GameDefenses : IDefenseGame
     }
 
     /// <summary>An agent with no position stands at the origin: the walk order is then only a guess, never a refusal.</summary>
-    private static Spot PositionOf(BaseAgent agent)
+    internal static Spot PositionOf(BaseAgent agent)
     {
         var transform = AgentTools.GetAgentComponent<TransformComponent>(agent);
 

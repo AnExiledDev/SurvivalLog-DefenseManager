@@ -29,6 +29,12 @@ public abstract record PageCommand
 
     public sealed record Remove(long DefenseId) : PageCommand;
 
+    /// <summary>A row's own power button: the next power setting for that one defense.</summary>
+    public sealed record Power(long DefenseId) : PageCommand;
+
+    /// <summary>A row's type power button: the next power setting for every defense of that defense's type.</summary>
+    public sealed record PowerType(long DefenseId) : PageCommand;
+
     /// <summary>The page script just installed itself.</summary>
     public sealed record Ready : PageCommand;
 
@@ -54,6 +60,8 @@ public abstract record PageCommand
             ("clearbroken", 1) => new ClearBroken(),
             ("repair", 2) when TryId(parts[1], out var id) => new Repair(id),
             ("remove", 2) when TryId(parts[1], out var id) => new Remove(id),
+            ("power", 2) when TryId(parts[1], out var id) => new Power(id),
+            ("powertype", 2) when TryId(parts[1], out var id) => new PowerType(id),
             ("ready", 1) => new Ready(),
             ("noscript", 1) => new NoScript(),
             _ => new Unknown(message),
