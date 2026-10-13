@@ -345,8 +345,9 @@ internal sealed class GameDefenses : IDefenseGame
     }
 
     /// <summary>
-    /// The condition set behind the Repair button, run the way its menu runs it. The game answers whether it blocks
-    /// and the line it would show; a block without a line comes back as an empty reason, which still blocks.
+    /// The condition set behind the Repair button, run the way the game's action check runs it: CheckConditionSet
+    /// decides, and CheckFurnitureFuncCondition only supplies the line to show. The flag in that second call's result
+    /// read as "blocked" on every repair, so it is never used; a block without a line comes back as an empty reason.
     /// </summary>
     private string? WhyRepairRefused(ConfigManager config, ConditionSetManager conditions, int conditionSetId, long defenseId)
     {
@@ -354,11 +355,11 @@ internal sealed class GameDefenses : IDefenseGame
 
         try
         {
-            var check = conditions.CheckFurnitureFuncCondition(conditionSetId, defenseId);
+            if (conditions.CheckConditionSet(conditionSetId, defenseId, false)) return null;
 
-            if (!check.Item1) return null;
+            var reason = conditions.CheckFurnitureFuncCondition(conditionSetId, defenseId).Item2;
 
-            return Translate(config, check.Item2) ?? NonEmpty(check.Item2) ?? "";
+            return Translate(config, reason) ?? NonEmpty(reason) ?? "";
         }
         catch (Exception ex)
         {

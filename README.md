@@ -107,7 +107,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, create
 
 Tested on Survival Log 1.1.18317 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.3.0 started, key F7, Layout controls on, power default WaveOnly, proximity range 15 m`. The same line, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.3.1 started, key F7, Layout controls on, power default WaveOnly, proximity range 15 m`. The same line, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
 
 If an electrical defense is not switched, check its row in the panel: a broken or not working defense is left alone, and a defense in Default mode is left to the game. If no row has power buttons, look in `BepInEx\defense-manager.log` for a line about the power settings.
 
@@ -117,6 +117,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
+- 0.3.1: Repair and Repair all now work. Before, every repair was refused as "can't be repaired right now" even when the game would allow the repair.
 - 0.3.0: power modes for electrical defenses (Wave only, Proximity, Always on, Default), set for each defense, for each type, or for all in the config. New config settings `DefaultMode` and `ProximityRange`.
 - 0.2.2: plainer setting descriptions in the config file, now also in Simplified Chinese.
 - 0.2.1: the panel, HUD button, Layout buttons and F7 are off on expeditions.
