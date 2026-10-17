@@ -16,8 +16,17 @@
   var SVG_NS = 'http://www.w3.org/2000/svg';
   // A shield, drawn on the 24-unit grid the game's HUD icons use.
   var SHIELD_PATH = 'M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3zm0 2.14L6 6.39V11c0 4.1 2.5 7.67 6 8.9 3.5-1.23 6-4.8 6-8.9V6.39l-6-2.25zM11 8h2v3h3v2h-3v3h-2v-3H8v-2h3z';
-  var STATE_LABEL = { broken: 'Broken', damaged: 'Damaged', intact: 'Intact' };
-  var QUEUED_LABEL = { repair: 'Repair queued', remove: 'Removal queued' };
+  var STATE_WORD = { broken: 'broken', damaged: 'damaged', intact: 'intact' };
+  var QUEUED_WORD = { repair: 'repairQueued', remove: 'removeQueued' };
+  // The plugin hands over the words in the game's language before every call (Texts.cs); English stands in until then.
+  var ENGLISH = {
+    broken: 'Broken', damaged: 'Damaged', intact: 'Intact', repairQueued: 'Repair queued', removeQueued: 'Removal queued',
+    repairAll: 'Repair all ({0})', clearAll: 'Clear all broken ({0})', materials: 'Materials free / needed:',
+    empty: 'No traps or barricades outside your home yet.', repairCost: 'Repair:', short: '({0} short)', powerOn: 'Power on',
+    powerOff: 'Power off', mode: 'Mode: {0}', unmanaged: 'Not switched while broken or not working', thisOne: 'This one: {0}',
+    every: 'Every {0}: {1}', repair: 'Repair', remove: 'Remove', escClose: 'Esc to close',
+    tip: 'Repair or remove your outdoor defenses', defenseList: 'Defense list', defenseListKey: 'Defense list ({0})'
+  };
 
   var state = { data: emptyData(), isOpen: false, isLive: false, key: '', layout: null };
   var ui = null;
@@ -31,6 +40,15 @@
 
   function emptyData() {
     return { note: null, locked: null, repairAll: 0, clearAll: 0, materials: [], defenses: [] };
+  }
+
+  function say(key) {
+    var words = window.__sldefenseWords || ENGLISH;
+    var text = words[key] || ENGLISH[key] || key;
+
+    for (var i = 1; i < arguments.length; i++) text = text.split('{' + (i - 1) + '}').join(String(arguments[i]));
+
+    return text;
   }
 
   function send(message) {
@@ -246,10 +264,10 @@
     var isUnlocked = !data.locked;
     var mats = el('div', 'dm-mats');
     ui.bar.textContent = '';
-    ui.bar.appendChild(button('Repair all (' + data.repairAll + ')', 'repairall', null, isUnlocked));
-    ui.bar.appendChild(button('Clear all broken (' + data.clearAll + ')', 'clearbroken', null, isUnlocked, 'dm-danger'));
+    ui.bar.appendChild(button(say('repairAll', data.repairAll), 'repairall', null, isUnlocked));
+    ui.bar.appendChild(button(say('clearAll', data.clearAll), 'clearbroken', null, isUnlocked, 'dm-danger'));
 
-    if (data.materials.length > 0) mats.appendChild(el('span', '', 'Materials free / needed:'));
+    if (data.materials.length > 0) mats.appendChild(el('span', '', say('materials')));
 
     data.materials.forEach(function (material) { mats.appendChild(materialChip(material)); });
     ui.bar.appendChild(mats);
@@ -276,7 +294,7 @@
     ui.list.textContent = '';
 
     if (data.defenses.length === 0) {
-      ui.list.appendChild(el('div', 'dm-empty', data.note || 'No traps or barricades outside your home yet.'));
+      ui.list.appendChild(el('div', 'dm-empty', data.note || say('empty')));
 
       return;
     }
@@ -293,9 +311,9 @@
     var main = el('div', 'dm-main');
     var top = el('div', 'dm-top');
     top.appendChild(el('div', 'dm-name', defense.name));
-    top.appendChild(el('span', 'dm-badge dm-badge-' + defense.state, STATE_LABEL[defense.state] || defense.state));
+    top.appendChild(el('span', 'dm-badge dm-badge-' + defense.state, STATE_WORD[defense.state] ? say(STATE_WORD[defense.state]) : defense.state));
 
-    if (defense.queued) top.appendChild(el('span', 'dm-badge dm-badge-queued', QUEUED_LABEL[defense.queued] || defense.queued));
+    if (defense.queued) top.appendChild(el('span', 'dm-badge dm-badge-queued', QUEUED_WORD[defense.queued] ? say(QUEUED_WORD[defense.queued]) : defense.queued));
 
     main.appendChild(top);
     main.appendChild(condition(defense));
@@ -325,7 +343,7 @@
 
   function cost(entries) {
     var box = el('div', 'dm-cost');
-    box.appendChild(el('span', '', 'Repair:'));
+    box.appendChild(el('span', '', say('repairCost')));
 
     entries.forEach(function (entry) {
       var chip = el('div', 'dm-chip' + (entry.short > 0 ? ' dm-short' : ''));
@@ -333,7 +351,7 @@
       chip.appendChild(el('span', 'dm-num', String(entry.count)));
       chip.appendChild(el('span', '', entry.name));
 
-      if (entry.short > 0) chip.appendChild(el('span', 'dm-miss', '(' + entry.short + ' short)'));
+      if (entry.short > 0) chip.appendChild(el('span', 'dm-miss', say('short', entry.short)));
 
       box.appendChild(chip);
     });
@@ -346,13 +364,13 @@
   function power(defense) {
     var p = defense.power;
     var box = el('div', 'dm-power');
-    box.appendChild(el('span', 'dm-badge ' + (p.on ? 'dm-badge-on' : 'dm-badge-off'), p.on ? 'Power on' : 'Power off'));
-    box.appendChild(el('span', 'dm-mode', 'Mode: ' + p.mode));
+    box.appendChild(el('span', 'dm-badge ' + (p.on ? 'dm-badge-on' : 'dm-badge-off'), say(p.on ? 'powerOn' : 'powerOff')));
+    box.appendChild(el('span', 'dm-mode', say('mode', p.mode)));
 
-    if (!p.managed) box.appendChild(el('span', 'dm-miss', 'Not switched while broken or not working'));
+    if (!p.managed) box.appendChild(el('span', 'dm-miss', say('unmanaged')));
 
-    box.appendChild(button('This one: ' + p.label, 'power', defense.id, true));
-    box.appendChild(button('Every ' + defense.name + ': ' + p.typeLabel, 'powertype', defense.id, true));
+    box.appendChild(button(say('thisOne', p.label), 'power', defense.id, true));
+    box.appendChild(button(say('every', defense.name, p.typeLabel), 'powertype', defense.id, true));
 
     return box;
   }
@@ -361,8 +379,8 @@
   function actions(defense) {
     var box = el('div', 'dm-acts');
     var buttons = el('div', 'dm-btns');
-    buttons.appendChild(button('Repair', 'repair', defense.id, defense.canRepair));
-    buttons.appendChild(button('Remove', 'remove', defense.id, defense.canRemove, 'dm-danger'));
+    buttons.appendChild(button(say('repair'), 'repair', defense.id, defense.canRepair));
+    buttons.appendChild(button(say('remove'), 'remove', defense.id, defense.canRemove, 'dm-danger'));
     box.appendChild(buttons);
 
     if (!defense.canRepair && defense.why) box.appendChild(el('div', 'dm-why', defense.why));
@@ -372,7 +390,7 @@
   }
 
   function renderKeys() {
-    ui.keys.textContent = state.key ? state.key + ' / Esc to close' : 'Esc to close';
+    ui.keys.textContent = state.key ? state.key + ' / ' + say('escClose') : say('escClose');
   }
 
   function open(data) {
@@ -532,7 +550,7 @@
     title.className = 'entry-tip-title';
     title.textContent = 'Defense Manager';
     body.className = 'entry-tip-body';
-    body.textContent = 'Repair or remove your outdoor defenses';
+    body.textContent = say('tip');
 
     if (state.key) {
       var key = doc.createElement('span');
@@ -606,9 +624,9 @@
     bar.id = LAYOUT_ID;
     bar.setAttribute('data-version', String(layoutVersion));
     row.className = 'dm-lb-row unity-interactive';
-    row.appendChild(layoutButton(doc, 'Repair all (' + data.repairAll + ')', 'repairall', isUnlocked, ''));
-    row.appendChild(layoutButton(doc, 'Clear all broken (' + data.clearAll + ')', 'clearbroken', isUnlocked, 'dm-lb-danger'));
-    row.appendChild(layoutButton(doc, state.key ? 'Defense list (' + state.key + ')' : 'Defense list', 'toggle', true, ''));
+    row.appendChild(layoutButton(doc, say('repairAll', data.repairAll), 'repairall', isUnlocked, ''));
+    row.appendChild(layoutButton(doc, say('clearAll', data.clearAll), 'clearbroken', isUnlocked, 'dm-lb-danger'));
+    row.appendChild(layoutButton(doc, state.key ? say('defenseListKey', state.key) : say('defenseList'), 'toggle', true, ''));
     row.addEventListener('click', onClick);
     bar.appendChild(row);
 

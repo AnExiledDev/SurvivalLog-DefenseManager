@@ -12,7 +12,7 @@ namespace DefenseManager.Adapters;
 internal sealed class DefenseSession
 {
     private const float RefreshSeconds = 1f;
-    private const string FailedStatus = "Defense Manager failed, see BepInEx/defense-manager.log.";
+    private static string FailedStatus => Texts.Failed.Pick(GameLanguage.IsChinese());
 
     private readonly GameDefenses _game;
     private readonly PowerSession _power;
@@ -212,7 +212,7 @@ internal sealed class DefenseSession
         {
             _wasInLayout = _game.IsInLayout();
 
-            return LayoutBar.View(_isLayoutBarEnabled, _wasInLayout, _game.Locate(), _game.Read);
+            return LayoutBar.View(_isLayoutBarEnabled, _wasInLayout, _game.Locate(), _game.Read, GameLanguage.IsChinese());
         }
         catch (Exception ex)
         {
@@ -342,7 +342,7 @@ internal sealed class DefenseSession
     {
         _nextRefreshAt = Time.unscaledTime + RefreshSeconds;
 
-        return Presence.PanelView(_game.Locate(), _game.Read, _power.Policy());
+        return Presence.PanelView(_game.Locate(), _game.Read, _power.Policy(), GameLanguage.IsChinese());
     }
 
     /// <summary>
@@ -381,7 +381,7 @@ internal sealed class DefenseSession
         try
         {
             var outcome = press();
-            message = OutcomeMessage.Describe(outcome, _game.IsInLayout());
+            message = OutcomeMessage.Describe(outcome, isInLayout: _game.IsInLayout(), isChinese: GameLanguage.IsChinese());
             _log($"{name}: {outcome} -> {message ?? "(no message)"}");
         }
         catch (Exception ex)

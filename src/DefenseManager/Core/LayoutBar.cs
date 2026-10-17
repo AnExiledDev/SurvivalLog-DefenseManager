@@ -9,10 +9,10 @@ namespace DefenseManager.Core;
 public static class LayoutBar
 {
     /// <summary>The view the bar draws from, or null when it should not show: switched off, not in Layout, away from home, or no game.</summary>
-    public static string? View(bool isEnabled, bool isInLayout, Where where, Func<DefenseRead> read)
+    public static string? View(bool isEnabled, bool isInLayout, Where where, Func<DefenseRead> read, bool isChinese = false)
     {
         if (!isEnabled || !isInLayout) return null;
 
-        return Presence.PanelView(where, read);
+        return Presence.PanelView(where, read, isChinese: isChinese);
     }
 }

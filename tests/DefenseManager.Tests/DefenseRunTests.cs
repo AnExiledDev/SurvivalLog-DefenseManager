@@ -145,7 +145,7 @@ public class DefenseRunTests
         Assert.Equal(new long[] { 1, 2 }, game.Repairing);
         Assert.Empty(game.FailingRepairs);
         Assert.Equal(2, tally.Blocked);
-        Assert.Equal(RepairCheck.OutStaminaReason(10), tally.BlockedReason);
+        Assert.Equal(Texts.OutOfStamina.Say(false, 10), tally.BlockedReason);
     }
 
     [Fact]
@@ -393,7 +393,7 @@ public class DefenseRunTests
 
         var refused = Assert.IsType<DefenseOutcome.RepairRefused>(DefenseRun.Repair(game, 2));
 
-        Assert.Equal(new RepairVerdict.Blocked(RepairCheck.OutStaminaReason(10)), refused.Verdict);
+        Assert.Equal(new RepairVerdict.Blocked(Texts.OutOfStamina.Say(false, 10)), refused.Verdict);
         Assert.Empty(game.FailingRepairs);
     }
 

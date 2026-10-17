@@ -23,11 +23,11 @@ internal sealed class GameDefenses : IDefenseGame
     private const int DefaultRemoveFunc = 299;
     private const int DefaultRepairAction = 9121;
     private const int DefaultRemoveAction = 199;
-    private const string NoWorld = "the game world is not loaded";
-    private const string ReadFailed = "the game could not be read, see BepInEx/defense-manager.log";
-    private const string NoRepair = "it has no repair";
-    private const string CostUnreadable = "its repair cost could not be read";
-    private const string CheckFailed = "the game's repair check failed, see BepInEx/defense-manager.log";
+    private static string NoWorld => Texts.NoWorld.Pick(GameLanguage.IsChinese());
+    private static string ReadFailed => Texts.ReadFailed.Pick(GameLanguage.IsChinese());
+    private static string NoRepair => Texts.NoRepair.Pick(GameLanguage.IsChinese());
+    private static string CostUnreadable => Texts.CostUnreadable.Pick(GameLanguage.IsChinese());
+    private static string CheckFailed => Texts.CheckFailed.Pick(GameLanguage.IsChinese());
 
     private static readonly IReadOnlyDictionary<int, int> NoCost = new Dictionary<int, int>();
 
@@ -178,7 +178,7 @@ internal sealed class GameDefenses : IDefenseGame
         var defenses = ReadDefenses(agents, config, actions, conditions, world._PowerManager, role.InstanceId);
         var materials = ReadMaterials(config, defenses);
         var isWaveLocked = world._TowerWaveManager?.IsWaveOperationLocked() ?? false;
-        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role));
+        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role), GameLanguage.IsChinese());
 
         LogDefenseCount(defenses.Count);
 

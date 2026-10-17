@@ -17,51 +17,52 @@ public enum PowerTarget
 /// </summary>
 public static class PowerPress
 {
-    public const string NoSaveText = "Power settings are kept per save, and this game has no save yet. Save the game first.";
-    public const string UnreadableText = "The power settings file could not be read, so nothing was changed. See BepInEx/defense-manager.log.";
-    public const string NoGameText = "Load a game first.";
-    public const string NoSwitchText = "That defense has no power switch.";
-
-    public static string Cycle(PowerTarget target, long defenseId, PowerScene? scene, PowerSlot slot, PowerMode global)
+    public static string Cycle(PowerTarget target, long defenseId, PowerScene? scene, PowerSlot slot, PowerMode global, bool isChinese = false)
     {
-        if (scene == null) return NoGameText;
+        if (scene == null) return Texts.NoGame.Pick(isChinese);
 
         var unit = scene.Defenses.FirstOrDefault(candidate => candidate.Id == defenseId);
 
-        if (unit == null || !unit.IsElectrical) return NoSwitchText;
+        if (unit == null || !unit.IsElectrical) return Texts.NoSwitch.Pick(isChinese);
 
         var (edit, done) = target switch
         {
-            PowerTarget.Defense => CycleDefense(unit, slot, global),
-            PowerTarget.Type => CycleType(unit, slot, global),
+            PowerTarget.Defense => CycleDefense(unit, slot, global, isChinese),
+            PowerTarget.Type => CycleType(unit, slot, global, isChinese),
             _ => throw new ArgumentOutOfRangeException(nameof(target), target, "unknown power target"),
         };
 
         return edit switch
         {
             SettingsEdit.Saved => done,
-            SettingsEdit.NotSaved => done + " It could not be written to the settings file, so it lasts until the game is closed.",
-            SettingsEdit.NoSave => NoSaveText,
-            SettingsEdit.Unreadable => UnreadableText,
+            SettingsEdit.NotSaved => Texts.Sentences(isChinese, new[] { done, Texts.NotSaved.Pick(isChinese) }),
+            SettingsEdit.NoSave => Texts.NoSave.Pick(isChinese),
+            SettingsEdit.Unreadable => Texts.Unreadable.Pick(isChinese),
             _ => throw new InvalidOperationException("unknown settings edit " + edit),
         };
     }
 
-    private static (SettingsEdit Edit, string Done) CycleDefense(PowerUnit unit, PowerSlot slot, PowerMode global)
+    private static (SettingsEdit Edit, string Done) CycleDefense(PowerUnit unit, PowerSlot slot, PowerMode global, bool isChinese)
     {
         var next = PowerModes.Next(slot.Settings.DefenseSetting(unit.Key));
         var edit = slot.SetDefense(unit.Key, next);
         var typeMode = new PowerPolicy(slot.Settings, global).TypeMode(unit.ConfigId);
-        var done = next is { } mode ? $"{unit.Name} set to {PowerModes.Label(mode)}." : $"{unit.Name} now follows its type setting ({PowerModes.Label(typeMode)}).";
+
+        var done = next is { } mode
+            ? Texts.DefenseSet.Say(isChinese, unit.Name, PowerModes.Label(mode, isChinese))
+            : Texts.DefenseFollowsType.Say(isChinese, unit.Name, PowerModes.Label(typeMode, isChinese));
 
         return (edit, done);
     }
 
-    private static (SettingsEdit Edit, string Done) CycleType(PowerUnit unit, PowerSlot slot, PowerMode global)
+    private static (SettingsEdit Edit, string Done) CycleType(PowerUnit unit, PowerSlot slot, PowerMode global, bool isChinese)
     {
         var next = PowerModes.Next(slot.Settings.TypeSetting(unit.ConfigId));
         var edit = slot.SetType(unit.ConfigId, next);
-        var done = next is { } mode ? $"Every {unit.Name} set to {PowerModes.Label(mode)}." : $"Every {unit.Name} now follows the global setting ({PowerModes.Label(global)}).";
+
+        var done = next is { } mode
+            ? Texts.TypeSet.Say(isChinese, unit.Name, PowerModes.Label(mode, isChinese))
+            : Texts.TypeFollowsGlobal.Say(isChinese, unit.Name, PowerModes.Label(global, isChinese));
 
         return (edit, done);
     }

@@ -39,7 +39,7 @@ public static class RepairCheck
         if (defense.IsRemovalQueued) return new RepairVerdict.QueuedForRemoval();
         if (!defense.IsDamaged) return new RepairVerdict.Undamaged();
         if (defense.RepairBlockedReason is { } reason) return new RepairVerdict.Blocked(reason);
-        if (!stamina.CoversOne) return new RepairVerdict.Blocked(OutStaminaReason(stamina.PerRepair));
+        if (!stamina.CoversOne) return new RepairVerdict.Blocked(Texts.OutOfStamina.Say(survey.IsChinese, stamina.PerRepair));
 
         var missing = budget.Missing(defense.Cost);
 
@@ -47,7 +47,4 @@ public static class RepairCheck
 
         return new RepairVerdict.Allowed();
     }
-
-    /// <summary>The game's own check only sees the stamina now, so this covers the repairs lined up ahead of this one.</summary>
-    public static string OutStaminaReason(int perRepair) => $"Not enough stamina for another repair (each needs {perRepair})";
 }

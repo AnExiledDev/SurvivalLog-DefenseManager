@@ -26,12 +26,12 @@ public static class PowerModes
 
     private static readonly PowerMode[] All = { PowerMode.AlwaysOn, PowerMode.WaveOnly, PowerMode.Proximity, PowerMode.GameDefault };
 
-    public static string Label(PowerMode mode) => mode switch
+    public static string Label(PowerMode mode, bool isChinese = false) => mode switch
     {
-        PowerMode.AlwaysOn => "Always on",
-        PowerMode.WaveOnly => "Wave only",
-        PowerMode.Proximity => "Proximity",
-        PowerMode.GameDefault => "Default",
+        PowerMode.AlwaysOn => Texts.AlwaysOn.Pick(isChinese),
+        PowerMode.WaveOnly => Texts.WaveOnly.Pick(isChinese),
+        PowerMode.Proximity => Texts.Proximity.Pick(isChinese),
+        PowerMode.GameDefault => Texts.GameDefault.Pick(isChinese),
         _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "unknown power mode"),
     };
 

@@ -45,10 +45,10 @@ public sealed record PowerPolicy(PowerSettings Settings, PowerMode Global)
     public PowerMode TypeMode(int configId) => Settings.TypeSetting(configId) ?? Global;
 
     /// <summary>The defense's own setting, or "Type setting (mode)" with the mode it gets from its type.</summary>
-    public string DefenseLabel(DefenseKey key) =>
-        Settings.DefenseSetting(key) is { } own ? PowerModes.Label(own) : $"Type setting ({PowerModes.Label(TypeMode(key.ConfigId))})";
+    public string DefenseLabel(DefenseKey key, bool isChinese = false) =>
+        Settings.DefenseSetting(key) is { } own ? PowerModes.Label(own, isChinese) : Texts.TypeSetting.Say(isChinese, PowerModes.Label(TypeMode(key.ConfigId), isChinese));
 
     /// <summary>The type's setting, or "Global setting (mode)" with the global default.</summary>
-    public string TypeLabel(int configId) =>
-        Settings.TypeSetting(configId) is { } own ? PowerModes.Label(own) : $"Global setting ({PowerModes.Label(Global)})";
+    public string TypeLabel(int configId, bool isChinese = false) =>
+        Settings.TypeSetting(configId) is { } own ? PowerModes.Label(own, isChinese) : Texts.GlobalSetting.Say(isChinese, PowerModes.Label(Global, isChinese));
 }

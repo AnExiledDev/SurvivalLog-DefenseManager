@@ -16,10 +16,10 @@ namespace DefenseManager.Core;
 public static class DefenseView
 {
     /// <summary>The view for a read: the defenses, an empty view saying why they could not be read, or null outside a game.</summary>
-    public static string? Of(DefenseRead read, PowerPolicy? power = null) => read switch
+    public static string? Of(DefenseRead read, PowerPolicy? power = null, bool isChinese = false) => read switch
     {
         DefenseRead.Ready ready => Build(ready.Survey, power),
-        DefenseRead.NotReady notReady => Empty(OutcomeMessage.Describe(new DefenseOutcome.NotReady(notReady.Reason)) ?? notReady.Reason),
+        DefenseRead.NotReady notReady => Empty(OutcomeMessage.Describe(new DefenseOutcome.NotReady(notReady.Reason), isChinese) ?? notReady.Reason),
         DefenseRead.NoGame => null,
         _ => throw new InvalidOperationException("unknown defense read " + read),
     };
@@ -42,8 +42,8 @@ public static class DefenseView
 
     private static string? LockedText(Survey survey)
     {
-        if (survey.IsWaveLocked) return OutcomeMessage.WaveLockedText;
-        if (!survey.IsHome) return OutcomeMessage.AwayFromHomeText;
+        if (survey.IsWaveLocked) return Texts.WaveLocked.Pick(survey.IsChinese);
+        if (!survey.IsHome) return Texts.AwayFromHome.Pick(survey.IsChinese);
 
         return null;
     }
@@ -80,9 +80,9 @@ public static class DefenseView
         return $"{{\"id\":{Str(defense.Id.ToString(CultureInfo.InvariantCulture))},\"name\":{Str(defense.Name)},\"icon\":{Str(defense.Icon)}"
             + $",\"cur\":{Num(defense.Current)},\"max\":{Num(defense.Max)},\"state\":{Str(State(defense))},\"queued\":{Str(Queued(defense))}"
             + $",\"cost\":[{string.Join(",", cost)}]"
-            + $",\"canRepair\":{Bool(isUnlocked && repair is RepairVerdict.Allowed)},\"why\":{Str(OutcomeMessage.WhyNot(repair))}"
-            + $",\"canRemove\":{Bool(isUnlocked && remove is RemoveVerdict.Allowed)},\"removeWhy\":{Str(OutcomeMessage.WhyNotRemove(remove))}"
-            + $",\"power\":{PowerJson(defense, power)}}}";
+            + $",\"canRepair\":{Bool(isUnlocked && repair is RepairVerdict.Allowed)},\"why\":{Str(OutcomeMessage.WhyNot(repair, survey.IsChinese))}"
+            + $",\"canRemove\":{Bool(isUnlocked && remove is RemoveVerdict.Allowed)},\"removeWhy\":{Str(OutcomeMessage.WhyNotRemove(remove, survey.IsChinese))}"
+            + $",\"power\":{PowerJson(defense, power, survey.IsChinese)}}}";
     }
 
     /// <summary>
@@ -90,14 +90,14 @@ public static class DefenseView
     /// is what the row's own button shows (the defense's setting) and "typeLabel" what its type's button shows;
     /// "managed" is false while the mod leaves the defense alone because it is broken or not working.
     /// </summary>
-    private static string PowerJson(Defense defense, PowerPolicy? power)
+    private static string PowerJson(Defense defense, PowerPolicy? power, bool isChinese)
     {
         if (defense.Power is not { } state || power is null) return "null";
 
         var key = DefenseKey.Of(defense.ConfigId, defense.Position);
 
-        return $"{{\"on\":{Bool(state.IsOn)},\"managed\":{Bool(defense.IsPowerManaged)},\"mode\":{Str(PowerModes.Label(power.ModeOf(key)))}"
-            + $",\"label\":{Str(power.DefenseLabel(key))},\"typeLabel\":{Str(power.TypeLabel(defense.ConfigId))}}}";
+        return $"{{\"on\":{Bool(state.IsOn)},\"managed\":{Bool(defense.IsPowerManaged)},\"mode\":{Str(PowerModes.Label(power.ModeOf(key), isChinese))}"
+            + $",\"label\":{Str(power.DefenseLabel(key, isChinese))},\"typeLabel\":{Str(power.TypeLabel(defense.ConfigId, isChinese))}}}";
     }
 
     private static string CostJson(Survey survey, int itemId, int count, int shortBy)

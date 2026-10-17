@@ -103,7 +103,7 @@ public class DefenseViewTests
     {
         var view = View(SurveyOf(new[] { Def(1), Def(2, cur: 0, broken: true) }, isWaveLocked: true));
 
-        Assert.Equal(OutcomeMessage.WaveLockedText, view.GetProperty("locked").GetString());
+        Assert.Equal(Texts.WaveLocked.En, view.GetProperty("locked").GetString());
         Assert.All(view.GetProperty("defenses").EnumerateArray(), row => Assert.False(row.GetProperty("canRepair").GetBoolean() || row.GetProperty("canRemove").GetBoolean()));
     }
 
@@ -112,7 +112,7 @@ public class DefenseViewTests
     {
         var view = View(SurveyOf(new[] { Def(1), Def(2, cur: 0, broken: true) }, isHome: false));
 
-        Assert.Equal(OutcomeMessage.AwayFromHomeText, view.GetProperty("locked").GetString());
+        Assert.Equal(Texts.AwayFromHome.En, view.GetProperty("locked").GetString());
         Assert.All(view.GetProperty("defenses").EnumerateArray(), row => Assert.False(row.GetProperty("canRepair").GetBoolean() || row.GetProperty("canRemove").GetBoolean()));
     }
 

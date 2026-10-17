@@ -48,6 +48,21 @@ public class PageScriptTests
     }
 
     [Fact]
+    public void In_a_chinese_game_the_bar_takes_the_words_the_plugin_sends()
+    {
+        var page = new PageScript();
+
+        page.Run(PageWords.Script(isChinese: true));
+        page.Live(true, "F7");
+        page.OpenLayout();
+        page.Layout(BarView(Home()));
+
+        Assert.Equal("全部修理（2）", Label(page, "repairall"));
+        Assert.Equal("清除全部损毁（1）", Label(page, "clearbroken"));
+        Assert.Equal("防御列表（F7）", Label(page, "toggle"));
+    }
+
+    [Fact]
     public void A_Layout_page_the_game_draws_after_the_view_arrived_gets_the_bar_on_the_next_check()
     {
         var page = new PageScript();
@@ -165,7 +180,7 @@ public class PageScriptTests
         page.Click("barButton('toggle')");
 
         Assert.Equal(new PageCommand[] { new PageCommand.Toggle() }, page.Sent);
-        Assert.Equal(OutcomeMessage.WaveLockedText, page.Text("bar().querySelector('.dm-lb-note').textContent"));
+        Assert.Equal(Texts.WaveLocked.En, page.Text("bar().querySelector('.dm-lb-note').textContent"));
     }
 
     /// <summary>A press holds the buttons until its answer; opening or shutting the panel gets no answer, so it must not.</summary>
@@ -217,6 +232,20 @@ public class PageScriptTests
         Assert.Equal("Every Tesla coil: Global setting (Wave only)", page.Text("panelButton('powertype').textContent"));
         Assert.Equal("Power on", page.Text("document.querySelector('.dm-badge-on').textContent"));
         Assert.Equal("2", PowerButtonCount(page));
+    }
+
+    [Fact]
+    public void In_a_chinese_game_an_electrical_row_is_labelled_in_chinese()
+    {
+        var game = new FakeGame { IsChinese = true, Defenses = { Def(1, name: "Tesla coil") with { Power = new DefensePower(IsOn: true, IsOperational: true) } } };
+        var page = new PageScript();
+
+        page.Run(PageWords.Script(isChinese: true));
+        page.Open(DefenseView.Of(game.Read(), new PowerPolicy(PowerSettings.None, PowerMode.WaveOnly), isChinese: true) ?? throw new InvalidOperationException("no panel view"));
+
+        Assert.Equal("这个：类型设置（仅尸潮）", page.Text("panelButton('power').textContent"));
+        Assert.Equal("所有Tesla coil：全局设置（仅尸潮）", page.Text("panelButton('powertype').textContent"));
+        Assert.Equal("通电", page.Text("document.querySelector('.dm-badge-on').textContent"));
     }
 
     [Fact]

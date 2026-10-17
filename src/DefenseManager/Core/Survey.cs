@@ -11,7 +11,8 @@ public sealed record RepairStamina(float Have, int PerRepair);
 /// <summary>
 /// Everything one press decides from: the home's outdoor defenses, where the character stands, the materials their
 /// repairs use, what starting a batch does to the character's queue, whether a zombie wave has defenses locked,
-/// whether the character is at home where the defenses are, and their stamina (null when it could not be read).
+/// whether the character is at home where the defenses are, their stamina (null when it could not be read), and
+/// whether the game is showing Chinese, which the words the press ends with follow.
 /// </summary>
 public sealed record Survey(
     IReadOnlyList<Defense> Defenses,
@@ -20,10 +21,11 @@ public sealed record Survey(
     QueueOnStart QueueOnStart,
     bool IsWaveLocked,
     bool IsHome,
-    RepairStamina? Stamina = null)
+    RepairStamina? Stamina = null,
+    bool IsChinese = false)
 {
     /// <summary>A material the game did not describe is still named, so a message never shows a bare id alone.</summary>
-    public string MaterialName(int itemId) => Materials.TryGetValue(itemId, out var material) ? material.Name : $"Item {itemId}";
+    public string MaterialName(int itemId) => Materials.TryGetValue(itemId, out var material) ? material.Name : Texts.UnnamedItem.Say(IsChinese, itemId);
 
     /// <summary>A material the game did not describe counts as none in stock, so no repair is promised on it.</summary>
     public int Stock(int itemId) => Materials.TryGetValue(itemId, out var material) ? material.Stock : 0;

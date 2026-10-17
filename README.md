@@ -33,7 +33,7 @@ Defense Manager writes nothing into your save file. Its power settings are its o
 
 `F7` can be changed or turned off in the config. The HUD button works either way.
 
-The mod's panel and messages are in English. Defense and material names come from the game, and the game's own refusal reasons are shown as the game words them, which can be Chinese.
+The mod's panel, buttons and messages follow the game's language: English or Simplified Chinese. Defense and material names, and the game's own refusal reasons, come from the game as it words them.
 
 ## How it works
 
@@ -85,7 +85,7 @@ If a defense is missing from the list, a repair uses the wrong materials, or a p
 
 ## Requirements
 
-- Survival Log 1.1.18317. Built and tested on this version; a game update can break it until the mod is updated.
+- Survival Log 1.1.18902. Built and tested on this version; a game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
 
 ## Install
@@ -101,13 +101,13 @@ Each electrical defense stays in the power state the mod last switched it to, be
 
 ## Configuration
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Edit it while the game is closed; changes apply at the next game start. See [CONFIG.md](CONFIG.md) for every setting.
+Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Edit it while the game is closed; changes apply at the next game start. Each setting in the cfg file is explained in English and Simplified Chinese. See [CONFIG.md](CONFIG.md) for every setting.
 
 ## Troubleshooting
 
-Tested on Survival Log 1.1.18317 with BepInEx `6.0.0-be.788`.
+Tested on Survival Log 1.1.18902 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.3.1 started, key F7, Layout controls on, power default WaveOnly, proximity range 15 m`. The same line, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.3.2 started, key F7, Layout controls on, power default WaveOnly, proximity range 15 m`. The same line, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
 
 If an electrical defense is not switched, check its row in the panel: a broken or not working defense is left alone, and a defense in Default mode is left to the game. If no row has power buttons, look in `BepInEx\defense-manager.log` for a line about the power settings.
 
@@ -117,6 +117,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
+- 0.3.2: the panel, the HUD button's tip, the Layout buttons and every message are now in Simplified Chinese when the game is.
 - 0.3.1: Repair and Repair all now work. Before, every repair was refused as "can't be repaired right now" even when the game would allow the repair. Repair all also lines up only as many repairs as your stamina covers (each needs 10), so none are refused partway through.
 - 0.3.0: power modes for electrical defenses (Wave only, Proximity, Always on, Default), set for each defense, for each type, or for all in the config. New config settings `DefaultMode` and `ProximityRange`.
 - 0.2.2: plainer setting descriptions in the config file, now also in Simplified Chinese.

@@ -30,6 +30,9 @@ internal sealed class FakeGame : IDefenseGame
 
     public bool IsHome { get; set; } = true;
 
+    /// <summary>The game's language is Chinese.</summary>
+    public bool IsChinese { get; set; }
+
     public bool StartClearsQueue { get; set; }
 
     /// <summary>The game's queue refuses everything, as it does for an action id it does not know.</summary>
@@ -112,7 +115,7 @@ internal sealed class FakeGame : IDefenseGame
         var defenses = Defenses.Select(defense => defense with { IsRepairQueued = queue.Contains(new Act(Job.Repair, defense.Id)), IsRemovalQueued = queue.Contains(new Act(Job.Remove, defense.Id)) }).ToList();
         var materials = Stock.ToDictionary(entry => entry.Key, entry => new Material(NameOf(entry.Key), null, entry.Value));
 
-        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina));
+        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina, IsChinese));
     }
 
     /// <summary>Like the game's own queue, this takes any job it is handed, whatever the materials or the repair check say.</summary>

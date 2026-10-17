@@ -57,7 +57,8 @@ internal sealed class WebPage
     /// <summary>The view the bar on the game's Layout screen draws from, or null to take the bar away.</summary>
     public bool Layout(string? viewJson) => Call($"layout({viewJson ?? "null"})");
 
-    private bool Call(string expression) => Run($"window.__sldefense?window.__sldefense.{expression}:{NoScriptReply}");
+    /// <summary>Every call hands the page its words first, so a switch of the game's language shows at the next redraw.</summary>
+    private bool Call(string expression) => Run($"{PageWords.Script(GameLanguage.IsChinese())}window.__sldefense?window.__sldefense.{expression}:{NoScriptReply}");
 
     private bool Run(string javaScript)
     {

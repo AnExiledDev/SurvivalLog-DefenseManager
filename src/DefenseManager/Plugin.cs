@@ -13,7 +13,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.3.1";
+    private const string Version = "0.3.2";
     private const string PowerFileName = Guid + ".power.txt";
 
     public override void Load()
@@ -23,7 +23,7 @@ public sealed class Plugin : BasePlugin
             "打开和关闭 Defense Manager 面板的按键，默认 F7。设为 None 则停用该按键，屏幕左下角的盾牌按钮仍可打开面板。").Value;
         var isLayoutBarEnabled = Config.Bind("Controls", "LayoutControls", true,
             "Show Repair all, Clear all broken and Defense list buttons at the top middle of the game's Layout screen. Set to false to hide them; the panel key and the shield button still work.\n" +
-            "在游戏「规划模式」界面的顶部中间显示「Repair all」「Clear all broken」「Defense list」三个按钮。设为 false 则隐藏这些按钮，面板按键和盾牌按钮照常可用。").Value;
+            "在游戏「规划模式」界面的顶部中间显示「全部修理」「清除全部损毁」「防御列表」三个按钮。设为 false 则隐藏这些按钮，面板按键和盾牌按钮照常可用。").Value;
         var defaultModeName = Config.Bind("Power", "DefaultMode", PowerModes.ConfigName(PowerMode.WaveOnly), new ConfigDescription(
             "How electrical defenses are powered when neither the defense nor its type has a setting of its own in the Defense Manager panel. WaveOnly: on during waves and while zombies are at the base, off otherwise. AlwaysOn: always on. Proximity: on while a living zombie is within ProximityRange, off once none has been in range for 10 game minutes. Default: the mod leaves the defense alone and the game's own power switch decides.\n" +
             "电力防御设施在该设施及其类型都没有单独设置（在 Defense Manager 面板中设置）时的供电方式。WaveOnly：尸潮期间以及基地有僵尸时开启，其余时间关闭。AlwaysOn：始终开启。Proximity：有活着的僵尸进入 ProximityRange 范围内时开启，范围内连续 10 分钟游戏时间没有僵尸后关闭。Default：本模组不干预，由游戏自身的电源开关决定。",

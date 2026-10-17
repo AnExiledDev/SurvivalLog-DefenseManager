@@ -125,8 +125,8 @@ public class OutcomeMessageTests
     [Fact]
     public void Presses_that_touch_nothing_say_why()
     {
-        Assert.Equal(OutcomeMessage.WaveLockedText, OutcomeMessage.Describe(new DefenseOutcome.WaveLocked()));
-        Assert.Equal(OutcomeMessage.AwayFromHomeText, OutcomeMessage.Describe(new DefenseOutcome.AwayFromHome()));
+        Assert.Equal(Texts.WaveLocked.En, OutcomeMessage.Describe(new DefenseOutcome.WaveLocked()));
+        Assert.Equal(Texts.AwayFromHome.En, OutcomeMessage.Describe(new DefenseOutcome.AwayFromHome()));
         Assert.Equal("Finish or cancel your queued actions first.", OutcomeMessage.Describe(new DefenseOutcome.QueueBusy()));
         Assert.Equal("Every defense is in full repair.", OutcomeMessage.Describe(new DefenseOutcome.NothingToDo(Job.Repair)));
         Assert.Equal("No broken defenses.", OutcomeMessage.Describe(new DefenseOutcome.NothingToDo(Job.Remove)));
@@ -159,17 +159,17 @@ public class OutcomeMessageTests
     {
         string? InLayout(DefenseOutcome outcome) => OutcomeMessage.Describe(outcome, isInLayout: true);
 
-        Assert.Equal("Repairing Sandbags. " + OutcomeMessage.InLayoutText, InLayout(new DefenseOutcome.Queued(Job.Repair, "Sandbags")));
-        Assert.Equal("Removing Sandbags. " + OutcomeMessage.InLayoutText, InLayout(new DefenseOutcome.Queued(Job.Remove, "Sandbags")));
-        Assert.Equal("Repairing 2 defenses. " + OutcomeMessage.InLayoutText, InLayout(new DefenseOutcome.Repaired(Tally(queued: 2))));
-        Assert.Equal("Removing 3 broken defenses. " + OutcomeMessage.InLayoutText, InLayout(new DefenseOutcome.Cleared(new ClearTally(3, 0, 0, 0))));
+        Assert.Equal("Repairing Sandbags. " + Texts.InLayout.En, InLayout(new DefenseOutcome.Queued(Job.Repair, "Sandbags")));
+        Assert.Equal("Removing Sandbags. " + Texts.InLayout.En, InLayout(new DefenseOutcome.Queued(Job.Remove, "Sandbags")));
+        Assert.Equal("Repairing 2 defenses. " + Texts.InLayout.En, InLayout(new DefenseOutcome.Repaired(Tally(queued: 2))));
+        Assert.Equal("Removing 3 broken defenses. " + Texts.InLayout.En, InLayout(new DefenseOutcome.Cleared(new ClearTally(3, 0, 0, 0))));
     }
 
     [Fact]
     public void A_second_press_in_Layout_also_says_the_queued_work_is_waiting()
     {
-        Assert.Equal("Already repairing: 2 repairs still queued. " + OutcomeMessage.InLayoutText, OutcomeMessage.Describe(new DefenseOutcome.Repaired(Tally(alreadyQueued: 2)), isInLayout: true));
-        Assert.Equal("Already clearing: 1 removal still queued. " + OutcomeMessage.InLayoutText, OutcomeMessage.Describe(new DefenseOutcome.Cleared(new ClearTally(0, 1, 0, 0)), isInLayout: true));
+        Assert.Equal("Already repairing: 2 repairs still queued. " + Texts.InLayout.En, OutcomeMessage.Describe(new DefenseOutcome.Repaired(Tally(alreadyQueued: 2)), isInLayout: true));
+        Assert.Equal("Already clearing: 1 removal still queued. " + Texts.InLayout.En, OutcomeMessage.Describe(new DefenseOutcome.Cleared(new ClearTally(0, 1, 0, 0)), isInLayout: true));
     }
 
     [Fact]
@@ -186,8 +186,8 @@ public class OutcomeMessageTests
         string? InLayout(DefenseOutcome outcome) => OutcomeMessage.Describe(outcome, isInLayout: true);
 
         Assert.Null(InLayout(new DefenseOutcome.NoGame()));
-        Assert.Equal(OutcomeMessage.WaveLockedText, InLayout(new DefenseOutcome.WaveLocked()));
-        Assert.Equal(OutcomeMessage.AwayFromHomeText, InLayout(new DefenseOutcome.AwayFromHome()));
+        Assert.Equal(Texts.WaveLocked.En, InLayout(new DefenseOutcome.WaveLocked()));
+        Assert.Equal(Texts.AwayFromHome.En, InLayout(new DefenseOutcome.AwayFromHome()));
         Assert.Equal("Finish or cancel your queued actions first.", InLayout(new DefenseOutcome.QueueBusy()));
         Assert.Equal("Every defense is in full repair.", InLayout(new DefenseOutcome.NothingToDo(Job.Repair)));
         Assert.Equal("That defense is gone.", InLayout(new DefenseOutcome.Gone()));

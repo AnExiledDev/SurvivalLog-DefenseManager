@@ -11,36 +11,32 @@ namespace DefenseManager.Core;
 /// </summary>
 public static class OutcomeMessage
 {
-    public const string WaveLockedText = "A zombie wave is on: defenses can't be repaired or removed until it ends.";
-    public const string AwayFromHomeText = "Go home first: your defenses are there.";
-    public const string InLayoutText = "Work starts when you leave Layout.";
-
     private const int NamedShortfalls = 3;
 
-    private static readonly char[] ClosingPunctuation = { '.', '!', '?', '\u3002', '\uff01', '\uff1f', ' ', '\t', '\r', '\n' };
+    private static readonly char[] ClosingPunctuation = { '.', '!', '?', '。', '！', '？', ' ', '\t', '\r', '\n' };
 
     /// <summary>Unity rich-text tags such as &lt;color=#f55&gt;, &lt;/b&gt; or &lt;#ff0000&gt;, which the game's own UI renders but the panel would print.</summary>
     private static readonly Regex RichTextTag = new("</?[A-Za-z][^<>]*>|<#[0-9A-Fa-f]{3,8}>", RegexOptions.CultureInvariant);
 
     /// <summary>The status line for a press, or null when the press should pass without a word.</summary>
-    public static string? Describe(DefenseOutcome outcome) => outcome switch
+    public static string? Describe(DefenseOutcome outcome, bool isChinese = false) => outcome switch
     {
         DefenseOutcome.NoGame => null,
-        DefenseOutcome.NotReady notReady => $"Can't manage defenses right now: {Reason(notReady.Reason)}.",
-        DefenseOutcome.WaveLocked => WaveLockedText,
-        DefenseOutcome.AwayFromHome => AwayFromHomeText,
-        DefenseOutcome.QueueBusy => "Finish or cancel your queued actions first.",
-        DefenseOutcome.NothingToDo { Job: Job.Repair } => "Every defense is in full repair.",
-        DefenseOutcome.NothingToDo { Job: Job.Remove } => "No broken defenses.",
-        DefenseOutcome.Gone => "That defense is gone.",
-        DefenseOutcome.RepairRefused refused => RepairRefusedMessage(refused.Name, refused.Verdict),
-        DefenseOutcome.RemoveRefused refused => RemoveRefusedMessage(refused.Name, refused.Verdict),
-        DefenseOutcome.NotQueued notQueued => $"The game would not queue the {JobNoun(notQueued.Job)} of {notQueued.Name}.",
-        DefenseOutcome.StartFailed failed => $"Could not start the {Noun(failed.Count, JobNoun(failed.Job))}, see BepInEx/defense-manager.log.",
-        DefenseOutcome.Queued { Job: Job.Repair } queued => $"Repairing {queued.Name}.",
-        DefenseOutcome.Queued { Job: Job.Remove } queued => $"Removing {queued.Name}.",
-        DefenseOutcome.Repaired repaired => Describe(repaired.Tally),
-        DefenseOutcome.Cleared cleared => Describe(cleared.Tally),
+        DefenseOutcome.NotReady notReady => Texts.NotReady.Say(isChinese, Reason(notReady.Reason)),
+        DefenseOutcome.WaveLocked => Texts.WaveLocked.Pick(isChinese),
+        DefenseOutcome.AwayFromHome => Texts.AwayFromHome.Pick(isChinese),
+        DefenseOutcome.QueueBusy => Texts.QueueBusy.Pick(isChinese),
+        DefenseOutcome.NothingToDo { Job: Job.Repair } => Texts.AllRepaired.Pick(isChinese),
+        DefenseOutcome.NothingToDo { Job: Job.Remove } => Texts.NoneBroken.Pick(isChinese),
+        DefenseOutcome.Gone => Texts.Gone.Pick(isChinese),
+        DefenseOutcome.RepairRefused refused => RepairRefusedMessage(refused.Name, refused.Verdict, isChinese),
+        DefenseOutcome.RemoveRefused refused => RemoveRefusedMessage(refused.Name, refused.Verdict, isChinese),
+        DefenseOutcome.NotQueued notQueued => Texts.NotQueued.Say(isChinese, JobNoun(notQueued.Job, 1, isChinese), notQueued.Name),
+        DefenseOutcome.StartFailed failed => Texts.StartFailed.Say(isChinese, JobNoun(failed.Job, failed.Count, isChinese)),
+        DefenseOutcome.Queued { Job: Job.Repair } queued => Texts.QueuedRepair.Say(isChinese, queued.Name),
+        DefenseOutcome.Queued { Job: Job.Remove } queued => Texts.QueuedRemoval.Say(isChinese, queued.Name),
+        DefenseOutcome.Repaired repaired => Describe(repaired.Tally, isChinese),
+        DefenseOutcome.Cleared cleared => Describe(cleared.Tally, isChinese),
         _ => throw new InvalidOperationException("unknown defense outcome " + outcome),
     };
 
@@ -48,27 +44,27 @@ public static class OutcomeMessage
     /// The status line for a press made while the game's Layout screen is up. Layout pauses the game, so work it lines
     /// up waits there: the line says so whenever the press left anything in the queue, new or already there.
     /// </summary>
-    public static string? Describe(DefenseOutcome outcome, bool isInLayout)
+    public static string? Describe(DefenseOutcome outcome, bool isInLayout, bool isChinese = false)
     {
-        var message = Describe(outcome);
+        var message = Describe(outcome, isChinese);
 
-        return isInLayout && message != null && LeavesWorkQueued(outcome) ? message + " " + InLayoutText : message;
+        return isInLayout && message != null && LeavesWorkQueued(outcome) ? Texts.Sentences(isChinese, new[] { message, Texts.InLayout.Pick(isChinese) }) : message;
     }
 
     /// <summary>Why a row's Repair button is off, or null when the row already says it (allowed, intact, or queued).</summary>
-    public static string? WhyNot(RepairVerdict verdict) => verdict switch
+    public static string? WhyNot(RepairVerdict verdict, bool isChinese = false) => verdict switch
     {
         RepairVerdict.Allowed or RepairVerdict.Undamaged or RepairVerdict.AlreadyQueued or RepairVerdict.QueuedForRemoval => null,
-        RepairVerdict.Blocked blocked => Reason(blocked.Reason) is { Length: > 0 } reason ? reason : "The game would not allow it",
-        RepairVerdict.Short shortOf => "Needs " + Needs(shortOf.Missing),
+        RepairVerdict.Blocked blocked => Reason(blocked.Reason) is { Length: > 0 } reason ? reason : Texts.NotAllowed.Pick(isChinese),
+        RepairVerdict.Short shortOf => Texts.Needs.Say(isChinese, Needs(shortOf.Missing, isChinese)),
         _ => throw new InvalidOperationException("unknown repair verdict " + verdict),
     };
 
     /// <summary>Why a row's Remove button is off, or null when the row already says it.</summary>
-    public static string? WhyNotRemove(RemoveVerdict verdict) => verdict switch
+    public static string? WhyNotRemove(RemoveVerdict verdict, bool isChinese = false) => verdict switch
     {
         RemoveVerdict.Allowed or RemoveVerdict.AlreadyQueued => null,
-        RemoveVerdict.QueuedForRepair => "Repair queued: let it finish or cancel it first",
+        RemoveVerdict.QueuedForRepair => Texts.RepairQueuedFirst.Pick(isChinese),
         _ => throw new InvalidOperationException("unknown remove verdict " + verdict),
     };
 
@@ -83,86 +79,89 @@ public static class OutcomeMessage
         _ => throw new InvalidOperationException("unknown defense outcome " + outcome),
     };
 
-    private static string Describe(RepairTally tally)
+    private static string Describe(RepairTally tally, bool isChinese)
     {
-        var lines = new List<string> { RepairHeadline(tally.Queued, tally.AlreadyQueued) };
+        var lines = new List<string> { RepairHeadline(tally.Queued, tally.AlreadyQueued, isChinese) };
 
-        if (tally.Short.Count > 0) lines.Add(ShortfallLine(tally.Short));
-        if (tally.Blocked > 0) lines.Add(BlockedLine(tally.Blocked, tally.BlockedReason));
-        if (tally.BeingRemoved > 0) lines.Add($"{tally.BeingRemoved} queued for removal, so not repaired.");
-        if (tally.Refused > 0) lines.Add($"{tally.Refused} refused by the game's queue.");
+        if (tally.Short.Count > 0) lines.Add(ShortfallLine(tally.Short, isChinese));
+        if (tally.Blocked > 0) lines.Add(BlockedLine(tally.Blocked, tally.BlockedReason, isChinese));
+        if (tally.BeingRemoved > 0) lines.Add(Texts.BeingRemoved.Say(isChinese, tally.BeingRemoved));
+        if (tally.Refused > 0) lines.Add(Texts.RefusedByQueue.Say(isChinese, tally.Refused));
 
-        return string.Join(" ", lines);
+        return Texts.Sentences(isChinese, lines);
     }
 
-    private static string Describe(ClearTally tally)
+    private static string Describe(ClearTally tally, bool isChinese)
     {
-        var lines = new List<string> { ClearHeadline(tally.Queued, tally.AlreadyQueued) };
+        var lines = new List<string> { ClearHeadline(tally.Queued, tally.AlreadyQueued, isChinese) };
 
-        if (tally.BeingRepaired > 0) lines.Add($"{tally.BeingRepaired} queued for repair, so kept.");
-        if (tally.Refused > 0) lines.Add($"{tally.Refused} refused by the game's queue.");
+        if (tally.BeingRepaired > 0) lines.Add(Texts.BeingRepaired.Say(isChinese, tally.BeingRepaired));
+        if (tally.Refused > 0) lines.Add(Texts.RefusedByQueue.Say(isChinese, tally.Refused));
 
-        return string.Join(" ", lines);
+        return Texts.Sentences(isChinese, lines);
     }
 
-    private static string RepairHeadline(int queued, int alreadyQueued) => (queued, alreadyQueued) switch
+    private static string RepairHeadline(int queued, int alreadyQueued, bool isChinese) => (queued, alreadyQueued) switch
     {
-        (0, 0) => "Nothing repaired.",
-        (0, _) => $"Already repairing: {Plural(alreadyQueued, "repair")} still queued.",
-        (_, 0) => $"Repairing {Plural(queued, "defense")}.",
-        _ => $"Repairing {Plural(queued, "defense")}, {alreadyQueued} more already queued.",
+        (0, 0) => Texts.NothingRepaired.Pick(isChinese),
+        (0, _) => Texts.AlreadyRepairing.Say(isChinese, alreadyQueued),
+        (_, 0) => Texts.Repairing.Say(isChinese, queued),
+        _ => Texts.RepairingMore.Say(isChinese, queued, alreadyQueued),
     };
 
-    private static string ClearHeadline(int queued, int alreadyQueued) => (queued, alreadyQueued) switch
+    private static string ClearHeadline(int queued, int alreadyQueued, bool isChinese) => (queued, alreadyQueued) switch
     {
-        (0, 0) => "Nothing cleared.",
-        (0, _) => $"Already clearing: {Plural(alreadyQueued, "removal")} still queued.",
-        (_, 0) => $"Removing {Plural(queued, "broken defense")}.",
-        _ => $"Removing {Plural(queued, "broken defense")}, {alreadyQueued} more already queued.",
+        (0, 0) => Texts.NothingCleared.Pick(isChinese),
+        (0, _) => Texts.AlreadyClearing.Say(isChinese, alreadyQueued),
+        (_, 0) => Texts.Removing.Say(isChinese, queued),
+        _ => Texts.RemovingMore.Say(isChinese, queued, alreadyQueued),
     };
 
     /// <summary>Names the first few defenses left for lack of materials and what each is missing; the rest are counted.</summary>
-    private static string ShortfallLine(IReadOnlyList<Shortfall> shortfalls)
+    private static string ShortfallLine(IReadOnlyList<Shortfall> shortfalls, bool isChinese)
     {
-        var named = shortfalls.Take(NamedShortfalls).Select(shortfall => $"{shortfall.Name} needs {Needs(shortfall.Missing)}");
+        var named = shortfalls.Take(NamedShortfalls).Select(shortfall => Texts.ShortfallNamed.Say(isChinese, shortfall.Name, Needs(shortfall.Missing, isChinese))).ToList();
         var unnamed = shortfalls.Count - NamedShortfalls;
-        var list = string.Join("; ", named) + (unnamed > 0 ? $"; and {unnamed} more" : "");
 
-        return $"{shortfalls.Count} left for lack of materials: {list}.";
+        if (unnamed > 0) named.Add(Texts.AndMore.Say(isChinese, unnamed));
+
+        return Texts.ShortOfMaterials.Say(isChinese, shortfalls.Count, string.Join(isChinese ? "；" : "; ", named));
     }
 
-    private static string BlockedLine(int count, string? reason)
+    private static string BlockedLine(int count, string? reason, bool isChinese)
     {
         var trimmed = reason is null ? "" : Reason(reason);
 
-        return trimmed.Length == 0 ? $"{count} can't be repaired right now." : $"{count} can't be repaired right now: {trimmed}.";
+        return trimmed.Length == 0 ? Texts.CantRepairCount.Say(isChinese, count) : Texts.CantRepairCountWhy.Say(isChinese, count, trimmed);
     }
 
-    private static string RepairRefusedMessage(string name, RepairVerdict verdict) => verdict switch
+    private static string RepairRefusedMessage(string name, RepairVerdict verdict, bool isChinese) => verdict switch
     {
-        RepairVerdict.AlreadyQueued => $"{name} is already queued for repair.",
-        RepairVerdict.QueuedForRemoval => $"{name} is queued for removal.",
-        RepairVerdict.Undamaged => $"{name} needs no repair.",
-        RepairVerdict.Blocked blocked => Reason(blocked.Reason) is { Length: > 0 } reason ? $"Can't repair {name}: {reason}." : $"Can't repair {name} right now.",
-        RepairVerdict.Short shortOf => $"Can't repair {name}: needs {Needs(shortOf.Missing)}.",
+        RepairVerdict.AlreadyQueued => Texts.AlreadyQueuedRepair.Say(isChinese, name),
+        RepairVerdict.QueuedForRemoval => Texts.QueuedForRemoval.Say(isChinese, name),
+        RepairVerdict.Undamaged => Texts.NeedsNoRepair.Say(isChinese, name),
+        RepairVerdict.Blocked blocked => Reason(blocked.Reason) is { Length: > 0 } reason ? Texts.CantRepairWhy.Say(isChinese, name, reason) : Texts.CantRepair.Say(isChinese, name),
+        RepairVerdict.Short shortOf => Texts.CantRepairShort.Say(isChinese, name, Needs(shortOf.Missing, isChinese)),
         RepairVerdict.Allowed => throw new InvalidOperationException("an allowed repair was reported as refused"),
         _ => throw new InvalidOperationException("unknown repair verdict " + verdict),
     };
 
-    private static string RemoveRefusedMessage(string name, RemoveVerdict verdict) => verdict switch
+    private static string RemoveRefusedMessage(string name, RemoveVerdict verdict, bool isChinese) => verdict switch
     {
-        RemoveVerdict.AlreadyQueued => $"{name} is already queued for removal.",
-        RemoveVerdict.QueuedForRepair => $"{name} is queued for repair: let it finish or cancel it first.",
+        RemoveVerdict.AlreadyQueued => Texts.AlreadyQueuedRemoval.Say(isChinese, name),
+        RemoveVerdict.QueuedForRepair => Texts.QueuedForRepair.Say(isChinese, name),
         RemoveVerdict.Allowed => throw new InvalidOperationException("an allowed removal was reported as refused"),
         _ => throw new InvalidOperationException("unknown remove verdict " + verdict),
     };
 
     /// <summary>"3 more Wood", "3 more Wood and 1 more Part", "3 more Wood, 2 more Nail and 1 more Part".</summary>
-    private static string Needs(IReadOnlyList<Need> missing)
+    private static string Needs(IReadOnlyList<Need> missing, bool isChinese)
     {
-        var parts = missing.Select(need => $"{need.Missing} more {need.ItemName}").ToList();
+        var parts = missing.Select(need => Texts.NeedItem.Say(isChinese, need.Missing, need.ItemName)).ToList();
+        var comma = isChinese ? "、" : ", ";
+        var and = isChinese ? "和" : " and ";
 
-        return parts.Count <= 1 ? string.Concat(parts) : string.Join(", ", parts.Take(parts.Count - 1)) + " and " + parts[^1];
+        return parts.Count <= 1 ? string.Concat(parts) : string.Join(comma, parts.Take(parts.Count - 1)) + and + parts[^1];
     }
 
     /// <summary>
@@ -171,14 +170,10 @@ public static class OutcomeMessage
     /// </summary>
     private static string Reason(string reason) => RichTextTag.Replace(reason, "").Trim().TrimEnd(ClosingPunctuation);
 
-    private static string JobNoun(Job job) => job switch
+    private static string JobNoun(Job job, int count, bool isChinese) => job switch
     {
-        Job.Repair => "repair",
-        Job.Remove => "removal",
+        Job.Repair => (count == 1 ? Texts.RepairJob : Texts.RepairJobs).Pick(isChinese),
+        Job.Remove => (count == 1 ? Texts.RemovalJob : Texts.RemovalJobs).Pick(isChinese),
         _ => throw new ArgumentOutOfRangeException(nameof(job), job, "unknown job"),
     };
-
-    private static string Plural(int count, string noun) => $"{count} {Noun(count, noun)}";
-
-    private static string Noun(int count, string noun) => count == 1 ? noun : noun + "s";
 }

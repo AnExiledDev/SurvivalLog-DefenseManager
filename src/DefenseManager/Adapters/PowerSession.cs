@@ -63,7 +63,7 @@ internal sealed class PowerSession
     {
         Policy();
 
-        return PowerPress.Cycle(target, defenseId, _game.ReadPower(), _slot, _global);
+        return PowerPress.Cycle(target, defenseId, _game.ReadPower(), _slot, _global, GameLanguage.IsChinese());
     }
 
     private void LogLoad(SettingsLoad load)

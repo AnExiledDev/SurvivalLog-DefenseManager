@@ -43,8 +43,8 @@ public class LayoutBarTests
         var awayGame = Home();
         awayGame.IsHome = false;
 
-        Assert.Equal(OutcomeMessage.WaveLockedText, Parse(LayoutBar.View(true, true, Where.Home, waveGame.Read)).GetProperty("locked").GetString());
-        Assert.Equal(OutcomeMessage.AwayFromHomeText, Parse(LayoutBar.View(true, true, Where.Home, awayGame.Read)).GetProperty("locked").GetString());
+        Assert.Equal(Texts.WaveLocked.En, Parse(LayoutBar.View(true, true, Where.Home, waveGame.Read)).GetProperty("locked").GetString());
+        Assert.Equal(Texts.AwayFromHome.En, Parse(LayoutBar.View(true, true, Where.Home, awayGame.Read)).GetProperty("locked").GetString());
     }
 
     [Fact]

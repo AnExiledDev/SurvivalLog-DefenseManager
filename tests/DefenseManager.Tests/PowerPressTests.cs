@@ -136,9 +136,9 @@ public class PowerPressTests
         var file = new FakePowerFile();
         var slot = Slot(file);
 
-        Assert.Equal(PowerPress.NoSwitchText, Press(PowerTarget.Defense, 4, game, slot));
-        Assert.Equal(PowerPress.NoSwitchText, Press(PowerTarget.Type, 4, game, slot));
-        Assert.Equal(PowerPress.NoSwitchText, Press(PowerTarget.Defense, 99, game, slot));
+        Assert.Equal(Texts.NoSwitch.En, Press(PowerTarget.Defense, 4, game, slot));
+        Assert.Equal(Texts.NoSwitch.En, Press(PowerTarget.Type, 4, game, slot));
+        Assert.Equal(Texts.NoSwitch.En, Press(PowerTarget.Defense, 99, game, slot));
         Assert.Empty(slot.Settings.Defenses);
         Assert.Empty(slot.Settings.Types);
         Assert.Equal("", file.Text);
@@ -150,13 +150,13 @@ public class PowerPressTests
         var game = Home();
         game.IsNoGame = true;
 
-        Assert.Equal(PowerPress.NoGameText, Press(PowerTarget.Defense, 1, game, Slot(new FakePowerFile())));
+        Assert.Equal(Texts.NoGame.En, Press(PowerTarget.Defense, 1, game, Slot(new FakePowerFile())));
     }
 
     [Fact]
     public void A_game_with_no_save_yet_is_asked_to_save_first()
     {
-        Assert.Equal(PowerPress.NoSaveText, PowerPress.Cycle(PowerTarget.Defense, 1, Home().ReadPower(), new PowerSlot(new FakePowerFile()), Global));
+        Assert.Equal(Texts.NoSave.En, PowerPress.Cycle(PowerTarget.Defense, 1, Home().ReadPower(), new PowerSlot(new FakePowerFile()), Global));
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public class PowerPressTests
         var file = new FakePowerFile { IsUnreadable = true };
         var slot = Slot(file);
 
-        Assert.Equal(PowerPress.UnreadableText, Press(PowerTarget.Type, 1, Home(), slot));
+        Assert.Equal(Texts.Unreadable.En, Press(PowerTarget.Type, 1, Home(), slot));
         Assert.Empty(slot.Settings.Types);
     }
 
