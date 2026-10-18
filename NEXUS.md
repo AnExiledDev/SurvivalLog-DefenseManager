@@ -32,7 +32,6 @@ Works in English and Chinese.
 
 [size=5]Known issues[/size]
 [list]
-[*]Back up your save before trying it for the first time.[/*]
 [*]Nothing can be repaired or removed during a zombie wave.[/*]
 [*]On an expedition the panel, the HUD button and the Layout buttons are hidden, since your defenses are back home.[/*]
 [*]The game is paused while the Layout screen is open, so anything you queue there starts when you leave Layout (or when you unpause, if you had paused before).[/*]
@@ -45,7 +44,6 @@ Works in English and Chinese.
 [*]Repairing an electrical defense makes the game switch it on, which costs one tick of power even when its mode has the mod switch it off again straight after.[/*]
 [*]Power settings belong to a save file. A game that carries on under a new save file name, such as after an ending or in endless mode, starts with no defense or type settings of its own.[/*]
 [/list]
-If you run into anything strange, please tell me (see Feedback below).
 
 [size=5]Requirements[/size]
 [list]
@@ -106,7 +104,6 @@ F7 可以在配置中修改或停用。面板打开时游戏自己的快捷键�
 
 [size=5]已知问题[/size]
 [list]
-[*]第一次使用前请备份存档。[/*]
 [*]尸潮期间无法修理或拆除任何防御设施。[/*]
 [*]外出探索时，面板、HUD 按钮和「规划模式」界面上的按钮都会隐藏，因为你的防御设施在家里。[/*]
 [*]「规划模式」界面打开时游戏是暂停的，所以在那里排队的行动会在离开「规划模式」后开始（如果之前已经暂停，则在取消暂停后开始）。[/*]
@@ -119,7 +116,6 @@ F7 可以在配置中修改或停用。面板打开时游戏自己的快捷键�
 [*]修理电力防御设施时游戏会把它打开，即使它的模式随后让模组马上关闭它，也会消耗一次电量。[/*]
 [*]供电设置属于某个存档文件。以新存档文件名继续的游戏（例如结局之后或无尽模式）开始时没有任何单个或类型设置。[/*]
 [/list]
-如果遇到任何奇怪的情况，请告诉我（见下方反馈）。
 
 [size=5]前置要求[/size]
 [list]

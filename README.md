@@ -62,8 +62,6 @@ The mod checks the defenses about twice a second whenever a game is loaded, with
 
 ## Known issues and limits
 
-This mod repairs and removes defenses and uses your materials. Back up your save before trying it for the first time.
-
 - Nothing can be repaired or removed during a zombie wave. The panel says so and its buttons wait.
 - On an expedition the panel, the HUD button and the Layout buttons are hidden and `F7` does nothing, since your defenses are back home. They come back when you return home.
 - The game is paused while the Layout screen is open, so repairs and removals you queue there wait. The character starts on them when you leave Layout (or, if you had paused the game before opening Layout, when you unpause). The message after each press says so.
@@ -73,15 +71,11 @@ This mod repairs and removes defenses and uses your materials. Back up your save
 - Rows are listed by name. The walking order only applies to Repair all and Clear all broken.
 - Robot repair is not included.
 - A removal you did not mean can be cancelled from the action queue before the character gets to it, like any other queued action. There is no confirmation box.
-- Colour and other formatting tags in the game's refusal reasons are removed.
 - A defense in any mode but Default is switched back to what its mode wants within a second if you flip its power by hand from its own menu. Set it to Default to switch it yourself.
 - Nothing is switched while the Layout screen is open or while the game locks its power switches.
 - Repairing an electrical defense makes the game switch it on, which costs one tick of power even when its mode has the mod switch it off again straight after.
 - Power settings belong to a save file. A game that carries on under a new save file name, such as after an ending or in endless mode, starts with no defense or type settings of its own.
-- The power buttons do not show, and nothing is switched, in a new game until it has been saved once, or while the power settings file cannot be read. The log says which. A file that cannot be read is never written over.
-- `BepInEx\defense-manager.log` is never trimmed. Delete it while the game is closed if it gets large.
-
-If a defense is missing from the list, a repair uses the wrong materials, or a press does something you did not expect, please tell me (see [Feedback](#feedback-and-bug-reports)).
+- The power buttons do not show, and nothing is switched, in a new game until it has been saved once.
 
 ## Requirements
 
