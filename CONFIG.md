@@ -27,3 +27,9 @@ Changing `DefaultMode` here changes every defense and type that has no setting o
 Repairing an electrical defense makes the game switch it on, which costs one tick of power even when its mode has the mod switch it off again straight after.
 
 The defense and type settings belong to a save file. A game that carries on under a new save file name, such as after an ending or in endless mode, starts with none of its own and follows `DefaultMode`.
+
+## Combat
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `DefensesHitCrawlers` | `true` | Every defense that does damage also hits crawler zombies. In the base game crawlers dodge some defenses, and the chainsaw never hits them. `false` keeps the game's dodging. |
