@@ -1,5 +1,5 @@
 Name: Defense Manager
-Summary: One panel for the traps and barricades outside your home. Repair all damaged defenses in one press, clear the broken ones, or repair and remove them one by one. Opens with F7 or a HUD button, with Repair all and Clear all broken also on the game's Layout screen. Switches electrical defenses on only while zombies are at the base, only when zombies come near, or always. 一个面板管理家外面的所有陷阱和路障：一键修理全部受损的防御设施、清除损毁的防御设施，或逐个修理和拆除。用 F7 或 HUD 按钮打开，游戏的「规划模式」界面上也有「全部修理」和「清除全部损毁」按钮。电力防御设施可以设为只在僵尸到达基地时、只在僵尸靠近时或一直开启。
+Summary: One panel for the traps and barricades outside your home. Repair all damaged defenses in one press, clear the broken ones, or repair and remove them one by one. Opens with F7 or a HUD button, with Repair all and Clear all broken also on the game's Layout screen. Switches electrical defenses on only while zombies are at the base, only when zombies come near, or always. Lets the chainsaw hit crawler zombies. 一个面板管理家外面的所有陷阱和路障：一键修理全部受损的防御设施、清除损毁的防御设施，或逐个修理和拆除。用 F7 或 HUD 按钮打开，游戏的「规划模式」界面上也有「全部修理」和「清除全部损毁」按钮。电力防御设施可以设为只在僵尸到达基地时、只在僵尸靠近时或一直开启。还能让电锯打到爬行者丧尸。
 
 Description (BBCode):
 Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel, so you can repair or clear them in one press.

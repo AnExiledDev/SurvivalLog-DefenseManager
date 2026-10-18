@@ -18,6 +18,7 @@ internal static class DodgeRulesPatch
 
     private static CrawlerDodge _dodge = new(0f, 0f);
     private static string? _written;
+    private static bool _hasFailed;
     private static Action<string> _log = _ => { };
 
     public static void Apply(Harmony harmony, CrawlerDodge dodge, Action<string> log)
@@ -40,6 +41,9 @@ internal static class DodgeRulesPatch
 
     private static void UsePlayersChances()
     {
+        // RollDodge runs for every chainsaw target on every swing, so a write that keeps failing is tried and logged once.
+        if (_hasFailed) return;
+
         try
         {
             var rules = GameSingleton.Existing<ConfigManager>()?.TryGet_Config_GlobalSetting(RulesId);
@@ -53,6 +57,7 @@ internal static class DodgeRulesPatch
         }
         catch (Exception ex)
         {
+            _hasFailed = true;
             _log($"could not set the crawler dodge chances, the game's own apply: {ex.Message}");
         }
     }

@@ -2,7 +2,7 @@
 
 ## 0.4.0
 
-The Mechanical Chainsaw now hits crawler zombies. In the base game they dodge it every time, so it never hurts them. Now they dodge it 25% of the time by default. New config settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
+The Mechanical Chainsaw now hits crawler zombies. In the base game they dodge it every time, so its blade never hits them. Now they dodge it 25% of the time by default. New config settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
 
 ## 0.3.3
 

@@ -32,5 +32,5 @@ The defense and type settings belong to a save file. A game that carries on unde
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `CrawlerDodgeChance` | `0.25` | Chance that a Crawler dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw never hurts crawlers. |
-| `ArmoredCrawlerDodgeChance` | `0.25` | The same for the Armored Crawler. |
+| `CrawlerDodgeChance` | `0.25` | Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. |
+| `ArmoredCrawlerDodgeChance` | `0.25` | The same for the Armored Crawler Zombie. |
