@@ -39,12 +39,25 @@ public static class RepairCheck
         if (defense.IsRemovalQueued) return new RepairVerdict.QueuedForRemoval();
         if (!defense.IsDamaged) return new RepairVerdict.Undamaged();
         if (defense.RepairBlockedReason is { } reason) return new RepairVerdict.Blocked(reason);
-        if (survey.Stamina is { } stamina && stamina.Have < stamina.NeededToStart) return new RepairVerdict.Blocked(Texts.OutOfStamina.Say(survey.IsChinese, stamina.NeededToStart));
+        if (IsShortOfStaminaToStart(survey, out var needed)) return new RepairVerdict.Blocked(Texts.OutOfStamina.Say(survey.IsChinese, needed));
 
         var missing = budget.Missing(defense.Cost);
 
         if (missing.Count > 0) return new RepairVerdict.Short(missing.Select(entry => new Need(entry.Key, survey.MaterialName(entry.Key), entry.Value)).ToList());
 
         return new RepairVerdict.Allowed();
+    }
+
+    /// <summary>
+    /// Only the stamina the game asks for before a repair starts is checked, and only when the repair would be the
+    /// next thing the character does. What each repair spends is left to the game, which refuses any that run short.
+    /// </summary>
+    private static bool IsShortOfStaminaToStart(Survey survey, out int needed)
+    {
+        needed = survey.Stamina?.NeededToStart ?? 0;
+
+        if (survey.Stamina is not { } stamina || survey.QueueOnStart == QueueOnStart.AppendsBehindPlayerActions) return false;
+
+        return stamina.Have < stamina.NeededToStart;
     }
 }

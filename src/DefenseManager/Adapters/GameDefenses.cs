@@ -438,9 +438,11 @@ internal sealed class GameDefenses : IDefenseGame
     {
         var mode = AgentTools.GetAgentComponent<ActionCacheComponent>(role)?.Mode ?? ActionMode.Default;
 
-        if (mode == ActionMode.Queue) return QueueOnStart.Appends;
+        var hasPlayerActions = actions.HasManualActionInQueue(role.InstanceId);
 
-        return actions.HasManualActionInQueue(role.InstanceId) ? QueueOnStart.ReplacesPlayerActions : QueueOnStart.ReplacesOwnActions;
+        if (mode == ActionMode.Queue) return hasPlayerActions ? QueueOnStart.AppendsBehindPlayerActions : QueueOnStart.Appends;
+
+        return hasPlayerActions ? QueueOnStart.ReplacesPlayerActions : QueueOnStart.ReplacesOwnActions;
     }
 
     /// <summary>The defenses are on the home map, so a failed check counts as away and lines nothing up.</summary>

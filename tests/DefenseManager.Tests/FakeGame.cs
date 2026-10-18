@@ -145,9 +145,11 @@ internal sealed class FakeGame : IDefenseGame
 
     private QueueOnStart WhatStartDoes()
     {
-        if (!StartClearsQueue) return QueueOnStart.Appends;
+        var hasPlayerActions = Running.Any(act => act != Walking);
 
-        return Running.Any(act => act != Walking) ? QueueOnStart.ReplacesPlayerActions : QueueOnStart.ReplacesOwnActions;
+        if (!StartClearsQueue) return hasPlayerActions ? QueueOnStart.AppendsBehindPlayerActions : QueueOnStart.Appends;
+
+        return hasPlayerActions ? QueueOnStart.ReplacesPlayerActions : QueueOnStart.ReplacesOwnActions;
     }
 }
 

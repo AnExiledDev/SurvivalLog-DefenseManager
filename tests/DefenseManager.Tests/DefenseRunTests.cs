@@ -394,6 +394,16 @@ public class DefenseRunTests
     }
 
     [Fact]
+    public void Repair_all_leaves_the_stamina_to_the_game_when_player_actions_run_first()
+    {
+        var game = new FakeGame { Stamina = new RepairStamina(6, 10), Running = { Eating }, Defenses = { Def(1, x: 1), Def(2, x: 2) } };
+
+        DefenseRun.RepairAll(game);
+
+        Assert.Equal(new long[] { 1, 2 }, game.Repairing);
+    }
+
+    [Fact]
     public void A_row_repair_is_refused_when_the_stamina_is_below_what_a_repair_needs_to_start()
     {
         var game = new FakeGame { Stamina = new RepairStamina(9, 10), Defenses = { Def(1) } };

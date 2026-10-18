@@ -56,6 +56,12 @@ public enum QueueOnStart
     /// <summary>The repairs or removals join the end of the queue and everything already in it stays.</summary>
     Appends,
 
+    /// <summary>
+    /// The repairs or removals join the end of the queue, behind actions the player queued. Those may change the
+    /// character's stamina before any repair starts, so stamina at the press says nothing about the first repair.
+    /// </summary>
+    AppendsBehindPlayerActions,
+
     /// <summary>The queue is replaced, but it holds nothing the player queued: only what the character chose to do itself.</summary>
     ReplacesOwnActions,
 

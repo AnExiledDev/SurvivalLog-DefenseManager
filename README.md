@@ -113,7 +113,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
-- 0.3.3: repair all no longer assumes every repair costs 10 stamina. Repairs often cost less, so it used to stop short. It now lines up every repair the materials cover as long as you have the 10 stamina a repair needs to start; if your stamina runs out partway, the game skips the rest.
+- 0.3.3: Repair and Repair all no longer assume every repair costs 10 stamina. Repairs often cost less, so Repair all used to stop short. Now repairs are only held back when you have less than the 10 stamina a repair needs to start, and not at all when actions you queued run first. If your stamina runs out partway, the game refuses the rest.
 - 0.3.2: the panel, the HUD button's tip, the Layout buttons and every message are now in Simplified Chinese when the game is.
 - 0.3.1: Repair and Repair all now work. Before, every repair was refused as "can't be repaired right now" even when the game would allow the repair. Repair all also lines up only as many repairs as your stamina covers (each needs 10), so none are refused partway through.
 - 0.3.0: power modes for electrical defenses (Wave only, Proximity, Always on, Default), set for each defense, for each type, or for all in the config. New config settings `DefaultMode` and `ProximityRange`.

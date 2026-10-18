@@ -2,7 +2,7 @@
 
 ## 0.3.3
 
-Repair all no longer assumes every repair costs 10 stamina. Repairs often cost less, so it used to stop short. It now lines up every repair the materials cover as long as you have the 10 stamina a repair needs to start; if your stamina runs out partway, the game skips the rest.
+Repair and Repair all no longer assume every repair costs 10 stamina. Repairs often cost less, so Repair all used to stop short. Now repairs are only held back when you have less than the 10 stamina a repair needs to start, and not at all when actions you queued run first. If your stamina runs out partway, the game refuses the rest.
 
 ## 0.3.2
 
