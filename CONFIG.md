@@ -32,4 +32,5 @@ The defense and type settings belong to a save file. A game that carries on unde
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `DefensesHitCrawlers` | `true` | Every defense that does damage also hits crawler zombies. In the base game crawlers dodge some defenses, and the chainsaw never hits them. `false` keeps the game's dodging. |
+| `CrawlerDodgeChance` | `0.25` | Chance that a Crawler dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw never hurts crawlers. |
+| `ArmoredCrawlerDodgeChance` | `0.25` | The same for the Armored Crawler. |

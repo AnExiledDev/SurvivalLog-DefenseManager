@@ -32,19 +32,25 @@ public sealed class Plugin : BasePlugin
             "How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground; height does not count. 15 by default, from 1 to 100.\n" +
             "设为 Proximity 的防御设施在活着的僵尸进入多少米范围内时开启。按地面水平距离计算，不计高度。默认 15，可设为 1 到 100。",
             new AcceptableValueRange<float>(1f, 100f))).Value;
-        var doDefensesHitCrawlers = Config.Bind("Combat", "DefensesHitCrawlers", true,
-            "Every defense that does damage also hits crawler zombies. In the base game crawlers dodge some defenses, and the chainsaw never hits them. Set to false to keep the game's dodging.\n" +
-            "所有造成伤害的防御设施也能击中爬行者。原版游戏中爬行者会闪避部分防御设施，「机械电锯」完全打不到它们。设为 false 则保留游戏原本的闪避。").Value;
+        var crawlerDodge = Config.Bind("Combat", "CrawlerDodgeChance", 0.25f, new ConfigDescription(
+            "Chance that a Crawler dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw never hurts crawlers. 0.25 by default.\n" +
+            "「爬行者」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1，电锯完全伤不到爬行者。默认 0.25。",
+            new AcceptableValueRange<float>(0f, 1f))).Value;
+        var armoredCrawlerDodge = Config.Bind("Combat", "ArmoredCrawlerDodgeChance", 0.25f, new ConfigDescription(
+            "Chance that an Armored Crawler dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. 0.25 by default.\n" +
+            "「重甲爬行者」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1。默认 0.25。",
+            new AcceptableValueRange<float>(0f, 1f))).Value;
+        var dodge = new CrawlerDodge(crawlerDodge, armoredCrawlerDodge);
         var defaultMode = PowerModes.Parse(defaultModeName) ?? PowerMode.WaveOnly;
         var log = new DefenseLog(Log, Path.Combine(Paths.BepInExRootPath, "defense-manager.log"));
         var harmony = new Harmony(Guid);
         var powerSlot = new PowerSlot(new PowerFileOnDisk(Path.Combine(Paths.ConfigPath, PowerFileName), log.Write));
         var power = new PowerSession(new GamePower(log.Write), powerSlot, defaultMode, proximityRange, log.Write);
 
-        log.Write($"===== Defense Manager {Version} started, key {panelKey}, Layout controls {(isLayoutBarEnabled ? "on" : "off")}, power default {PowerModes.ConfigName(defaultMode)}, proximity range {proximityRange} m, defenses hit crawlers {(doDefensesHitCrawlers ? "on" : "off")}");
+        log.Write($"===== Defense Manager {Version} started, key {panelKey}, Layout controls {(isLayoutBarEnabled ? "on" : "off")}, power default {PowerModes.ConfigName(defaultMode)}, proximity range {proximityRange} m, crawler dodge {dodge.Crawler}, armored crawler dodge {dodge.ArmoredCrawler}");
         InputGate.Apply(harmony, log.Write);
         PageMessages.Apply(harmony, log.Write);
-        if (doDefensesHitCrawlers) CrawlerHits.Apply(harmony, log.Write);
+        DodgeRulesPatch.Apply(harmony, dodge, log.Write);
         DefenseTicker.Session = new DefenseSession(new GameDefenses(log.Write), power, new WebPage(log.Write), panelKey, isLayoutBarEnabled, log.Write);
         DefenseTicker.Log = log.Write;
         AddComponent<DefenseTicker>();

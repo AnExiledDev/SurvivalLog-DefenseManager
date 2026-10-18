@@ -18,7 +18,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 - **Clear messages**: after each press a line says what was queued and what was left and why. Repair all names up to three defenses that are short of materials and exactly what each is missing. When the panel is closed, the message shows as a short pop-up instead.
 - **Power modes for electrical defenses**: the mod switches each electrical defense's power for you, in one of four modes (see [Power modes](#power-modes)). Its row shows whether the power is on, the mode it runs in, and two buttons: **This one: ...** changes the mode of that one defense, and **Every (name): ...** changes it for every defense of that type. Each button shows its current setting.
 - **Game hotkeys paused**: the game's own hotkeys are off while the panel is open and come back when it closes, so keys you press in the panel do not reach the game.
-- **Defenses hit crawlers**: in the base game crawler zombies dodge some defenses, and the chainsaw never hits them at all. With the mod, every defense that does damage hits crawlers like any other zombie. `DefensesHitCrawlers` in the config turns this off.
+- **Crawlers can be hit by the chainsaw**: in the base game crawler zombies always dodge the Mechanical Chainsaw, so it never hurts them. With the mod they dodge it only 25% of the time. `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` in the config set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
 - **Log file**: every press and what came of it is written to `BepInEx\defense-manager.log`.
 
 Every repair and removal is the game's own action, the same one the defense's menu lines up, so the game's own walking, timing and material use apply. Only defenses outside your home are listed; doors and windows are not touched.
@@ -114,7 +114,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
-- 0.4.0: every defense that does damage now hits crawler zombies, including the chainsaw, which never did before. New config setting `DefensesHitCrawlers` (on by default).
+- 0.4.0: the Mechanical Chainsaw now hits crawler zombies, which used to dodge it every time. They dodge it 25% of the time by default. New config settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance`.
 - 0.3.3: Repair and Repair all no longer assume every repair costs 10 stamina. Repairs often cost less, so Repair all used to stop short. Now repairs are only held back when you have less than the 10 stamina a repair needs to start, and not at all when actions you queued run first. If your stamina runs out partway, the game refuses the rest.
 - 0.3.2: the panel, the HUD button's tip, the Layout buttons and every message are now in Simplified Chinese when the game is.
 - 0.3.1: Repair and Repair all now work. Before, every repair was refused as "can't be repaired right now" even when the game would allow the repair. Repair all also lines up only as many repairs as your stamina covers (each needs 10), so none are refused partway through.

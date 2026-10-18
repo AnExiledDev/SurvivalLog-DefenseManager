@@ -17,7 +17,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Game's own actions[/b]: repairs and removals join the end of your action queue, so your own queued actions run first.[/*]
 [*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them on during waves and while zombies are at the base, and off otherwise, [b]Proximity[/b] turns them on while a zombie is in range (15 m by default) and off after 10 game minutes with none, [b]Always on[/b] keeps them on, and [b]Default[/b] leaves them to the game's own switch.[/*]
 [*][b]Per defense, per type, or for all[/b]: each electrical row has a [b]This one[/b] button for that defense and an [b]Every (name)[/b] button for all of its type. Anything without a setting follows its type, and a type without one follows the mode in the config (Wave only unless you change it).[/*]
-[*][b]Defenses hit crawlers[/b]: in the base game crawlers dodge some defenses, and the chainsaw never hits them. With the mod, every defense that does damage hits them too. Can be turned off in the config.[/*]
+[*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. With the mod they dodge it 25% of the time, and the chance for each kind of crawler can be set in the config.[/*]
 [/list]
 
 [size=5]Hotkeys[/size]
@@ -90,7 +90,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*][b]使用游戏自己的行动[/b]：修理和拆除会排到你的行动队列末尾，你自己排好的行动先执行。[/*]
 [*][b]供电模式[/b]：模组会替你切换电力防御设施。[b]仅尸潮[/b]在尸潮期间和基地有僵尸时开启，其余时间关闭；[b]僵尸靠近[/b]在有僵尸进入范围（默认 15 米）时开启，连续 10 分钟游戏时间没有僵尸后关闭；[b]常开[/b]一直开启；[b]默认[/b]交给游戏自己的开关。[/*]
 [*][b]单个、同类或全部[/b]：每个电力防御设施的一行都有「这个」按钮设置这一个，和「所有（名称）」按钮设置同类的全部。没有单独设置的跟随它的类型，类型也没有设置的跟随配置里的模式（默认是仅尸潮）。[/*]
-[*][b]防御设施能打到爬行者[/b]：原版游戏中爬行者会闪避部分防御设施，「机械电锯」完全打不到它们。本模组让所有造成伤害的防御设施都能击中爬行者，可以在配置里关闭。[/*]
+[*][b]电锯能打到爬行者[/b]：原版游戏中爬行者总能闪避「机械电锯」。本模组把闪避概率降到 25%，每种爬行者的概率都可以在配置里设置。[/*]
 [/list]
 
 [size=5]快捷键[/size]

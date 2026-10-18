@@ -2,7 +2,7 @@
 
 ## 0.4.0
 
-Every defense that does damage now hits crawler zombies. In the base game crawlers dodge some defenses, and the chainsaw never hits them at all. New config setting `DefensesHitCrawlers`, on by default; set it to false to keep the game's dodging.
+The Mechanical Chainsaw now hits crawler zombies. In the base game they dodge it every time, so it never hurts them. Now they dodge it 25% of the time by default. New config settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
 
 ## 0.3.3
 
