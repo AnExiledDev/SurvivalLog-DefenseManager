@@ -136,29 +136,38 @@ public class DefenseRunTests
     }
 
     [Fact]
-    public void Repair_all_lines_up_only_the_repairs_the_stamina_covers()
+    public void Repair_all_does_not_treat_the_starting_minimum_as_what_each_repair_spends()
     {
-        var game = new FakeGame { Stamina = new RepairStamina(25, 10), Defenses = { Def(1, x: 1), Def(2, x: 2), Def(3, x: 3), Def(4, x: 4) } };
+        var game = new FakeGame { Stamina = new RepairStamina(25, 10), SpentPerRepair = 4, Defenses = { Def(1, x: 1), Def(2, x: 2), Def(3, x: 3), Def(4, x: 4) } };
 
         var tally = Repaired(DefenseRun.RepairAll(game));
 
-        Assert.Equal(new long[] { 1, 2 }, game.Repairing);
+        Assert.Equal(new long[] { 1, 2, 3, 4 }, game.Repairing);
         Assert.Empty(game.FailingRepairs);
-        Assert.Equal(2, tally.Blocked);
-        Assert.Equal(Texts.OutOfStamina.Say(false, 10), tally.BlockedReason);
+        Assert.Equal(0, tally.Blocked);
     }
 
     [Fact]
-    public void Repair_all_leaves_the_stamina_of_repairs_already_queued_to_them()
+    public void Repair_all_leaves_repairs_the_stamina_runs_out_on_to_the_game_to_refuse()
     {
-        var game = new FakeGame { Stamina = new RepairStamina(30, 10), Defenses = { Def(1, x: 1), Def(2, x: 2), Def(3, x: 3), Def(4, x: 4) } };
+        var game = new FakeGame { Stamina = new RepairStamina(25, 10), SpentPerRepair = 10, Defenses = { Def(1, x: 1), Def(2, x: 2), Def(3, x: 3), Def(4, x: 4) } };
 
-        DefenseRun.Repair(game, 4);
-        DefenseRun.Repair(game, 3);
         DefenseRun.RepairAll(game);
 
-        Assert.Equal(new long[] { 4, 3, 1 }, game.Repairing);
-        Assert.Empty(game.FailingRepairs);
+        Assert.Equal(new long[] { 1, 2, 3, 4 }, game.Repairing);
+        Assert.Equal(new long[] { 3, 4 }, game.FailingRepairs);
+    }
+
+    [Fact]
+    public void Repair_all_lines_up_nothing_when_the_stamina_is_below_what_a_repair_needs_to_start()
+    {
+        var game = new FakeGame { Stamina = new RepairStamina(9, 10), Defenses = { Def(1, x: 1), Def(2, x: 2) } };
+
+        var tally = Repaired(DefenseRun.RepairAll(game));
+
+        Assert.Empty(game.Repairing);
+        Assert.Equal(2, tally.Blocked);
+        Assert.Equal(Texts.OutOfStamina.Say(false, 10), tally.BlockedReason);
     }
 
     [Fact]
@@ -385,15 +394,25 @@ public class DefenseRunTests
     }
 
     [Fact]
-    public void A_row_repair_is_refused_when_repairs_already_queued_use_the_stamina()
+    public void A_row_repair_is_refused_when_the_stamina_is_below_what_a_repair_needs_to_start()
     {
-        var game = new FakeGame { Stamina = new RepairStamina(19, 10), Defenses = { Def(1), Def(2) } };
+        var game = new FakeGame { Stamina = new RepairStamina(9, 10), Defenses = { Def(1) } };
 
-        DefenseRun.Repair(game, 1);
-
-        var refused = Assert.IsType<DefenseOutcome.RepairRefused>(DefenseRun.Repair(game, 2));
+        var refused = Assert.IsType<DefenseOutcome.RepairRefused>(DefenseRun.Repair(game, 1));
 
         Assert.Equal(new RepairVerdict.Blocked(Texts.OutOfStamina.Say(false, 10)), refused.Verdict);
+        Assert.Empty(game.Repairing);
+    }
+
+    [Fact]
+    public void A_row_repair_is_not_refused_for_stamina_that_queued_repairs_might_spend()
+    {
+        var game = new FakeGame { Stamina = new RepairStamina(19, 10), SpentPerRepair = 4, Defenses = { Def(1), Def(2) } };
+
+        DefenseRun.Repair(game, 1);
+        DefenseRun.Repair(game, 2);
+
+        Assert.Equal(new long[] { 1, 2 }, game.Repairing);
         Assert.Empty(game.FailingRepairs);
     }
 

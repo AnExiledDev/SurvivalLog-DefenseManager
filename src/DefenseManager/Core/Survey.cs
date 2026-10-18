@@ -5,8 +5,12 @@ namespace DefenseManager.Core;
 /// <summary>A repair material: its name, its picture (page-relative path or null) and how many the player has.</summary>
 public sealed record Material(string Name, string? Icon, int Stock);
 
-/// <summary>The character's stamina and what each repair needs of it; the game spends that much when a repair starts.</summary>
-public sealed record RepairStamina(float Have, int PerRepair);
+/// <summary>
+/// The character's stamina and the least the game lets a repair start with. What a repair then spends varies and is
+/// not in the game's tables, so only the starting minimum is checked; a queued repair that later finds too little
+/// stamina is refused by the game itself.
+/// </summary>
+public sealed record RepairStamina(float Have, int NeededToStart);
 
 /// <summary>
 /// Everything one press decides from: the home's outdoor defenses, where the character stands, the materials their

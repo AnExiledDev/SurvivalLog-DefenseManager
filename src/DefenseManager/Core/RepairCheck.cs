@@ -33,13 +33,13 @@ public abstract record RepairVerdict
 /// <summary>Decides whether one defense's repair would be taken by the game, so no repair is queued only to be refused when it runs.</summary>
 public static class RepairCheck
 {
-    public static RepairVerdict Judge(Defense defense, MaterialBudget budget, StaminaBudget stamina, Survey survey)
+    public static RepairVerdict Judge(Defense defense, MaterialBudget budget, Survey survey)
     {
         if (defense.IsRepairQueued) return new RepairVerdict.AlreadyQueued();
         if (defense.IsRemovalQueued) return new RepairVerdict.QueuedForRemoval();
         if (!defense.IsDamaged) return new RepairVerdict.Undamaged();
         if (defense.RepairBlockedReason is { } reason) return new RepairVerdict.Blocked(reason);
-        if (!stamina.CoversOne) return new RepairVerdict.Blocked(Texts.OutOfStamina.Say(survey.IsChinese, stamina.PerRepair));
+        if (survey.Stamina is { } stamina && stamina.Have < stamina.NeededToStart) return new RepairVerdict.Blocked(Texts.OutOfStamina.Say(survey.IsChinese, stamina.NeededToStart));
 
         var missing = budget.Missing(defense.Cost);
 

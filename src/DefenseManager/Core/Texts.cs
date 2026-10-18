@@ -89,7 +89,7 @@ public static class Texts
     /// <summary>One missing material: {0} is how many, {1} its name.</summary>
     public static readonly Phrase NeedItem = new("{0} more {1}", "{0} 个{1}");
 
-    public static readonly Phrase OutOfStamina = new("Not enough stamina for another repair (each needs {0})", "精力不足，无法再修理（每次需要 {0}）");
+    public static readonly Phrase OutOfStamina = new("Not enough stamina to start a repair (needs {0})", "精力不足，无法开始修理（需要 {0}）");
 
     /// <summary>A material the game did not name; {0} is its id.</summary>
     public static readonly Phrase UnnamedItem = new("Item {0}", "物品 {0}");

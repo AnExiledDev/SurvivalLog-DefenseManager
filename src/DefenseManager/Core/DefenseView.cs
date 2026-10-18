@@ -27,12 +27,11 @@ public static class DefenseView
     public static string Build(Survey survey, PowerPolicy? power = null)
     {
         var budget = MaterialBudget.Of(survey);
-        var stamina = StaminaBudget.Of(survey);
         var locked = LockedText(survey);
         var toRepair = survey.Defenses.Where(defense => defense.IsDamaged && !defense.IsRepairQueued && !defense.IsRemovalQueued).ToList();
         var toClear = survey.Defenses.Count(defense => defense.IsBroken && RemoveCheck.Judge(defense) is RemoveVerdict.Allowed);
         var materials = survey.Materials.OrderBy(entry => entry.Key).Select(entry => MaterialJson(entry.Value, budget.Left(entry.Key), NeededBy(toRepair, entry.Key)));
-        var rows = survey.Defenses.OrderBy(defense => defense.Name, StringComparer.Ordinal).ThenBy(defense => defense.Id).Select(defense => RowJson(defense, survey, budget, stamina, locked is null, power));
+        var rows = survey.Defenses.OrderBy(defense => defense.Name, StringComparer.Ordinal).ThenBy(defense => defense.Id).Select(defense => RowJson(defense, survey, budget, locked is null, power));
 
         return Json(note: null, locked, toRepair.Count, toClear, materials, rows);
     }
@@ -67,12 +66,12 @@ public static class DefenseView
         $"{{\"name\":{Str(material.Name)},\"icon\":{Str(material.Icon)},\"free\":{Num(free)},\"need\":{Num(need)}}}";
 
     /// <summary>
-    /// One defense, judged on its own against the stamina and materials left after repairs already queued: the row says whether
+    /// One defense, judged on its own against the character's stamina and the materials left after repairs already queued: the row says whether
     /// this one repair would be taken now, not whether it fits in a Repair all round.
     /// </summary>
-    private static string RowJson(Defense defense, Survey survey, MaterialBudget budget, StaminaBudget stamina, bool isUnlocked, PowerPolicy? power)
+    private static string RowJson(Defense defense, Survey survey, MaterialBudget budget, bool isUnlocked, PowerPolicy? power)
     {
-        var repair = RepairCheck.Judge(defense, budget, stamina, survey);
+        var repair = RepairCheck.Judge(defense, budget, survey);
         var remove = RemoveCheck.Judge(defense);
         var missing = budget.Missing(defense.Cost);
         var cost = defense.Cost.OrderBy(entry => entry.Key).Select(entry => CostJson(survey, entry.Key, entry.Value, missing.GetValueOrDefault(entry.Key)));

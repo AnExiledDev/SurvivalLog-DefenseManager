@@ -372,22 +372,22 @@ internal sealed class GameDefenses : IDefenseGame
 
     /// <summary>
     /// The character's stamina, read the way the game's condition check reads it (ConditionSetManager.c:935-990), and
-    /// the stamina rule in the repair's condition set. Null when either cannot be read, so Repair all is capped only by
-    /// the game's own check, as before.
+    /// the least stamina the repair's condition set lets a repair start with. Null when either cannot be read, so only
+    /// the game's own check applies.
     /// </summary>
     private RepairStamina? ReadStamina(ConfigManager config, LeadingRole role)
     {
         try
         {
             var conditionSetId = config.Get_Config_FurnitureFunc(RepairFunc)?.ConditionSetId ?? 0;
-            var perRepair = conditionSetId > 0 ? StaminaRule(config.Get_Config_ConditionSet(conditionSetId)) : 0;
+            var neededToStart = conditionSetId > 0 ? StaminaRule(config.Get_Config_ConditionSet(conditionSetId)) : 0;
             var attributes = AgentTools.GetAgentComponent<AttributeComponent>(role);
 
-            if (perRepair <= 0 || attributes == null) return null;
+            if (neededToStart <= 0 || attributes == null) return null;
 
             var have = attributes.IsSingle(AttrName.Stamina) ? attributes.GetTotalValue_Float(AttrName.Stamina) : attributes.GetTotalValue_Int(AttrName.Stamina);
 
-            return new RepairStamina(have, perRepair);
+            return new RepairStamina(have, neededToStart);
         }
         catch (Exception ex)
         {
@@ -397,7 +397,7 @@ internal sealed class GameDefenses : IDefenseGame
         }
     }
 
-    /// <summary>The stamina the condition set asks for; the repair's effect spends the same amount when it starts.</summary>
+    /// <summary>The stamina the condition set asks for before a repair starts; it is a minimum, not what the repair spends.</summary>
     private static int StaminaRule(Config_ConditionSet? conditionSet)
     {
         var keys = conditionSet?.AttriKey;
