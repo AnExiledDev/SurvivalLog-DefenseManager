@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0
+
+New config setting `DeviceAttackRate`: how often defense devices strike. 2 strikes twice as often, 0.5 half as often. 1 by default, the game's own rate. A powered device uses power on every strike, so a higher rate uses more power.
+
 ## 0.4.0
 
 The Mechanical Chainsaw now hits crawler zombies. In the base game they dodge it every time, so its blade never hits them. Now they dodge it 25% of the time by default. New config settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).

@@ -13,7 +13,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.4.0";
+    private const string Version = "0.5.0";
     private const string PowerFileName = Guid + ".power.txt";
 
     public override void Load()
@@ -40,6 +40,10 @@ public sealed class Plugin : BasePlugin
             "Chance that an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. 0.25 by default.\n" +
             "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1。默认 0.25。",
             new AcceptableValueRange<float>(0f, 1f))).Value;
+        var attackRate = DeviceAttackRate.From(Config.Bind("Combat", "DeviceAttackRate", 1f, new ConfigDescription(
+            "How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. Each strike of a powered device uses power, so a higher rate also uses more power. 1 by default, from 0.25 to 10.\n" +
+            "防御设施攻击的频率：2 为两倍频率，0.5 为一半，1 为游戏原速。用电的防御设施每次攻击都耗电，所以频率越高耗电越多。默认 1，可设为 0.25 到 10。",
+            new AcceptableValueRange<float>(DeviceAttackRate.Slowest, DeviceAttackRate.Fastest))).Value);
         var dodge = new CrawlerDodge(crawlerDodge, armoredCrawlerDodge);
         var defaultMode = PowerModes.Parse(defaultModeName) ?? PowerMode.WaveOnly;
         var log = new DefenseLog(Log, Path.Combine(Paths.BepInExRootPath, "defense-manager.log"));
@@ -47,10 +51,11 @@ public sealed class Plugin : BasePlugin
         var powerSlot = new PowerSlot(new PowerFileOnDisk(Path.Combine(Paths.ConfigPath, PowerFileName), log.Write));
         var power = new PowerSession(new GamePower(log.Write), powerSlot, defaultMode, proximityRange, log.Write);
 
-        log.Write($"===== Defense Manager {Version} started, key {panelKey}, Layout controls {(isLayoutBarEnabled ? "on" : "off")}, power default {PowerModes.ConfigName(defaultMode)}, proximity range {proximityRange} m, crawler dodge {dodge.Crawler}, armored crawler dodge {dodge.ArmoredCrawler}");
+        log.Write($"===== Defense Manager {Version} started, key {panelKey}, Layout controls {(isLayoutBarEnabled ? "on" : "off")}, power default {PowerModes.ConfigName(defaultMode)}, proximity range {proximityRange} m, crawler dodge {dodge.Crawler}, armored crawler dodge {dodge.ArmoredCrawler}, device attack rate {attackRate.Value}");
         InputGate.Apply(harmony, log.Write);
         PageMessages.Apply(harmony, log.Write);
         DodgeRulesPatch.Apply(harmony, dodge, log.Write);
+        AttackRatePatch.Apply(harmony, attackRate, log.Write);
         DefenseTicker.Session = new DefenseSession(new GameDefenses(log.Write), power, new WebPage(log.Write), panelKey, isLayoutBarEnabled, log.Write);
         DefenseTicker.Log = log.Write;
         AddComponent<DefenseTicker>();

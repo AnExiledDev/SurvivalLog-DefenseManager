@@ -18,6 +18,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 - **Clear messages**: after each press a line says what was queued and what was left and why. Repair all names up to three defenses that are short of materials and exactly what each is missing. When the panel is closed, the message shows as a short pop-up instead.
 - **Power modes for electrical defenses**: the mod switches each electrical defense's power for you, in one of four modes (see [Power modes](#power-modes)). Its row shows whether the power is on, the mode it runs in, and two buttons: **This one: ...** changes the mode of that one defense, and **Every (name): ...** changes it for every defense of that type. Each button shows its current setting.
 - **Game hotkeys paused**: the game's own hotkeys are off while the panel is open and come back when it closes, so keys you press in the panel do not reach the game.
+- **Device attack rate**: `DeviceAttackRate` in the config sets how often defense devices strike. 2 strikes twice as often. A powered device uses power on every strike, so a faster rate uses more power. It is 1, the game's own rate, by default.
 - **Crawlers can be hit by the chainsaw**: in the base game crawler zombies always dodge the Mechanical Chainsaw, so its blade never hits them. With the mod they dodge it only 25% of the time. `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` in the config set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
 - **Log file**: every press and what came of it is written to `BepInEx\defense-manager.log`.
 
@@ -114,6 +115,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
+- 0.5.0: new config setting `DeviceAttackRate` sets how often defense devices strike.
 - 0.4.0: the Mechanical Chainsaw now hits crawler zombies, which used to dodge it every time. They dodge it 25% of the time by default. New config settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance`.
 - 0.3.3: Repair and Repair all no longer assume every repair costs 10 stamina. Repairs often cost less, so Repair all used to stop short. Now repairs are only held back when you have less than the 10 stamina a repair needs to start, and not at all when actions you queued run first. If your stamina runs out partway, the game refuses the rest.
 - 0.3.2: the panel, the HUD button's tip, the Layout buttons and every message are now in Simplified Chinese when the game is.
