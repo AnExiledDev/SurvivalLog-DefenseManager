@@ -66,10 +66,10 @@ Works in English and Chinese.
 Delete [font=Courier New]DefenseManager.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder. Each electrical defense stays in the power state the mod last switched it to; switch any you want changed from the defense's own menu.
 
 [size=5]Configuration[/size]
-To change the key, turn off the Layout screen buttons, or set the global power mode ([font=Courier New]DefaultMode[/font]) and the Proximity range ([font=Courier New]ProximityRange[/font]), edit [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.cfg[/font] while the game is closed, or do it in game on the Mod Manager's Mods screen, where changes take effect at once ([font=Courier New]DeviceAttackRate[/font] at the next game start) (see [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url]; the cfg file explains each setting in English and Chinese).
+To change the key, turn off the Layout screen buttons, or set the global power mode ([font=Courier New]DefaultMode[/font]) and the Proximity range ([font=Courier New]ProximityRange[/font]), edit [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.cfg[/font] while the game is closed, or do it in game on the Mod Manager's Mods screen, where changes take effect at once ([font=Courier New]DeviceAttackRate[/font] at the next game start) (see [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url]; the cfg file explains each setting in English and Chinese). Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
 
 [size=5]Feedback[/size]
-Found a bug or have an idea? Come say hi on the [url=https://discord.gg/trTsyxUFqg]Core Directive Discord[/url], or leave a comment here. For bugs, please include [font=Courier New]BepInEx\LogOutput.log[/font] and [font=Courier New]BepInEx\defense-manager.log[/font].
+Found a bug or have an idea? Come say hi on the [url=https://discord.gg/trTsyxUFqg]Core Directive Discord[/url], or post in this page's Posts tab. For bugs, please include [font=Courier New]BepInEx\LogOutput.log[/font] and [font=Courier New]BepInEx\defense-manager.log[/font].
 To reach me directly, message [b]exiled.dev[/b] on Discord; you can find me in the [url=https://discord.gg/MZGg4gQAUe]official Survival Log Discord[/url]. I'm also on X as [url=https://x.com/AnExiledDev]@AnExiledDev[/url].
 Coming soon: a Survival Log wiki with detailed documentation for all of my mods.
 
@@ -143,10 +143,10 @@ F7 可以在配置中修改或停用。面板打开时游戏自己的快捷键�
 从 [font=Courier New]BepInEx\plugins[/font] 文件夹中删除 [font=Courier New]DefenseManager.dll[/font]。每个电力防御设施会保持模组最后一次切换的供电状态；想改的话，用该防御设施自己的菜单切换。
 
 [size=5]配置[/size]
-如需修改按键、关闭「规划模式」界面上的按钮，或设置全局供电模式（[font=Courier New]DefaultMode[/font]）和靠近触发的范围（[font=Courier New]ProximityRange[/font]），可以在游戏内 Mod Manager 的「模组」界面修改（立即生效，[font=Courier New]DeviceAttackRate[/font] 在下次启动游戏时生效），也可以在游戏关闭时编辑 [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.cfg[/font]。配置文件中每项设置都有中文说明，完整说明见 [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url]（英文）。
+如需修改按键、关闭「规划模式」界面上的按钮，或设置全局供电模式（[font=Courier New]DefaultMode[/font]）和靠近触发的范围（[font=Courier New]ProximityRange[/font]），可以在游戏内 Mod Manager 的「模组」界面修改（立即生效，[font=Courier New]DeviceAttackRate[/font] 在下次启动游戏时生效），也可以在游戏关闭时编辑 [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.cfg[/font]。配置文件中每项设置都有中文说明，完整说明见 [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url]（英文）。没装 Exiled's Toolkit 的话，在「模组」界面的改动改为在下次启动游戏时生效。
 
 [size=5]反馈[/size]
-发现 bug 或有好点子？欢迎来 [url=https://discord.gg/trTsyxUFqg]Core Directive Discord[/url] 打个招呼，或在这里留言。报告 bug 时，请附上 [font=Courier New]BepInEx\LogOutput.log[/font] 和 [font=Courier New]BepInEx\defense-manager.log[/font]。
+发现 bug 或有好点子？欢迎来 [url=https://discord.gg/trTsyxUFqg]Core Directive Discord[/url] 打个招呼，或在本页的「Posts」标签里发帖。报告 bug 时，请附上 [font=Courier New]BepInEx\LogOutput.log[/font] 和 [font=Courier New]BepInEx\defense-manager.log[/font]。
 想直接联系我，可以在 Discord 上给 [b]exiled.dev[/b] 发消息，我在 [url=https://discord.gg/MZGg4gQAUe]Survival Log 官方 Discord[/url] 里。也可以在 X 上找我：[url=https://x.com/AnExiledDev]@AnExiledDev[/url]。
 即将推出：Survival Log 维基，收录我所有模组的详细说明。
 
