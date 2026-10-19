@@ -4,14 +4,13 @@ using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using DefenseManager.Adapters;
 using DefenseManager.Core;
-using ExiledToolkit;
 using HarmonyLib;
 using UnityEngine;
 
 namespace DefenseManager;
 
 [BepInPlugin(Guid, "Defense Manager", Version)]
-[BepInDependency(ExiledToolkit.Plugin.Guid, ">=0.4.0")]
+[BepInDependency(OptionalLive.ToolkitGuid, BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
@@ -20,6 +19,8 @@ public sealed class Plugin : BasePlugin
 
     public override void Load()
     {
+        if (!OptionalLive.IsToolkitInstalled) Log.LogInfo(OptionalLive.MissingNote);
+
         var panelKey = Config.Bind("Controls", "PanelKey", KeyCode.F7,
             "Key that opens and closes the Defense Manager panel, F7 by default. None turns the key off; the shield button in the bottom-left corner of the screen still opens the panel.\n" +
             "打开和关闭 Defense Manager 面板的按键，默认 F7。设为 None 则停用该按键，屏幕左下角的盾牌按钮仍可打开面板。");
@@ -58,13 +59,13 @@ public sealed class Plugin : BasePlugin
         DodgeRulesPatch.Apply(harmony, log.Write);
         AttackRatePatch.Apply(harmony, attackRate, log.Write);
 
-        LiveSettings.Watch(() =>
+        OptionalLive.Watch(() =>
         {
             session.UseControls(panelKey.Value, layoutControls.Value);
             log.Write($"key {panelKey.Value}, Layout controls {(layoutControls.Value ? "on" : "off")}");
         }, panelKey, layoutControls);
 
-        LiveSettings.Watch(() =>
+        OptionalLive.Watch(() =>
         {
             var defaultMode = PowerModes.Parse(defaultModeName.Value) ?? PowerMode.WaveOnly;
 
@@ -72,7 +73,7 @@ public sealed class Plugin : BasePlugin
             log.Write($"power default {PowerModes.ConfigName(defaultMode)}, proximity range {proximityRange.Value} m");
         }, defaultModeName, proximityRange);
 
-        LiveSettings.Watch(() => DodgeRulesPatch.Use(new CrawlerDodge(crawlerDodge.Value, armoredCrawlerDodge.Value)), crawlerDodge, armoredCrawlerDodge);
+        OptionalLive.Watch(() => DodgeRulesPatch.Use(new CrawlerDodge(crawlerDodge.Value, armoredCrawlerDodge.Value)), crawlerDodge, armoredCrawlerDodge);
 
         DefenseTicker.Session = session;
         DefenseTicker.Log = log.Write;
