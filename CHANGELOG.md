@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0
+
+- Settings changed on the Mod Manager's Mods screen take effect at once, except DeviceAttackRate, which takes effect at the next game start.
+- The Mods screen shows the mod's name, description, category and links.
+- Needs Exiled's Toolkit 0.4.0 or newer.
+
 ## 0.5.0
 
 New config setting `DeviceAttackRate`: how often defense devices strike. 2 strikes twice as often, 0.5 half as often. 1 by default, the game's own rate. A powered device uses power on every strike, so a higher rate uses more power.

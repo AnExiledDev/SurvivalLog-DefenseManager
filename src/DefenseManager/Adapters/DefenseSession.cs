@@ -17,8 +17,8 @@ internal sealed class DefenseSession
     private readonly GameDefenses _game;
     private readonly PowerSession _power;
     private readonly WebPage _page;
-    private readonly KeyCode _panelKey;
-    private readonly bool _isLayoutBarEnabled;
+    private KeyCode _panelKey;
+    private bool _isLayoutBarEnabled;
     private readonly Action<string> _log;
 
     private string _shownView = "";
@@ -33,14 +33,23 @@ internal sealed class DefenseSession
     private bool _hasReportedLayoutFailure;
     private bool _hasReportedPowerFailure;
 
-    public DefenseSession(GameDefenses game, PowerSession power, WebPage page, KeyCode panelKey, bool isLayoutBarEnabled, Action<string> log)
+    public DefenseSession(GameDefenses game, PowerSession power, WebPage page, Action<string> log)
     {
         _game = game;
         _power = power;
         _page = page;
+        _log = log;
+    }
+
+    /// <summary>
+    /// Called on the main thread at start and after each change. The page is told the key again at the next check, and
+    /// the Layout bar shows or goes with it.
+    /// </summary>
+    public void UseControls(KeyCode panelKey, bool isLayoutBarEnabled)
+    {
         _panelKey = panelKey;
         _isLayoutBarEnabled = isLayoutBarEnabled;
-        _log = log;
+        _sentLive = null;
     }
 
     public void Update()

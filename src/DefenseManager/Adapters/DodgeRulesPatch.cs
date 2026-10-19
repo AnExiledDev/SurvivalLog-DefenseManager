@@ -21,9 +21,8 @@ internal static class DodgeRulesPatch
     private static bool _hasFailed;
     private static Action<string> _log = _ => { };
 
-    public static void Apply(Harmony harmony, CrawlerDodge dodge, Action<string> log)
+    public static void Apply(Harmony harmony, Action<string> log)
     {
-        _dodge = dodge;
         _log = log;
 
         try
@@ -31,12 +30,23 @@ internal static class DodgeRulesPatch
             harmony.Patch(
                 AccessTools.Method(typeof(TowerCombatManager), nameof(TowerCombatManager.RollDodge)),
                 prefix: new HarmonyMethod(typeof(DodgeRulesPatch), nameof(UsePlayersChances)));
-            log($"crawler dodge chances set: crawler {dodge.Crawler}, armored crawler {dodge.ArmoredCrawler}");
+            log("hooked the crawler dodge rules");
         }
         catch (Exception ex)
         {
             log($"could not hook TowerCombatManager.RollDodge, crawlers keep the game's dodge chances: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Called on the main thread at start and after each change. The rules are written again at the next dodge roll;
+    /// the rewrite replaces every crawler's chance, so it works on rules this mod already wrote.
+    /// </summary>
+    public static void Use(CrawlerDodge dodge)
+    {
+        _dodge = dodge;
+        _written = null;
+        _log($"crawler dodge chances set: crawler {dodge.Crawler}, armored crawler {dodge.ArmoredCrawler}");
     }
 
     private static void UsePlayersChances()

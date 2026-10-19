@@ -15,20 +15,25 @@ internal sealed class PowerSession
     private readonly GamePower _game;
     private readonly PowerSlot _slot;
     private readonly PowerControl _control = new();
-    private readonly PowerMode _global;
-    private readonly double _range;
+    private PowerMode _global = PowerMode.WaveOnly;
+    private double _range;
     private readonly Action<string> _log;
 
     private float _nextPassAt;
     private string? _reportedUnreadableSave;
 
-    public PowerSession(GamePower game, PowerSlot slot, PowerMode global, double range, Action<string> log)
+    public PowerSession(GamePower game, PowerSlot slot, Action<string> log)
     {
         _game = game;
         _slot = slot;
+        _log = log;
+    }
+
+    /// <summary>Called on the main thread at start and after each change; the next pass goes by them.</summary>
+    public void Use(PowerMode global, double range)
+    {
         _global = global;
         _range = range;
-        _log = log;
     }
 
     public void Update(float now, Func<bool> isInLayout)
