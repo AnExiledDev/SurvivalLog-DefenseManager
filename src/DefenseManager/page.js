@@ -9,6 +9,8 @@
 
   var PREFIX = 'slmod|defensemanager|';
   var HUD_CLASS = 'dm-hud-btn';
+  // Defense Manager's place in the HUD's tool column when Exiled's Toolkit lays it out in columns of four.
+  var DOCK_ORDER = '40';
   var LAYOUT_ID = 'dm-layout';
   var LAYOUT_STYLE_ID = 'dm-layout-style';
   var BUSY_TIMEOUT_MS = 5000;
@@ -506,7 +508,10 @@
     if (existing && existing.parentNode === column && existing.getAttribute('data-key') === state.key) return;
     if (existing) existing.remove();
 
-    column.insertBefore(hudButton(doc), column.firstChild);
+    var node = hudButton(doc);
+
+    node.setAttribute('data-etk-dock', DOCK_ORDER);
+    column.insertBefore(node, column.firstChild);
 
     if (!hasReportedHudPlaced) send('diag|HUD button placed in the tool column');
     hasReportedHudPlaced = true;

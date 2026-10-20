@@ -63,6 +63,19 @@ public class PageScriptTests
     }
 
     [Fact]
+    public void The_hud_button_goes_on_top_of_the_tool_column_and_carries_its_place_for_the_toolkits_layout()
+    {
+        var page = new PageScript();
+
+        page.Run("openHud()");
+        page.Live(true, "F7");
+        page.Poll();
+
+        Assert.True(page.Is("hudButton().parentNode.firstChild === hudButton()"));
+        Assert.Equal("40", page.Text("hudButton().getAttribute('data-etk-dock')"));
+    }
+
+    [Fact]
     public void A_Layout_page_the_game_draws_after_the_view_arrived_gets_the_bar_on_the_next_check()
     {
         var page = new PageScript();

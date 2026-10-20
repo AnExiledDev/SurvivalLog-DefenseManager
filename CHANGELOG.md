@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.1
+
+- With Exiled's Toolkit 0.6.0 or later, the HUD button takes its place in the Toolkit's tidy layout of the tool buttons.
+
 ## 0.6.0
 
 - The Mods screen links this changelog.

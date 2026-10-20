@@ -246,6 +246,26 @@ function openLayout() {
   return frame;
 }
 
+// The in-game HUD: a CoreUI1 iframe whose tool column already holds the game's bag button.
+function openHud() {
+  var frame = document.body.appendChild(new FakeElement('iframe'));
+  var column = new FakeElement('div');
+
+  frame.src = 'https://game.local/UI/CoreUI1/CoreUI1.html';
+  frame.contentDocument = new FakeDocument();
+  column.className = 'vertical-tools';
+  column.appendChild(new FakeElement('button'));
+  frame.contentDocument.body.appendChild(column);
+
+  return frame;
+}
+
+function hudButton() {
+  var frame = document.querySelectorAll('iframe').filter(function (node) { return /CoreUI1/.test(node.src); })[0];
+
+  return frame.contentDocument.querySelector('.dm-hud-btn');
+}
+
 function layoutPage() {
   return document.querySelector('iframe').contentDocument;
 }
