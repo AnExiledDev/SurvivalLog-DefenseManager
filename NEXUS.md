@@ -1,5 +1,5 @@
 Name: Defense Manager
-Summary: One panel for the traps and barricades outside your home. Repair all damaged defenses in one press, clear the broken ones, or repair and remove them one by one. Opens with F7 or a HUD button, with Repair all and Clear all broken also on the game's Layout screen. Switches electrical defenses on only while zombies are at the base, only when zombies come near, or always. Lets the chainsaw hit crawler zombies. 一个面板管理家外面的所有陷阱和路障：一键修理全部受损的防御设施、清除损毁的防御设施，或逐个修理和拆除。用 F7 或 HUD 按钮打开，游戏的「规划模式」界面上也有「全部修理」和「清除全部损毁」按钮。电力防御设施可以设为只在僵尸到达基地时、只在僵尸靠近时或一直开启。还能让电锯打到爬行者丧尸。
+Summary: Repair every damaged trap and barricade in one press, clear all the broken ones in another, or handle them one by one from a single panel on F7 or a HUD button. Electrical defenses switch on only when zombies show up, and crawlers dodge the chainsaw 25% of the time instead of always. Repair all is on the Layout screen too.
 
 Description (BBCode):
 Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel, so you can repair or clear them in one press.
@@ -48,7 +48,7 @@ Works in English and Chinese.
 
 [size=5]Requirements[/size]
 [list]
-[*]Survival Log 1.1.18902. A game update can break it until the mod is updated.[/*]
+[*]Survival Log 1.1.19131. A game update can break it until the mod is updated.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
 [*]Optional: [url=https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit]Exiled's Toolkit[/url] 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start.[/*]
 [/list]
@@ -125,7 +125,7 @@ F7 可以在配置中修改或停用。面板打开时游戏自己的快捷键�
 
 [size=5]前置要求[/size]
 [list]
-[*]Survival Log 1.1.18902。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
+[*]Survival Log 1.1.19131。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]，请先安装。[/*]
 [*]可选：[url=https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit]Exiled's Toolkit[/url] 0.4.0 或更新版本。装了它，在 Mod Manager 的「模组」界面改动的设置无需重启游戏即可生效；没装的话，改动在下次启动游戏时生效。[/*]
 [/list]
