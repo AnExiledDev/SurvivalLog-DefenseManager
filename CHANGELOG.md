@@ -4,6 +4,8 @@
 
 - With Exiled's Toolkit 0.6.0 or later, the HUD button takes its place in the Toolkit's tidy layout of the tool buttons.
 
+- After a game update, a hook that can no longer be placed is logged as an error, so the Mod Manager can mark the mod as maybe needing an update.
+
 ## 0.6.0
 
 - The Mods screen links this changelog.

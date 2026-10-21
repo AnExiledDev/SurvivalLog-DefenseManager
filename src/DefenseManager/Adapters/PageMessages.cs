@@ -29,7 +29,7 @@ internal static class PageMessages
         }
         catch (Exception ex)
         {
-            log("could not listen for panel messages, the HUD button and panel buttons will do nothing (the hotkey still opens the panel): " + ex.Message);
+            log("could not hook panel messages, the HUD button and panel buttons will do nothing (the hotkey still opens the panel): " + ex.Message);
         }
     }
 
