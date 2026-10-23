@@ -620,7 +620,7 @@
     return '34px repeat(' + yard.cols + ',minmax(0,1fr))';
   }
 
-  // The door and window stand between square centres, so each spans the two columns either side of where it is.
+  // A door or window is three squares wide, the width of the sandbags that block it, centred on where it stands.
   function wall(yard) {
     var box = el('div', 'dm-wall');
 
@@ -628,10 +628,10 @@
     box.appendChild(el('div'));
 
     (yard.wall || []).forEach(function (feature) {
-      var first = Math.max(1, Math.min(yard.cols - 1, Math.round(feature.at - 1)));
+      var first = Math.max(1, Math.min(yard.cols - 2, Math.round(feature.at) - 1));
       var node = el('div', 'dm-wf dm-' + feature.kind, say(feature.kind));
 
-      node.style.gridColumn = (first + 1) + ' / ' + (first + 3);
+      node.style.gridColumn = (first + 1) + ' / ' + (first + 4);
       box.appendChild(node);
     });
 

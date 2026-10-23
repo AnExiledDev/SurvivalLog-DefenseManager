@@ -275,6 +275,20 @@ public class PageScriptTests
     }
 
     [Fact]
+    public void A_door_or_window_spans_the_three_squares_centred_on_it_the_way_its_sandbags_cover_it()
+    {
+        var squares = Enumerable.Range(0, 7).Select(i => new YardSquare("s" + i, 1, i * 0.7, 0, true, 0)).ToArray();
+        var game = new FakeGame { Yard = new Yard(squares, new[] { new WallFeature(WallFeatureKind.Window, 0.7), new WallFeature(WallFeatureKind.Door, 2.8) }) };
+        var page = new PageScript();
+
+        page.Open(YardView(game));
+
+        // Square n is grid column n + 1, after the row number column.
+        Assert.Equal("2 / 5", page.Text("document.querySelector('.dm-window').style.gridColumn"));
+        Assert.Equal("5 / 8", page.Text("document.querySelector('.dm-door').style.gridColumn"));
+    }
+
+    [Fact]
     public void Picking_a_defense_shows_it_and_its_power_choices_set_it_alone_or_send_it_back_to_its_type()
     {
         var page = OpenYard();
