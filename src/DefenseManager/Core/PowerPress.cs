@@ -11,13 +11,13 @@ public enum PowerTarget
 }
 
 /// <summary>
-/// A press of a power button: moves the setting one step round its cycle and says what it is now. The page sends the
-/// defense's instance id; it is turned into the defense's key (or its type) only now, from a fresh read, so the
+/// A press of a power button: puts the setting to the mode picked (null lets it go: a defense follows its type, a type
+/// the global default) and says what it is now. The page sends the defense's instance id, for a type any defense of it; it is turned into the defense's key (or its type) only now, from a fresh read, so the
 /// setting lands on the defense that stands there at the moment of the press.
 /// </summary>
 public static class PowerPress
 {
-    public static string Cycle(PowerTarget target, long defenseId, PowerScene? scene, PowerSlot slot, PowerMode global, bool isChinese = false)
+    public static string Set(PowerTarget target, long defenseId, PowerMode? mode, PowerScene? scene, PowerSlot slot, PowerMode global, bool isChinese = false)
     {
         if (scene == null) return Texts.NoGame.Pick(isChinese);
 
@@ -27,8 +27,8 @@ public static class PowerPress
 
         var (edit, done) = target switch
         {
-            PowerTarget.Defense => CycleDefense(unit, slot, global, isChinese),
-            PowerTarget.Type => CycleType(unit, slot, global, isChinese),
+            PowerTarget.Defense => SetDefense(unit, mode, slot, global, isChinese),
+            PowerTarget.Type => SetType(unit, mode, slot, global, isChinese),
             _ => throw new ArgumentOutOfRangeException(nameof(target), target, "unknown power target"),
         };
 
@@ -42,9 +42,8 @@ public static class PowerPress
         };
     }
 
-    private static (SettingsEdit Edit, string Done) CycleDefense(PowerUnit unit, PowerSlot slot, PowerMode global, bool isChinese)
+    private static (SettingsEdit Edit, string Done) SetDefense(PowerUnit unit, PowerMode? next, PowerSlot slot, PowerMode global, bool isChinese)
     {
-        var next = PowerModes.Next(slot.Settings.DefenseSetting(unit.Key));
         var edit = slot.SetDefense(unit.Key, next);
         var typeMode = new PowerPolicy(slot.Settings, global).TypeMode(unit.ConfigId);
 
@@ -55,9 +54,8 @@ public static class PowerPress
         return (edit, done);
     }
 
-    private static (SettingsEdit Edit, string Done) CycleType(PowerUnit unit, PowerSlot slot, PowerMode global, bool isChinese)
+    private static (SettingsEdit Edit, string Done) SetType(PowerUnit unit, PowerMode? next, PowerSlot slot, PowerMode global, bool isChinese)
     {
-        var next = PowerModes.Next(slot.Settings.TypeSetting(unit.ConfigId));
         var edit = slot.SetType(unit.ConfigId, next);
 
         var done = next is { } mode

@@ -14,7 +14,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.6.1";
+    private const string Version = "0.7.0";
     private const string PowerFileName = Guid + ".power.txt";
 
     public override void Load()
@@ -43,15 +43,17 @@ public sealed class Plugin : BasePlugin
             "Chance that an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. 0.25 by default.\n" +
             "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1。默认 0.25。",
             new AcceptableValueRange<float>(0f, 1f)));
-        var attackRate = DeviceAttackRate.From(Config.Bind("Combat", "DeviceAttackRate", 1f, new ConfigDescription(
+        var attackRateEntry = Config.Bind("Combat", "DeviceAttackRate", 1f, new ConfigDescription(
             "How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. Each strike of a powered device uses power, so a higher rate also uses more power. 1 by default, from 0.25 to 10. Takes effect at the next game start.\n" +
             "防御设施攻击的频率：2 为两倍频率，0.5 为一半，1 为游戏原速。用电的防御设施每次攻击都耗电，所以频率越高耗电越多。默认 1，可设为 0.25 到 10。下次启动游戏时生效。",
-            new AcceptableValueRange<float>(DeviceAttackRate.Slowest, DeviceAttackRate.Fastest), "ModManager.Restart")).Value);
+            new AcceptableValueRange<float>(DeviceAttackRate.Slowest, DeviceAttackRate.Fastest), "ModManager.Restart"));
+        var attackRate = DeviceAttackRate.From(attackRateEntry.Value);
         var log = new DefenseLog(Log, Path.Combine(Paths.BepInExRootPath, "defense-manager.log"));
         var harmony = new Harmony(Guid);
         var powerSlot = new PowerSlot(new PowerFileOnDisk(Path.Combine(Paths.ConfigPath, PowerFileName), log.Write));
         var power = new PowerSession(new GamePower(log.Write), powerSlot, log.Write);
-        var session = new DefenseSession(new GameDefenses(log.Write), power, new WebPage(log.Write), log.Write);
+        var config = new PanelConfig(panelKey, layoutControls, defaultModeName, proximityRange, crawlerDodge, armoredCrawlerDodge, attackRateEntry);
+        var session = new DefenseSession(new GameDefenses(log.Write), power, new WebPage(log.Write), config, log.Write);
 
         log.Write($"===== Defense Manager {Version} started, device attack rate {attackRate.Value}");
         InputGate.Apply(harmony, log.Write);
@@ -59,21 +61,21 @@ public sealed class Plugin : BasePlugin
         DodgeRulesPatch.Apply(harmony, log.Write);
         AttackRatePatch.Apply(harmony, attackRate, log.Write);
 
-        OptionalLive.Watch(() =>
+        config.ApplyControls = () =>
         {
-            session.UseControls(panelKey.Value, layoutControls.Value);
-            log.Write($"key {panelKey.Value}, Layout controls {(layoutControls.Value ? "on" : "off")}");
-        }, panelKey, layoutControls);
-
-        OptionalLive.Watch(() =>
+            session.UseControls(config.PanelKey, config.LayoutControls);
+            log.Write($"key {config.PanelKey}, Layout controls {(config.LayoutControls ? "on" : "off")}");
+        };
+        config.ApplyPower = () =>
         {
-            var defaultMode = PowerModes.Parse(defaultModeName.Value) ?? PowerMode.WaveOnly;
+            power.Use(config.DefaultMode, config.ProximityRange);
+            log.Write($"power default {PowerModes.ConfigName(config.DefaultMode)}, proximity range {config.ProximityRange} m");
+        };
+        config.ApplyDodge = () => DodgeRulesPatch.Use(config.Dodge);
 
-            power.Use(defaultMode, proximityRange.Value);
-            log.Write($"power default {PowerModes.ConfigName(defaultMode)}, proximity range {proximityRange.Value} m");
-        }, defaultModeName, proximityRange);
-
-        OptionalLive.Watch(() => DodgeRulesPatch.Use(new CrawlerDodge(crawlerDodge.Value, armoredCrawlerDodge.Value)), crawlerDodge, armoredCrawlerDodge);
+        OptionalLive.Watch(config.ApplyControls, panelKey, layoutControls);
+        OptionalLive.Watch(config.ApplyPower, defaultModeName, proximityRange);
+        OptionalLive.Watch(config.ApplyDodge, crawlerDodge, armoredCrawlerDodge);
 
         DefenseTicker.Session = session;
         DefenseTicker.Log = log.Write;

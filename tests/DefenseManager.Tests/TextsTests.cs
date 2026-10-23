@@ -62,10 +62,8 @@ public class TextsTests
     [Fact]
     public void A_chinese_game_gets_the_power_settings_named_in_chinese()
     {
-        var policy = new PowerPolicy(PowerSettings.None, PowerMode.WaveOnly);
-
-        Assert.Equal("全局设置（仅尸潮）", policy.TypeLabel(7, isChinese: true));
-        Assert.Equal("Global setting (Wave only)", policy.TypeLabel(7));
+        Assert.Equal("仅尸潮", PowerModes.Label(PowerMode.WaveOnly, isChinese: true));
+        Assert.Equal("Wave only", PowerModes.Label(PowerMode.WaveOnly));
     }
 
     [Theory]

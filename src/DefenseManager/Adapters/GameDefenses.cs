@@ -38,11 +38,13 @@ internal sealed class GameDefenses : IDefenseGame
     private readonly Dictionary<long, (int Repair, int Remove)> _actions = new();
 
     private IconIndex? _icons;
+    private readonly GameYard _yard;
     private int _loggedDefenseCount = -1;
 
     public GameDefenses(Action<string> log)
     {
         _log = log;
+        _yard = new GameYard(log);
     }
 
     public DefenseRead Read()
@@ -178,7 +180,7 @@ internal sealed class GameDefenses : IDefenseGame
         var defenses = ReadDefenses(agents, config, actions, conditions, world._PowerManager, role.InstanceId);
         var materials = ReadMaterials(config, defenses);
         var isWaveLocked = world._TowerWaveManager?.IsWaveOperationLocked() ?? false;
-        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role), GameLanguage.IsChinese());
+        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role), GameLanguage.IsChinese(), _yard.Read(world, config));
 
         LogDefenseCount(defenses.Count);
 

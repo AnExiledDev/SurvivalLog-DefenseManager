@@ -196,7 +196,7 @@ public class DefenseViewTests
     }
 
     [Fact]
-    public void An_electrical_row_shows_its_switch_its_mode_and_what_each_power_button_is_set_to()
+    public void An_electrical_row_shows_its_switch_its_mode_and_its_own_and_its_types_settings()
     {
         var own = Electrical(Def(1, x: 5), isOn: true);
         var following = Electrical(Def(2, x: 30), isOn: false);
@@ -206,11 +206,12 @@ public class DefenseViewTests
 
         Assert.True(Power(view, 1).GetProperty("on").GetBoolean());
         Assert.Equal("Always on", Power(view, 1).GetProperty("mode").GetString());
-        Assert.Equal("Always on", Power(view, 1).GetProperty("label").GetString());
-        Assert.Equal("Proximity", Power(view, 1).GetProperty("typeLabel").GetString());
+        Assert.Equal("AlwaysOn", Power(view, 1).GetProperty("own").GetString());
+        Assert.Equal("Proximity", Power(view, 1).GetProperty("typeOwn").GetString());
         Assert.False(Power(view, 2).GetProperty("on").GetBoolean());
         Assert.Equal("Proximity", Power(view, 2).GetProperty("mode").GetString());
-        Assert.Equal("Type setting (Proximity)", Power(view, 2).GetProperty("label").GetString());
+        Assert.Equal(JsonValueKind.Null, Power(view, 2).GetProperty("own").ValueKind);
+        Assert.Equal("Proximity", Power(view, 2).GetProperty("typeMode").GetProperty("name").GetString());
     }
 
     [Fact]
@@ -219,8 +220,9 @@ public class DefenseViewTests
         var view = View(SurveyOf(new[] { Electrical(Def(1)) }), new PowerPolicy(PowerSettings.None, PowerMode.GameDefault));
 
         Assert.Equal("Default", Power(view, 1).GetProperty("mode").GetString());
-        Assert.Equal("Type setting (Default)", Power(view, 1).GetProperty("label").GetString());
-        Assert.Equal("Global setting (Default)", Power(view, 1).GetProperty("typeLabel").GetString());
+        Assert.Equal(JsonValueKind.Null, Power(view, 1).GetProperty("typeOwn").ValueKind);
+        Assert.Equal("Default", Power(view, 1).GetProperty("typeMode").GetProperty("label").GetString());
+        Assert.Equal("Default", view.GetProperty("global").GetProperty("name").GetString());
     }
 
     [Fact]
@@ -240,5 +242,69 @@ public class DefenseViewTests
         var view = View(SurveyOf(new[] { Electrical(Def(1)) }));
 
         Assert.Equal(JsonValueKind.Null, Power(view, 1).ValueKind);
+    }
+
+    // ===== The yard grid =====
+
+    /// <summary>Two rows of three squares, 0.7 apart, row 1 against the house; the middle of row 2 is not owned yet.</summary>
+    private static Yard SmallYard() => new(
+        new[]
+        {
+            new YardSquare("A", 1, -1.4, 0, true, 0), new YardSquare("B", 1, -0.7, 0, true, 0), new YardSquare("C", 1, 0, 0, true, 0),
+            new YardSquare("D", 2, -1.4, -0.7, true, 0), new YardSquare("E", 2, -0.7, -0.7, false, 5), new YardSquare("F", 2, 0, -0.7, true, 0),
+        },
+        new[] { new WallFeature(WallFeatureKind.Door, -0.35) });
+
+    private static Survey WithYard(IEnumerable<Defense> defenses) =>
+        new(defenses.ToList(), new Spot(0, 0, 0), new Dictionary<int, Material>(), QueueOnStart.Appends, false, true, Yard: SmallYard());
+
+    [Fact]
+    public void Each_defense_row_says_which_square_of_the_grid_it_stands_on_and_one_off_the_grid_says_none()
+    {
+        var view = View(WithYard(new[] { Def(1, x: -0.68, z: -0.72), Def(2, x: 0.02, z: 0.01), Def(3, x: 9, z: 9) }));
+
+        Assert.Equal(2, Row(view, 1).GetProperty("row").GetInt32());
+        Assert.Equal(2, Row(view, 1).GetProperty("col").GetInt32());
+        Assert.Equal(1, Row(view, 2).GetProperty("row").GetInt32());
+        Assert.Equal(3, Row(view, 2).GetProperty("col").GetInt32());
+        Assert.Equal(JsonValueKind.Null, Row(view, 3).GetProperty("row").ValueKind);
+        Assert.Equal(JsonValueKind.Null, Row(view, 3).GetProperty("col").ValueKind);
+    }
+
+    [Fact]
+    public void The_view_carries_the_grid_with_the_squares_still_for_sale_and_the_door_between_columns()
+    {
+        var yard = View(WithYard(Array.Empty<Defense>())).GetProperty("yard");
+        var forSale = yard.GetProperty("squares").EnumerateArray().Where(square => !square.GetProperty("own").GetBoolean()).ToList();
+        var door = yard.GetProperty("wall").EnumerateArray().Single();
+
+        Assert.Equal(3, yard.GetProperty("cols").GetInt32());
+        Assert.Equal(2, yard.GetProperty("rows").GetInt32());
+        Assert.Single(forSale);
+        Assert.Equal(2, forSale[0].GetProperty("r").GetInt32());
+        Assert.Equal(2, forSale[0].GetProperty("c").GetInt32());
+        Assert.Equal(5, forSale[0].GetProperty("price").GetInt32());
+        Assert.Equal("door", door.GetProperty("kind").GetString());
+        Assert.Equal(2.5, door.GetProperty("at").GetDouble(), 2);
+    }
+
+    [Fact]
+    public void Without_a_grid_the_view_says_so()
+    {
+        Assert.Equal(JsonValueKind.Null, View(SurveyOf(new[] { Def(1) })).GetProperty("yard").ValueKind);
+    }
+
+    [Fact]
+    public void The_settings_tab_gets_the_saved_values_even_when_the_game_could_not_be_read()
+    {
+        var settings = new PanelSettings("F7", false, PowerMode.Proximity, 15, 0.25f, 0.3f, 1.5f);
+        var view = JsonDocument.Parse(DefenseView.Empty("Load a game first.", settings)).RootElement.GetProperty("settings");
+
+        Assert.Equal("F7", view.GetProperty("key").GetString());
+        Assert.False(view.GetProperty("layout").GetBoolean());
+        Assert.Equal("Proximity", view.GetProperty("mode").GetString());
+        Assert.Equal(15, view.GetProperty("range").GetDouble());
+        Assert.Equal(0.3, view.GetProperty("armored").GetDouble(), 3);
+        Assert.Equal(1.5, view.GetProperty("rate").GetDouble());
     }
 }

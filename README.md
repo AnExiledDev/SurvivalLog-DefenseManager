@@ -8,15 +8,19 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 
 - **Panel key**: press `F7` to open and close the panel at home in a loaded game, past the prologue. `Esc` or the close button in the top-right corner also closes it.
 - **HUD button**: a shield at the top of the tool column in the bottom-left corner of the screen, above the game's own buttons there. It opens and closes the panel like `F7`, and hovering it shows "Defense Manager" with the key and "Repair or remove your outdoor defenses". It only shows at home in a loaded game past the prologue, so it is hidden on expeditions, and it hides with the rest of the column on the Layout screen.
-- **Layout screen buttons**: while the game's Layout screen is open, three buttons sit at the top middle of the screen, styled like Layout's own buttons: **Repair all (n)**, **Clear all broken (n)** and **Defense list (F7)**. The first two do exactly what the panel's buttons of the same name do. Defense list opens the panel with every defense on its own row. When the buttons are greyed out, the reason shows under them. They can be turned off in the config.
+- **Layout screen buttons**: while the game's Layout screen is open, three buttons sit at the top middle of the screen, styled like Layout's own buttons: **Repair all (n)**, **Clear all broken (n)** and **Defense list (F7)**. The first two do exactly what the panel's buttons of the same name do. Defense list opens the panel. When the buttons are greyed out, the reason shows under them. They can be turned off in the config.
 - **Repair all (n)**: queues a repair for every damaged defense your materials cover (n is how many it would repair now). The character goes nearest-next from where they stand, so the round does not zigzag across the yard. A defense the remaining materials cannot cover is skipped and the round goes on to the next one they can.
 - **Clear all broken (n)**: queues the removal of every broken defense, nearest-next. A broken defense you already queued for repair is kept: you chose to fix it.
-- **One row per defense**: icon, name, state (Broken, Damaged or Intact), a condition bar, the repair cost, and a **Repair** and a **Remove** button. A defense already queued shows "Repair queued" or "Removal queued".
+- **Yard tab**: your yard as its real grid of squares, row 1 against the house and the highest row at the road side, with the house's doors and windows along the wall. Each defense sits on the square it stands on, colored by its state (Broken, Damaged or Intact). Squares you have not unlocked yet are marked with their Survival Points price. A defense on no square shows in a **Not on the grid** strip under the yard.
+- **Repairs list**: beside the yard, every defense that needs repair is listed worst first under the **Repair all** button, each with its condition and repair cost. A defense already queued shows "Repair queued" or "Removal queued".
+- **Click a defense** on the grid or in the list to see its name, where it stands, its condition, its repair cost, and a **Repair** and a **Remove** button. An electrical defense also shows whether its power is on and its power mode. **< Back to repairs** returns to the list.
+- **Click a row number** to see that row: how many defenses and squares of yours it has, what the rest cost, and **Repair row n (count)**, which repairs every damaged defense in that row the way Repair all does. Click an empty square to see whether it is yours.
 - **Buttons say why not**: a button that would be refused is greyed out and the reason shows under it: "Needs 3 more Wood", the game's own reason, or "Repair queued: let it finish or cancel it first".
 - **Remove without the are-you-sure box**: Remove queues the same removal action as the defense's own menu, without the confirmation box.
-- **Materials bar**: each repair material shows as free / needed: what is left after the repairs already queued, against what the repairs not yet queued would take. A material you are short of is outlined in red.
+- **Short of materials**: when your materials do not cover every repair, a line under Repair all names each material you are short of as free / needed: what is left after the repairs already queued, against what the repairs not yet queued would take.
 - **Clear messages**: after each press a line says what was queued and what was left and why. Repair all names up to three defenses that are short of materials and exactly what each is missing. When the panel is closed, the message shows as a short pop-up instead.
-- **Power modes for electrical defenses**: the mod switches each electrical defense's power for you, in one of four modes (see [Power modes](#power-modes)). Its row shows whether the power is on, the mode it runs in, and two buttons: **This one: ...** changes the mode of that one defense, and **Every (name): ...** changes it for every defense of that type. Each button shows its current setting.
+- **Power modes for electrical defenses**: the mod switches each electrical defense's power for you, in one of four modes (see [Power modes](#power-modes)). Click one to see whether its power is on and to pick its own mode. The **Power** tab sets the mode for every defense of a type.
+- **Settings tab**: the Layout screen buttons, the default power mode, the Proximity range, the crawler dodge chances and the device attack rate can be changed in the panel, and are saved to the config at once. The panel key shows there but is changed in the config.
 - **Game hotkeys paused**: the game's own hotkeys are off while the panel is open and come back when it closes, so keys you press in the panel do not reach the game.
 - **Device attack rate**: `DeviceAttackRate` in the config sets how often defense devices strike. 2 strikes twice as often. A powered device uses power on every strike, so a faster rate uses more power. It is 1, the game's own rate, by default.
 - **Crawlers can be hit by the chainsaw**: in the base game crawler zombies always dodge the Mechanical Chainsaw, so its blade never hits them. With the mod they dodge it only 25% of the time. `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` in the config set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
@@ -54,13 +58,13 @@ Each electrical defense runs in one of four modes:
 
 The mode comes from three levels, and the first one that has a setting wins:
 
-1. **This defense**: set with the row's **This one** button. A defense with no setting of its own shows **Type setting (mode)**, with the mode it gets from its type.
-2. **Its type**: set with the row's **Every (name)** button, and shared by every defense of that type in this save. A type with no setting shows **Global setting (mode)**, with the mode from the config.
-3. **Global**: `DefaultMode` in the config, **Wave only** unless you change it.
+1. **This defense**: picked when you click the defense on the grid. **Same as every (name) (mode)** means it has no setting of its own and follows its type.
+2. **Its type**: picked on the **Power** tab, and shared by every defense of that type in this save. **Global (mode)** means the type has no setting and follows the global mode. The tab also lists every defense of that type set on its own, with **Follow the type** to clear its setting.
+3. **Global**: `DefaultMode` in the config or **Default power mode** on the Settings tab, **Wave only** unless you change it.
 
-Each button steps through its own setting: This one goes Type setting, Always on, Wave only, Proximity, Default, then back to Type setting. Every (name) goes Global setting, Always on, Wave only, Proximity, Default, then back to Global setting. A setting belongs to the defense's type and the spot it stands on, so a defense you take down and build again in the same place keeps it.
+The mode picked shows highlighted. A setting belongs to the defense's type and the spot it stands on, so a defense you take down and build again in the same place keeps it.
 
-The mod checks the defenses about twice a second whenever a game is loaded, with the panel open or closed and while you are away from home. It only switches a defense when its power is not already where the mode wants it, and each switch is written to the log with the reason. Only electrical defenses that are whole and working are switched: a broken one, or one the game counts as not working, is left as it is, and its row says so. Settings are kept for each save, so a game is only switched once it has been saved.
+The mod checks the defenses about twice a second whenever a game is loaded, with the panel open or closed and while you are away from home. It only switches a defense when its power is not already where the mode wants it, and each switch is written to the log with the reason. Only electrical defenses that are whole and working are switched: a broken one, or one the game counts as not working, is left as it is, and the panel says so when you click it. Settings are kept for each save, so a game is only switched once it has been saved.
 
 ## Known issues and limits
 
@@ -70,14 +74,16 @@ The mod checks the defenses about twice a second whenever a game is loaded, with
 - The Layout buttons sit at the top middle of the screen. If they cover something you need on your screen size, turn them off with `LayoutControls` in the config; `F7` and the HUD button still work.
 - If something else uses the materials before the character reaches a defense, the game decides what happens to that repair, not the mod.
 - Nearest-next is measured in a straight line from where the character stands, not along the path they walk.
-- Rows are listed by name. The walking order only applies to Repair all and Clear all broken.
+- The walking order only applies to Repair all, Repair row and Clear all broken.
+- Repair row counts a defense as in a row by the square it stands on, so a defense in the Not on the grid strip is only repaired by Repair all or by itself.
+- A queued repair or removal cannot be cancelled from the panel. Cancel it from the game's action queue.
 - Robot repair is not included.
 - A removal you did not mean can be cancelled from the action queue before the character gets to it, like any other queued action. There is no confirmation box.
 - A defense in any mode but Default is switched back to what its mode wants within a second if you flip its power by hand from its own menu. Set it to Default to switch it yourself.
 - Nothing is switched while the Layout screen is open or while the game locks its power switches.
 - Repairing an electrical defense makes the game switch it on, which costs one tick of power even when its mode has the mod switch it off again straight after.
 - Power settings belong to a save file. A game that carries on under a new save file name, such as after an ending or in endless mode, starts with no defense or type settings of its own.
-- The power buttons do not show, and nothing is switched, in a new game until it has been saved once.
+- The power modes do not show, and nothing is switched, in a new game until it has been saved once.
 
 ## Requirements
 
@@ -101,15 +107,15 @@ Each electrical defense stays in the power state the mod last switched it to, be
 
 ## Configuration
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once except `DeviceAttackRate`, which takes effect at the next game start. Each setting in the cfg file is explained in English and Simplified Chinese. See [CONFIG.md](CONFIG.md) for every setting. Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
+Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once except `DeviceAttackRate`, which takes effect at the next game start. All but `PanelKey` can also be changed on the panel's Settings tab, which saves to the same file and works the same with or without Exiled's Toolkit. Each setting in the cfg file is explained in English and Simplified Chinese. See [CONFIG.md](CONFIG.md) for every setting. Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
 
 ## Troubleshooting
 
 Tested on Survival Log 1.1.19131 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.6.1 started, device attack rate 1`, followed by `key F7, Layout controls on` and `power default WaveOnly, proximity range 15 m` (the words change with your settings, and a setting changed on the Mods screen writes its line again). The same lines, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.7.0 started, device attack rate 1`, followed by `key F7, Layout controls on` and `power default WaveOnly, proximity range 15 m` (the words change with your settings, and a setting changed on the Mods screen writes its line again). The same lines, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
 
-If an electrical defense is not switched, check its row in the panel: a broken or not working defense is left alone, and a defense in Default mode is left to the game. If no row has power buttons, look in `BepInEx\defense-manager.log` for a line about the power settings.
+If an electrical defense is not switched, click it in the panel: a broken or not working defense is left alone, and a defense in Default mode is left to the game. If no defense shows power modes, look in `BepInEx\defense-manager.log` for a line about the power settings.
 
 If `F7` does nothing, check that you are at home in a loaded game past the prologue, and that no other mod uses the same key. You can pick another key in the config, or use the HUD button.
 
@@ -117,6 +123,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
+- 0.7.0: a new panel: the yard as its real grid of squares, Repair row, a Power tab for each type's power mode, a Settings tab, and a warm gold look.
 - 0.6.0: settings can be changed on the Mod Manager's Mods screen without a restart (all but `DeviceAttackRate`). Works with Exiled's Toolkit 0.4.0 or newer, which is optional.
 - 0.5.0: new config setting `DeviceAttackRate` sets how often defense devices strike.
 - 0.4.0: the Mechanical Chainsaw now hits crawler zombies, which used to dodge it every time. They dodge it 25% of the time by default. New config settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance`.

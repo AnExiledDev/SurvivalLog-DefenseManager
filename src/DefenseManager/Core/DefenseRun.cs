@@ -13,7 +13,11 @@ namespace DefenseManager.Core;
 /// </summary>
 public static class DefenseRun
 {
-    public static DefenseOutcome RepairAll(IDefenseGame game) => WithSurvey(game, survey => RepairAll(game, survey));
+    public static DefenseOutcome RepairAll(IDefenseGame game) => WithSurvey(game, survey => RepairAll(game, survey, survey.Defenses));
+
+    /// <summary>Repair all, for the defenses standing in one row of the yard grid. Without a grid no defense is in a row.</summary>
+    public static DefenseOutcome RepairRow(IDefenseGame game, int row) =>
+        WithSurvey(game, survey => RepairAll(game, survey, survey.Defenses.Where(defense => survey.Yard?.PlaceAt(defense.Position)?.Row == row)));
 
     public static DefenseOutcome ClearBroken(IDefenseGame game) => WithSurvey(game, survey => ClearBroken(game, survey));
 
@@ -41,9 +45,9 @@ public static class DefenseRun
     /// not zigzag. A defense the materials left cannot cover is skipped and the walk goes on to the next nearest one
     /// they can, so one costly repair does not hold back the cheap ones behind it.
     /// </summary>
-    private static DefenseOutcome RepairAll(IDefenseGame game, Survey survey)
+    private static DefenseOutcome RepairAll(IDefenseGame game, Survey survey, IEnumerable<Defense> defenses)
     {
-        var damaged = survey.Defenses.Where(defense => defense.IsDamaged).ToList();
+        var damaged = defenses.Where(defense => defense.IsDamaged).ToList();
 
         if (damaged.Count == 0) return new DefenseOutcome.NothingToDo(Job.Repair);
 

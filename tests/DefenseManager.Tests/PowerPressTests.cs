@@ -29,24 +29,27 @@ public class PowerPressTests
         return slot;
     }
 
-    private static string Press(PowerTarget target, long id, FakePowerGame game, PowerSlot slot) => PowerPress.Cycle(target, id, game.ReadPower(), slot, Global);
+    private static string Press(PowerTarget target, long id, FakePowerGame game, PowerSlot slot, PowerMode? mode = PowerMode.AlwaysOn) =>
+        PowerPress.Set(target, id, mode, game.ReadPower(), slot, Global);
 
     private static PowerUnit UnitOf(FakePowerGame game, long id) => game.Defenses.Single(defense => defense.Id == id);
 
     [Fact]
-    public void The_defense_button_cycles_that_one_defense_through_every_mode_and_back_to_its_type_setting()
+    public void Picking_a_mode_for_a_defense_sets_it_and_picking_none_puts_it_back_on_its_type_setting()
     {
         var game = Home();
         var slot = Slot(new FakePowerFile());
-        var labels = new List<string>();
+        var key = UnitOf(game, 1).Key;
 
-        for (var press = 0; press < 5; press++)
-        {
-            Press(PowerTarget.Defense, 1, game, slot);
-            labels.Add(new PowerPolicy(slot.Settings, Global).DefenseLabel(UnitOf(game, 1).Key));
-        }
+        Press(PowerTarget.Type, 1, game, slot, PowerMode.Proximity);
+        Press(PowerTarget.Defense, 1, game, slot, PowerMode.GameDefault);
 
-        Assert.Equal(new[] { "Always on", "Wave only", "Proximity", "Default", "Type setting (Wave only)" }, labels);
+        Assert.Equal(PowerMode.GameDefault, slot.Settings.DefenseSetting(key));
+
+        Press(PowerTarget.Defense, 1, game, slot, null);
+
+        Assert.Null(slot.Settings.DefenseSetting(key));
+        Assert.Equal(PowerMode.Proximity, new PowerPolicy(slot.Settings, Global).ModeOf(key));
     }
 
     [Fact]
@@ -64,19 +67,19 @@ public class PowerPressTests
     }
 
     [Fact]
-    public void The_type_button_cycles_every_defense_of_the_type_and_back_to_the_global_setting()
+    public void Picking_a_mode_for_a_type_sets_it_and_picking_none_puts_the_type_back_on_the_global_setting()
     {
         var game = Home();
         var slot = Slot(new FakePowerFile());
-        var labels = new List<string>();
 
-        for (var press = 0; press < 5; press++)
-        {
-            Press(PowerTarget.Type, 1, game, slot);
-            labels.Add(new PowerPolicy(slot.Settings, Global).TypeLabel(Coil));
-        }
+        Press(PowerTarget.Type, 1, game, slot, PowerMode.Proximity);
 
-        Assert.Equal(new[] { "Always on", "Wave only", "Proximity", "Default", "Global setting (Wave only)" }, labels);
+        Assert.Equal(PowerMode.Proximity, slot.Settings.TypeSetting(Coil));
+
+        Press(PowerTarget.Type, 1, game, slot, null);
+
+        Assert.Null(slot.Settings.TypeSetting(Coil));
+        Assert.Equal(Global, new PowerPolicy(slot.Settings, Global).ModeOf(UnitOf(game, 2).Key));
     }
 
     [Fact]
@@ -120,13 +123,8 @@ public class PowerPressTests
         Assert.Equal("Tesla coil set to Always on.", Press(PowerTarget.Defense, 1, game, slot));
         Assert.Equal("Every Tesla coil set to Always on.", Press(PowerTarget.Type, 1, game, slot));
 
-        for (var press = 0; press < 3; press++) Press(PowerTarget.Defense, 1, game, slot);
-
-        Assert.Equal("Tesla coil now follows its type setting (Always on).", Press(PowerTarget.Defense, 1, game, slot));
-
-        for (var press = 0; press < 3; press++) Press(PowerTarget.Type, 1, game, slot);
-
-        Assert.Equal("Every Tesla coil now follows the global setting (Wave only).", Press(PowerTarget.Type, 1, game, slot));
+        Assert.Equal("Tesla coil now follows its type setting (Always on).", Press(PowerTarget.Defense, 1, game, slot, null));
+        Assert.Equal("Every Tesla coil now follows the global setting (Wave only).", Press(PowerTarget.Type, 1, game, slot, null));
     }
 
     [Fact]
@@ -156,7 +154,7 @@ public class PowerPressTests
     [Fact]
     public void A_game_with_no_save_yet_is_asked_to_save_first()
     {
-        Assert.Equal(Texts.NoSave.En, PowerPress.Cycle(PowerTarget.Defense, 1, Home().ReadPower(), new PowerSlot(new FakePowerFile()), Global));
+        Assert.Equal(Texts.NoSave.En, PowerPress.Set(PowerTarget.Defense, 1, PowerMode.AlwaysOn, Home().ReadPower(), new PowerSlot(new FakePowerFile()), Global));
     }
 
     [Fact]

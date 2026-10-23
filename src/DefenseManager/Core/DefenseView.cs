@@ -11,20 +11,21 @@ namespace DefenseManager.Core;
 /// defense with its condition, its repair cost and whether each of its buttons would be taken. A button that would be
 /// refused carries the reason as visible text, since the web view draws no hover tips. Ids are sent as strings because
 /// a JavaScript number cannot hold every long. An electrical defense's row also carries its power: the switch as it
-/// stands and the labels of its two power buttons, when there are power settings to show.
+/// stands, its own setting and its type's, when there are power settings to show. Each row also says which square of the
+/// yard grid it stands on, and the view carries the grid itself and the Settings tab's values.
 /// </summary>
 public static class DefenseView
 {
     /// <summary>The view for a read: the defenses, an empty view saying why they could not be read, or null outside a game.</summary>
-    public static string? Of(DefenseRead read, PowerPolicy? power = null, bool isChinese = false) => read switch
+    public static string? Of(DefenseRead read, PowerPolicy? power = null, bool isChinese = false, PanelSettings? settings = null) => read switch
     {
-        DefenseRead.Ready ready => Build(ready.Survey, power),
-        DefenseRead.NotReady notReady => Empty(OutcomeMessage.Describe(new DefenseOutcome.NotReady(notReady.Reason), isChinese) ?? notReady.Reason),
+        DefenseRead.Ready ready => Build(ready.Survey, power, settings),
+        DefenseRead.NotReady notReady => Empty(OutcomeMessage.Describe(new DefenseOutcome.NotReady(notReady.Reason), isChinese) ?? notReady.Reason, settings),
         DefenseRead.NoGame => null,
         _ => throw new InvalidOperationException("unknown defense read " + read),
     };
 
-    public static string Build(Survey survey, PowerPolicy? power = null)
+    public static string Build(Survey survey, PowerPolicy? power = null, PanelSettings? settings = null)
     {
         var budget = MaterialBudget.Of(survey);
         var locked = LockedText(survey);
@@ -33,11 +34,12 @@ public static class DefenseView
         var materials = survey.Materials.OrderBy(entry => entry.Key).Select(entry => MaterialJson(entry.Value, budget.Left(entry.Key), NeededBy(toRepair, entry.Key)));
         var rows = survey.Defenses.OrderBy(defense => defense.Name, StringComparer.Ordinal).ThenBy(defense => defense.Id).Select(defense => RowJson(defense, survey, budget, locked is null, power));
 
-        return Json(note: null, locked, toRepair.Count, toClear, materials, rows);
+        return Json(note: null, locked, toRepair.Count, toClear, materials, rows, YardJson(survey.Yard), PowerModeJson(power?.Global, survey.IsChinese), SettingsJson(settings));
     }
 
     /// <summary>The panel with no defenses and a note saying why, for when the game could not be read.</summary>
-    public static string Empty(string note) => Json(note, locked: null, repairAll: 0, clearAll: 0, Enumerable.Empty<string>(), Enumerable.Empty<string>());
+    public static string Empty(string note, PanelSettings? settings = null) =>
+        Json(note, locked: null, repairAll: 0, clearAll: 0, Enumerable.Empty<string>(), Enumerable.Empty<string>(), "null", "null", SettingsJson(settings));
 
     private static string? LockedText(Survey survey)
     {
@@ -47,7 +49,7 @@ public static class DefenseView
         return null;
     }
 
-    private static string Json(string? note, string? locked, int repairAll, int clearAll, IEnumerable<string> materials, IEnumerable<string> rows)
+    private static string Json(string? note, string? locked, int repairAll, int clearAll, IEnumerable<string> materials, IEnumerable<string> rows, string yard, string global, string settings)
     {
         var json = new StringBuilder(4096);
 
@@ -57,7 +59,10 @@ public static class DefenseView
             .Append(",\"clearAll\":").Append(Num(clearAll))
             .Append(",\"materials\":[").AppendJoin(',', materials)
             .Append("],\"defenses\":[").AppendJoin(',', rows)
-            .Append("]}");
+            .Append("],\"yard\":").Append(yard)
+            .Append(",\"global\":").Append(global)
+            .Append(",\"settings\":").Append(settings)
+            .Append('}');
 
         return json.ToString();
     }
@@ -76,7 +81,10 @@ public static class DefenseView
         var missing = budget.Missing(defense.Cost);
         var cost = defense.Cost.OrderBy(entry => entry.Key).Select(entry => CostJson(survey, entry.Key, entry.Value, missing.GetValueOrDefault(entry.Key)));
 
-        return $"{{\"id\":{Str(defense.Id.ToString(CultureInfo.InvariantCulture))},\"name\":{Str(defense.Name)},\"icon\":{Str(defense.Icon)}"
+        var place = survey.Yard?.PlaceAt(defense.Position);
+
+        return $"{{\"id\":{Str(defense.Id.ToString(CultureInfo.InvariantCulture))},\"type\":{Num(defense.ConfigId)},\"name\":{Str(defense.Name)},\"icon\":{Str(defense.Icon)}"
+            + $",\"row\":{(place is { } at ? Num(at.Row) : "null")},\"col\":{(place is { } on ? Num(on.Column) : "null")}"
             + $",\"cur\":{Num(defense.Current)},\"max\":{Num(defense.Max)},\"state\":{Str(State(defense))},\"queued\":{Str(Queued(defense))}"
             + $",\"cost\":[{string.Join(",", cost)}]"
             + $",\"canRepair\":{Bool(isUnlocked && repair is RepairVerdict.Allowed)},\"why\":{Str(OutcomeMessage.WhyNot(repair, survey.IsChinese))}"
@@ -85,9 +93,10 @@ public static class DefenseView
     }
 
     /// <summary>
-    /// Null for a defense with no power switch, or with no power settings to show (while they cannot be read). "label"
-    /// is what the row's own button shows (the defense's setting) and "typeLabel" what its type's button shows;
-    /// "managed" is false while the mod leaves the defense alone because it is broken or not working.
+    /// Null for a defense with no power switch, or with no power settings to show (while they cannot be read). "mode" is
+    /// the mode it runs in; "own" and "typeOwn" are the defense's and its type's own settings (a config name, or null
+    /// for none) and "typeMode" the mode its type runs in. "managed" is false while the mod leaves the defense alone
+    /// because it is broken or not working.
     /// </summary>
     private static string PowerJson(Defense defense, PowerPolicy? power, bool isChinese)
     {
@@ -96,8 +105,41 @@ public static class DefenseView
         var key = DefenseKey.Of(defense.ConfigId, defense.Position);
 
         return $"{{\"on\":{Bool(state.IsOn)},\"managed\":{Bool(defense.IsPowerManaged)},\"mode\":{Str(PowerModes.Label(power.ModeOf(key), isChinese))}"
-            + $",\"label\":{Str(power.DefenseLabel(key, isChinese))},\"typeLabel\":{Str(power.TypeLabel(defense.ConfigId, isChinese))}}}";
+            + $",\"own\":{ModeName(power.Settings.DefenseSetting(key))},\"typeOwn\":{ModeName(power.Settings.TypeSetting(defense.ConfigId))}"
+            + $",\"typeMode\":{PowerModeJson(power.TypeMode(defense.ConfigId), isChinese)}}}";
     }
+
+    private static string ModeName(PowerMode? mode) => mode is { } set ? Str(PowerModes.ConfigName(set)) : "null";
+
+    /// <summary>A mode as its config name and its label, or null.</summary>
+    private static string PowerModeJson(PowerMode? mode, bool isChinese) =>
+        mode is { } set ? $"{{\"name\":{Str(PowerModes.ConfigName(set))},\"label\":{Str(PowerModes.Label(set, isChinese))}}}" : "null";
+
+    /// <summary>
+    /// The grid's size, every square by row and column with whether it is the player's and its price, and the door and
+    /// window along the house wall by column (with a fraction, as they stand between square centres). Null without a grid.
+    /// </summary>
+    private static string YardJson(Yard? yard)
+    {
+        if (yard is null || yard.Squares.Count == 0) return "null";
+
+        var squares = yard.Squares.Select(square =>
+        {
+            var place = yard.PlaceOf(square);
+
+            return $"{{\"r\":{Num(place.Row)},\"c\":{Num(place.Column)},\"own\":{Bool(square.IsOwned)},\"price\":{Num(square.Price)}}}";
+        });
+        var wall = yard.Wall.Select(feature => $"{{\"kind\":{Str(feature.Kind == WallFeatureKind.Door ? "door" : "window")},\"at\":{Dec(yard.ColumnAt(feature.X))}}}");
+
+        return $"{{\"cols\":{Num(yard.Columns)},\"rows\":{Num(yard.Rows)},\"squares\":[{string.Join(",", squares)}],\"wall\":[{string.Join(",", wall)}]}}";
+    }
+
+    private static string SettingsJson(PanelSettings? settings) => settings is null
+        ? "null"
+        : $"{{\"key\":{Str(settings.Key)},\"layout\":{Bool(settings.LayoutControls)},\"mode\":{Str(PowerModes.ConfigName(settings.DefaultMode))}"
+            + $",\"range\":{Dec(settings.ProximityRange)},\"crawler\":{Dec(settings.CrawlerDodge)},\"armored\":{Dec(settings.ArmoredCrawlerDodge)},\"rate\":{Dec(settings.AttackRate)}}}";
+
+    private static string Dec(double value) => Math.Round(value, 2).ToString("0.##", CultureInfo.InvariantCulture);
 
     private static string CostJson(Survey survey, int itemId, int count, int shortBy)
     {

@@ -116,12 +116,14 @@ public static class Texts
     public static readonly Phrase DefenseFollowsType = new("{0} now follows its type setting ({1}).", "{0}现在跟随类型设置（{1}）。");
     public static readonly Phrase TypeSet = new("Every {0} set to {1}.", "所有{0}已设为{1}。");
     public static readonly Phrase TypeFollowsGlobal = new("Every {0} now follows the global setting ({1}).", "所有{0}现在跟随全局设置（{1}）。");
-    public static readonly Phrase TypeSetting = new("Type setting ({0})", "类型设置（{0}）");
-    public static readonly Phrase GlobalSetting = new("Global setting ({0})", "全局设置（{0}）");
     public static readonly Phrase AlwaysOn = new("Always on", "常开");
     public static readonly Phrase WaveOnly = new("Wave only", "仅尸潮");
     public static readonly Phrase Proximity = new("Proximity", "僵尸靠近");
     public static readonly Phrase GameDefault = new("Default", "默认");
+
+    // The Settings tab.
+    public static readonly Phrase Saved = new("Setting saved.", "设置已保存。");
+    public static readonly Phrase SavedAtRestart = new("Setting saved. It takes effect at the next game start.", "设置已保存，下次启动游戏时生效。");
 
     /// <summary>The words page.js draws the panel, the HUD button's tip and the Layout bar with, by the key it looks them up by.</summary>
     public static readonly IReadOnlyList<(string Key, Phrase Phrase)> Page = new (string, Phrase)[]
@@ -133,22 +135,83 @@ public static class Texts
         ("removeQueued", new("Removal queued", "已排队拆除")),
         ("repairAll", new("Repair all ({0})", "全部修理（{0}）")),
         ("clearAll", new("Clear all broken ({0})", "清除全部损毁（{0}）")),
-        ("materials", new("Materials free / needed:", "材料 可用 / 所需：")),
         ("empty", new("No traps or barricades outside your home yet.", "家外面还没有陷阱或路障。")),
-        ("repairCost", new("Repair:", "修理：")),
-        ("short", new("({0} short)", "（还差 {0}）")),
-        ("powerOn", new("Power on", "通电")),
-        ("powerOff", new("Power off", "断电")),
-        ("mode", new("Mode: {0}", "模式：{0}")),
         ("unmanaged", new("Not switched while broken or not working", "损毁或不工作时不切换")),
-        ("thisOne", new("This one: {0}", "这个：{0}")),
-        ("every", new("Every {0}: {1}", "所有{0}：{1}")),
         ("repair", new("Repair", "修理")),
         ("remove", new("Remove", "拆除")),
         ("escClose", new("Esc to close", "按 Esc 关闭")),
         ("tip", new("Repair or remove your outdoor defenses", "修理或拆除你的室外防御设施")),
         ("defenseList", new("Defense list", "防御列表")),
         ("defenseListKey", new("Defense list ({0})", "防御列表（{0}）")),
+        ("title", new("DEFENSES", "防御设施")),
+        ("placed", new("{0} placed, {1} of {2} squares yours", "已放置 {0} 个，{2} 格中 {1} 格属于你")),
+        ("placedOnly", new("{0} placed", "已放置 {0} 个")),
+        ("tabYard", new("Yard", "空地")),
+        ("tabPower", new("Power", "供电")),
+        ("tabSettings", new("Settings", "设置")),
+        ("house", new("House", "房屋")),
+        ("hint", new("Click a defense, a row number or a square", "点击防御设施、行号或格子")),
+        ("window", new("Window", "窗户")),
+        ("door", new("Door", "门")),
+        ("road", new("Road side", "道路一侧")),
+        ("offGridLabel", new("Not on the grid", "不在格子上")),
+        ("legEmpty", new("Yours, empty", "你的空格")),
+        ("legBuy", new("Not yours yet (Survival Points)", "尚未解锁（生存点）")),
+        ("needsRepair", new("Needs repair", "需要修理")),
+        ("shortOf", new("Not enough for every repair: {0}", "材料不够全部修理：{0}")),
+        ("queuedCount", new("{0} queued", "{0} 个已排队")),
+        ("allGood", new("All good", "一切正常")),
+        ("nothingNeeds", new("Nothing needs repair.", "没有需要修理的防御设施。")),
+        ("back", new("< Back to repairs", "< 返回修理列表")),
+        ("where", new("Row {0}, square {1}", "第 {0} 行，第 {1} 格")),
+        ("offGrid", new("Not on the yard grid", "不在空地格子上")),
+        ("condition", new("Condition", "耐久")),
+        ("nothingToRepair", new("Nothing to repair", "无需修理")),
+        ("onNow", new("On now", "当前通电")),
+        ("offNow", new("Off now", "当前断电")),
+        ("sameAsType", new("Same as every {0} ({1})", "与所有{0}相同（{1}）")),
+        ("row", new("Row {0}", "第 {0} 行")),
+        ("againstHouse", new("Against the house", "紧贴房屋")),
+        ("rowOut1", new("1 row out from the house", "离房屋 1 行")),
+        ("rowsOut", new("{0} rows out from the house", "离房屋 {0} 行")),
+        ("rowInfo", new("Defenses: {0}. Squares yours: {1} of {2}.", "防御设施：{0} 个。属于你的格子：{2} 格中 {1} 格。")),
+        ("rowPrice", new("The other squares cost {0} Survival Points each.", "其余格子每格需要 {0} 生存点。")),
+        ("repairRow", new("Repair row {0} ({1})", "修理第 {0} 行（{1}）")),
+        ("emptySquare", new("Empty square", "空格")),
+        ("notYours", new("Not yours yet", "尚未解锁")),
+        ("buildHere", new("Build a defense here from the Layout screen.", "可在「规划模式」中在这里建造防御设施。")),
+        ("unlockFor", new("Unlock it from the Layout screen for {0} Survival Points.", "可在「规划模式」中花费 {0} 生存点解锁。")),
+        ("everyType", new("Every {0}", "所有{0}")),
+        ("global", new("Global ({0})", "全局（{0}）")),
+        ("ownList", new("Set on their own", "单独设置")),
+        ("followType", new("Follow the type", "跟随类型")),
+        ("noneOwn", new("None. Pick one in the Yard tab to set it alone.", "无。在「空地」标签中选中一个即可单独设置。")),
+        ("noPower", new("No powered defenses yet.", "还没有用电的防御设施。")),
+        ("powerNote", new("Wave only: on during waves and while zombies are at the base. Proximity: on while a zombie is in range. Always on: never turns off. Default: the game's own power switch decides.", "仅尸潮：尸潮期间以及基地有僵尸时开启。僵尸靠近：有僵尸在范围内时开启。常开：始终开启。默认：由游戏自身的电源开关决定。")),
+        ("modeWaveOnly", WaveOnly),
+        ("modeProximity", Proximity),
+        ("modeAlwaysOn", AlwaysOn),
+        ("modeDefault", GameDefault),
+        ("setControls", new("Controls", "控制")),
+        ("setCombat", new("Combat", "战斗")),
+        ("setKey", new("Open the panel", "打开面板")),
+        ("setKeyDesc", new("Key that opens and closes this window.", "打开和关闭此窗口的按键。")),
+        ("keyNone", new("None", "无")),
+        ("setLayout", new("Layout screen buttons", "「规划模式」按钮")),
+        ("setLayoutDesc", new("Show Repair all, Clear all broken and Defense list on the Layout screen.", "在「规划模式」界面显示「全部修理」「清除全部损毁」「防御列表」按钮。")),
+        ("setMode", new("Default power mode", "默认供电模式")),
+        ("setModeDesc", new("Mode for powered defenses with no setting of their own.", "没有单独设置的用电防御设施所用的模式。")),
+        ("setRange", new("Proximity range", "靠近范围")),
+        ("setRangeDesc", new("How close a zombie must come to turn a Proximity defense on, 1 to 100 meters.", "僵尸进入多少米内时开启设为「僵尸靠近」的防御设施，1 到 100 米。")),
+        ("meters", new("{0} m", "{0} 米")),
+        ("setCrawler", new("Crawler dodge chance", "「爬行者丧尸」闪避概率")),
+        ("setCrawlerDesc", new("Chance a Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.", "「爬行者丧尸」闪避「机械电锯」攻击的概率。原版游戏为 100%。")),
+        ("setArmored", new("Armored crawler dodge chance", "「重甲爬行者丧尸」闪避概率")),
+        ("setArmoredDesc", new("Chance an Armored Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.", "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率。原版游戏为 100%。")),
+        ("setRate", new("Device attack rate", "防御设施攻击频率")),
+        ("setRateDesc", new("How often defense devices strike, 0.25 to 10. Takes effect at the next game start.", "防御设施攻击的频率，0.25 到 10。下次启动游戏时生效。")),
+        ("keyClose", new("{0} or Esc to close", "按 {0} 或 Esc 关闭")),
+        ("noSettings", new("Settings are not available right now.", "现在无法读取设置。")),
     };
 
     public static IReadOnlyList<Counted> Counts { get; } = new[] { AlreadyRepairing, Repairing, RepairingMore, AlreadyClearing, Removing, RemovingMore };
@@ -169,7 +232,7 @@ public static class Texts
             QueuedForRepair, NotAllowed, Needs, RepairQueuedFirst, NeedItem, OutOfStamina, UnnamedItem,
             NoWorld, ReadFailed, NoRepair, CostUnreadable, CheckFailed, Failed,
             NoSave, Unreadable, NoGame, NoSwitch, NotSaved, DefenseSet, DefenseFollowsType, TypeSet, TypeFollowsGlobal,
-            TypeSetting, GlobalSetting, AlwaysOn, WaveOnly, Proximity, GameDefault,
+            AlwaysOn, WaveOnly, Proximity, GameDefault, Saved, SavedAtRestart,
         };
 
         foreach (var counted in Counts)
@@ -178,7 +241,11 @@ public static class Texts
             all.Add(counted.Many);
         }
 
-        foreach (var (_, phrase) in Page) all.Add(phrase);
+        // The page's mode words are the power phrases above, listed once.
+        foreach (var (_, phrase) in Page)
+        {
+            if (!all.Contains(phrase)) all.Add(phrase);
+        }
 
         return all;
     }

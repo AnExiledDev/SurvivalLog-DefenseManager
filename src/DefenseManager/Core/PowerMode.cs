@@ -51,18 +51,4 @@ public static class PowerModes
 
         return All.Where(mode => string.Equals(ConfigName(mode), trimmed, StringComparison.OrdinalIgnoreCase)).Select(mode => (PowerMode?)mode).FirstOrDefault();
     }
-
-    /// <summary>
-    /// The next setting a cycle button gives. Null is "no setting of its own" (a defense follows its type, a type follows
-    /// the global default), so a cycle always comes back round to letting go.
-    /// </summary>
-    public static PowerMode? Next(PowerMode? setting) => setting switch
-    {
-        null => PowerMode.AlwaysOn,
-        PowerMode.AlwaysOn => PowerMode.WaveOnly,
-        PowerMode.WaveOnly => PowerMode.Proximity,
-        PowerMode.Proximity => PowerMode.GameDefault,
-        PowerMode.GameDefault => null,
-        _ => throw new ArgumentOutOfRangeException(nameof(setting), setting, "unknown power mode"),
-    };
 }

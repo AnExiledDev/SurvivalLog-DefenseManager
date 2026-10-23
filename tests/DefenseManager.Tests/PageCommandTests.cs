@@ -25,10 +25,30 @@ public class PageCommandTests
     }
 
     [Fact]
-    public void The_power_buttons_carry_the_whole_defense_id_and_say_which_of_the_two_was_pressed()
+    public void A_power_pick_carries_the_whole_defense_id_the_mode_picked_and_whether_it_is_for_the_type()
     {
-        Assert.Equal(new PageCommand.Power(9007199254740993), PageCommand.Parse("slmod|defensemanager|power|9007199254740993"));
-        Assert.Equal(new PageCommand.PowerType(-42), PageCommand.Parse("slmod|defensemanager|powertype|-42"));
+        Assert.Equal(new PageCommand.Power(9007199254740993, PowerMode.AlwaysOn), PageCommand.Parse("slmod|defensemanager|power|9007199254740993|AlwaysOn"));
+        Assert.Equal(new PageCommand.PowerType(-42, PowerMode.GameDefault), PageCommand.Parse("slmod|defensemanager|powertype|-42|Default"));
+    }
+
+    [Fact]
+    public void Picking_none_lets_go_of_the_setting()
+    {
+        Assert.Equal(new PageCommand.Power(7, null), PageCommand.Parse("slmod|defensemanager|power|7|none"));
+        Assert.Equal(new PageCommand.PowerType(7, null), PageCommand.Parse("slmod|defensemanager|powertype|7|none"));
+    }
+
+    [Fact]
+    public void Repair_row_carries_the_row_number()
+    {
+        Assert.Equal(new PageCommand.RepairRow(3), PageCommand.Parse("slmod|defensemanager|repairrow|3"));
+    }
+
+    [Fact]
+    public void A_settings_change_carries_the_setting_and_its_value()
+    {
+        Assert.Equal(new PageCommand.Setting(new SettingChange.LayoutControls(false)), PageCommand.Parse("slmod|defensemanager|set|layoutcontrols|0"));
+        Assert.Equal(new PageCommand.Setting(new SettingChange.ProximityRange(20)), PageCommand.Parse("slmod|defensemanager|set|proximityrange|20"));
     }
 
     [Theory]
@@ -41,10 +61,18 @@ public class PageCommandTests
     [InlineData("slmod|defensemanager|remove|1.5")]
     [InlineData("slmod|defensemanager|remove|1|2")]
     [InlineData("slmod|defensemanager|power")]
-    [InlineData("slmod|defensemanager|power|x")]
-    [InlineData("slmod|defensemanager|Power|1")]
+    [InlineData("slmod|defensemanager|power|1")]
+    [InlineData("slmod|defensemanager|power|x|AlwaysOn")]
+    [InlineData("slmod|defensemanager|power|1|Sometimes")]
+    [InlineData("slmod|defensemanager|Power|1|AlwaysOn")]
     [InlineData("slmod|defensemanager|powertype")]
-    [InlineData("slmod|defensemanager|powertype|1|2")]
+    [InlineData("slmod|defensemanager|powertype|1|AlwaysOn|2")]
+    [InlineData("slmod|defensemanager|repairrow")]
+    [InlineData("slmod|defensemanager|repairrow|0")]
+    [InlineData("slmod|defensemanager|repairrow|two")]
+    [InlineData("slmod|defensemanager|set|layoutcontrols")]
+    [InlineData("slmod|defensemanager|set|layoutcontrols|yes")]
+    [InlineData("slmod|defensemanager|set|panelkey|F8")]
     [InlineData("slmod|defensemanager|diag|hud button placed")]
     [InlineData("slmod|unpackall|toggle")]
     public void Anything_else_is_unknown_and_kept_whole_for_the_log(string message)

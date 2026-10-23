@@ -63,12 +63,12 @@ internal sealed class PowerSession
         return load is SettingsLoad.Read or SettingsLoad.AlreadyRead ? new PowerPolicy(_slot.Settings, _global) : null;
     }
 
-    /// <summary>A power button press: the setting moves one step and the reply says what it is now.</summary>
-    public string Press(PowerTarget target, long defenseId)
+    /// <summary>A power button press: the setting becomes the mode picked (null for none) and the reply says what it is now.</summary>
+    public string Press(PowerTarget target, long defenseId, PowerMode? mode)
     {
         Policy();
 
-        return PowerPress.Cycle(target, defenseId, _game.ReadPower(), _slot, _global, GameLanguage.IsChinese());
+        return PowerPress.Set(target, defenseId, mode, _game.ReadPower(), _slot, _global, GameLanguage.IsChinese());
     }
 
     private void LogLoad(SettingsLoad load)

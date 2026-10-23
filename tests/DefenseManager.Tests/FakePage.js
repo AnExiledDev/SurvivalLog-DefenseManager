@@ -282,6 +282,11 @@ function panelButton(action) {
   return document.querySelectorAll('[data-act]').filter(function (node) { return node.getAttribute('data-act') === action; })[0];
 }
 
+// The first panel element that does this action with these arguments.
+function panelButtonWith(action, args) {
+  return document.querySelectorAll('[data-act]').filter(function (node) { return node.getAttribute('data-act') === action && node.getAttribute('data-args') === args; })[0];
+}
+
 // A click as the game's click-through delivers one: dispatched on whatever is under the pointer, greyed buttons
 // included, bubbling up until a listener stops it (webui-core.js:33-36).
 function click(target) {

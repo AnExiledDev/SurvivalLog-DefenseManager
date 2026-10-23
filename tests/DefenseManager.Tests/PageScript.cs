@@ -15,9 +15,12 @@ internal sealed class PageScript
     public PageScript()
     {
         _engine.Execute(Resource("DefenseManager.Tests.FakePage.js"));
-        _engine.Execute(Resource("DefenseManager.page.js"));
+        _engine.Execute(Source);
         Hear();
     }
+
+    /// <summary>page.js as the plugin embeds it.</summary>
+    public static string Source { get; } = Resource("DefenseManager.page.js");
 
     /// <summary>Every command the script sent the plugin, its ready message and diag notes aside.</summary>
     public List<PageCommand> Sent { get; } = new();

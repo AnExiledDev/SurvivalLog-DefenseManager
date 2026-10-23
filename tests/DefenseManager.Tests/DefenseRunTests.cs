@@ -12,6 +12,7 @@ public class DefenseRunTests
         DefenseRun.ClearBroken,
         game => DefenseRun.Repair(game, 1),
         game => DefenseRun.Remove(game, 1),
+        game => DefenseRun.RepairRow(game, 1),
     };
 
     private static RepairTally Repaired(DefenseOutcome outcome) => Assert.IsType<DefenseOutcome.Repaired>(outcome).Tally;
@@ -593,5 +594,41 @@ public class DefenseRunTests
             Assert.Equal(new DefenseOutcome.NotReady("no character"), press(game));
             Assert.Empty(game.LinedUp);
         }
+    }
+
+    // Repair row
+
+    /// <summary>Row 1 along the house at z 0, row 2 behind it at z -0.7, three squares each.</summary>
+    private static Yard TwoRows() => new(
+        new[] { -1.4, -0.7, 0.0 }.SelectMany(x => new[] { new YardSquare("r1", 1, x, 0, true, 0), new YardSquare("r2", 2, x, -0.7, true, 0) }).ToList(),
+        Array.Empty<WallFeature>());
+
+    [Fact]
+    public void Repair_row_repairs_only_the_damaged_defenses_standing_in_that_row()
+    {
+        var game = new FakeGame { Yard = TwoRows(), Defenses = { Def(1, x: -1.4, z: 0), Def(2, x: 0, z: -0.7), Def(3, x: 0, z: 0), Def(4, x: 5, z: 5) } };
+
+        var tally = Repaired(DefenseRun.RepairRow(game, 1));
+
+        Assert.Equal(new long[] { 3, 1 }, game.Repairing);
+        Assert.Equal(2, tally.Queued);
+    }
+
+    [Fact]
+    public void Repair_row_with_nothing_damaged_in_the_row_has_nothing_to_do_even_when_other_rows_do()
+    {
+        var game = new FakeGame { Yard = TwoRows(), Defenses = { Intact(1), Def(2, x: 0, z: -0.7) } };
+
+        Assert.IsType<DefenseOutcome.NothingToDo>(DefenseRun.RepairRow(game, 1));
+        Assert.Empty(game.Repairing);
+    }
+
+    [Fact]
+    public void Without_a_grid_no_defense_is_in_a_row()
+    {
+        var game = new FakeGame { Defenses = { Def(1) } };
+
+        Assert.IsType<DefenseOutcome.NothingToDo>(DefenseRun.RepairRow(game, 1));
+        Assert.Empty(game.Repairing);
     }
 }

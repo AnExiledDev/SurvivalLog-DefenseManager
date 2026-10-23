@@ -51,45 +51,6 @@ public class PowerSettingsTests
         Assert.Equal(PowerMode.GameDefault, new PowerPolicy(settings, PowerMode.WaveOnly).ModeOf(CoilAtGate));
     }
 
-    // ===== What the buttons say =====
-
-    [Fact]
-    public void A_defense_with_no_setting_of_its_own_says_it_follows_its_type_and_what_that_gives()
-    {
-        var settings = PowerSettings.None.WithType(Coil, PowerMode.Proximity).WithDefense(CoilAtGate, PowerMode.AlwaysOn);
-        var policy = new PowerPolicy(settings, PowerMode.WaveOnly);
-
-        Assert.Equal("Always on", policy.DefenseLabel(CoilAtGate));
-        Assert.Equal("Type setting (Proximity)", policy.DefenseLabel(CoilAtWall));
-        Assert.Equal("Type setting (Wave only)", policy.DefenseLabel(LampAtGate));
-    }
-
-    [Fact]
-    public void A_type_with_no_setting_says_it_follows_the_global_default_and_what_that_is()
-    {
-        var policy = new PowerPolicy(PowerSettings.None.WithType(Coil, PowerMode.GameDefault), PowerMode.Proximity);
-
-        Assert.Equal("Default", policy.TypeLabel(Coil));
-        Assert.Equal("Global setting (Proximity)", policy.TypeLabel(Lamp));
-    }
-
-    // ===== The cycle =====
-
-    [Fact]
-    public void A_cycle_runs_always_on_wave_only_proximity_default_then_lets_go()
-    {
-        var seen = new List<PowerMode?>();
-        PowerMode? setting = null;
-
-        for (var press = 0; press < 5; press++)
-        {
-            setting = PowerModes.Next(setting);
-            seen.Add(setting);
-        }
-
-        Assert.Equal(new PowerMode?[] { PowerMode.AlwaysOn, PowerMode.WaveOnly, PowerMode.Proximity, PowerMode.GameDefault, null }, seen);
-    }
-
     // ===== Names in the config and the file =====
 
     [Theory]

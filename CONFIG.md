@@ -1,6 +1,6 @@
 # Defense Manager settings
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once except `DeviceAttackRate`, which takes effect at the next game start. Delete the file to get the defaults back. Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
+Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once except `DeviceAttackRate`, which takes effect at the next game start. Every setting but `PanelKey` can also be changed on the panel's Settings tab, which saves to this file at once (`DeviceAttackRate` still takes effect at the next game start). Delete the file to get the defaults back. Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
 
 ## Controls
 
@@ -20,7 +20,7 @@ The game is paused while the Layout screen is open, so anything queued from its 
 | `DefaultMode` | `WaveOnly` | How electrical defenses are powered when neither the defense nor its type has a setting of its own in the panel. `WaveOnly`: on during waves and while zombies are at the base, off otherwise. `AlwaysOn`: always on. `Proximity`: on while a living zombie is within `ProximityRange`, off once none has been in range for 10 minutes of game time. `Default`: the mod leaves the defense alone and the game's own power switch decides. |
 | `ProximityRange` | `15` | How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground; height does not count. Any number from 1 to 100. |
 
-A defense's own setting wins over its type's, and a type's setting wins over `DefaultMode`. Those two are set with the buttons on each electrical defense's row in the panel, not in this file. They are kept for each save in `BepInEx\config\com.dev.survivallog.defensemanager.power.txt`, which the mod writes itself; edit it only while the game is closed, or delete it to clear every defense and type setting.
+A defense's own setting wins over its type's, and a type's setting wins over `DefaultMode`. Those two are set in the panel, not in this file: a defense's own mode when you click it on the yard grid, and a type's mode on the Power tab. They are kept for each save in `BepInEx\config\com.dev.survivallog.defensemanager.power.txt`, which the mod writes itself; edit it only while the game is closed, or delete it to clear every defense and type setting.
 
 Changing `DefaultMode` here changes every defense and type that has no setting of its own.
 

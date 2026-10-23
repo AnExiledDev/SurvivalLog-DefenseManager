@@ -43,6 +43,9 @@ internal sealed class FakeGame : IDefenseGame
 
     public bool FailsToStart { get; set; }
 
+    /// <summary>The yard grid the read hands out, none by default.</summary>
+    public Yard? Yard { get; set; }
+
     public Spot Character { get; set; }
 
     /// <summary>The defenses as they stand; their queued flags are ignored, the queue below says what is queued.</summary>
@@ -118,7 +121,7 @@ internal sealed class FakeGame : IDefenseGame
         var defenses = Defenses.Select(defense => defense with { IsRepairQueued = queue.Contains(new Act(Job.Repair, defense.Id)), IsRemovalQueued = queue.Contains(new Act(Job.Remove, defense.Id)) }).ToList();
         var materials = Stock.ToDictionary(entry => entry.Key, entry => new Material(NameOf(entry.Key), null, entry.Value));
 
-        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina, IsChinese));
+        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina, IsChinese, Yard));
     }
 
     /// <summary>Like the game's own queue, this takes any job it is handed, whatever the materials or the repair check say.</summary>

@@ -222,55 +222,204 @@ public class PageScriptTests
         Assert.Equal(new PageCommand[] { new PageCommand.RepairAll(), new PageCommand.Close() }, page.Sent);
     }
 
-    // ===== Power controls in the panel =====
+    // ===== The panel =====
 
-    /// <summary>A home with one electrical defense, switched on, and one barricade.</summary>
-    private static string PowerView()
+    /// <summary>Row 1 along the house at z 0, row 2 behind it at z -0.7, three squares each; the last square of row 2 is not the player's yet.</summary>
+    private static Yard TwoRows() => new(
+        new[]
+        {
+            new YardSquare("a", 1, -1.4, 0, true, 0), new YardSquare("b", 1, -0.7, 0, true, 0), new YardSquare("c", 1, 0, 0, true, 0),
+            new YardSquare("d", 2, -1.4, -0.7, true, 0), new YardSquare("e", 2, -0.7, -0.7, true, 0), new YardSquare("f", 2, 0, -0.7, false, 50),
+        },
+        new[] { new WallFeature(WallFeatureKind.Door, -0.35) });
+
+    private static Defense Tesla(long id, double x, double z) => Def(id, x: x, z: z, name: "Tesla coil") with { Power = new DefensePower(IsOn: true, IsOperational: true) };
+
+    /// <summary>Two damaged defenses in row 1 (one a powered Tesla coil) and an intact one in row 2.</summary>
+    private static FakeGame Yard(bool isChinese = false) => new()
     {
-        var game = new FakeGame { Defenses = { Def(1, name: "Tesla coil") with { Power = new DefensePower(IsOn: true, IsOperational: true) }, Def(2, name: "Barricade") } };
+        IsChinese = isChinese,
+        Yard = TwoRows(),
+        Defenses = { Tesla(1, -1.4, 0), Def(2, x: 0, z: 0), Def(3, x: -0.7, z: -0.7, cur: 100) },
+    };
 
-        return DefenseView.Of(game.Read(), new PowerPolicy(PowerSettings.None, PowerMode.WaveOnly)) ?? throw new InvalidOperationException("no panel view");
-    }
+    private static readonly PanelSettings Settings = new("F7", LayoutControls: true, PowerMode.WaveOnly, ProximityRange: 15, CrawlerDodge: 0.3f, ArmoredCrawlerDodge: 1f, AttackRate: 1f);
 
-    private static string PowerButtonCount(PageScript page) => page.Text("document.querySelectorAll('[data-act]').filter(function (node) { return /^power/.test(node.getAttribute('data-act')); }).length");
+    private static string YardView(FakeGame game) =>
+        DefenseView.Of(game.Read(), new PowerPolicy(PowerSettings.None, PowerMode.WaveOnly), game.IsChinese, Settings) ?? throw new InvalidOperationException("no panel view");
 
-    [Fact]
-    public void An_electrical_row_names_which_button_changes_this_defense_and_which_changes_its_whole_type()
-    {
-        var page = new PageScript();
-
-        page.Open(PowerView());
-
-        Assert.Equal("This one: Type setting (Wave only)", page.Text("panelButton('power').textContent"));
-        Assert.Equal("Every Tesla coil: Global setting (Wave only)", page.Text("panelButton('powertype').textContent"));
-        Assert.Equal("Power on", page.Text("document.querySelector('.dm-badge-on').textContent"));
-        Assert.Equal("2", PowerButtonCount(page));
-    }
-
-    [Fact]
-    public void In_a_chinese_game_an_electrical_row_is_labelled_in_chinese()
-    {
-        var game = new FakeGame { IsChinese = true, Defenses = { Def(1, name: "Tesla coil") with { Power = new DefensePower(IsOn: true, IsOperational: true) } } };
-        var page = new PageScript();
-
-        page.Run(PageWords.Script(isChinese: true));
-        page.Open(DefenseView.Of(game.Read(), new PowerPolicy(PowerSettings.None, PowerMode.WaveOnly), isChinese: true) ?? throw new InvalidOperationException("no panel view"));
-
-        Assert.Equal("这个：类型设置（仅尸潮）", page.Text("panelButton('power').textContent"));
-        Assert.Equal("所有Tesla coil：全局设置（仅尸潮）", page.Text("panelButton('powertype').textContent"));
-        Assert.Equal("通电", page.Text("document.querySelector('.dm-badge-on').textContent"));
-    }
-
-    [Fact]
-    public void The_two_power_buttons_send_their_own_commands_for_that_defense()
+    private static PageScript OpenYard(bool isChinese = false)
     {
         var page = new PageScript();
 
-        page.Open(PowerView());
-        page.Click("panelButton('power')");
-        page.Status("Tesla coil set to Always on.");
-        page.Click("panelButton('powertype')");
+        if (isChinese) page.Run(PageWords.Script(isChinese: true));
 
-        Assert.Equal(new PageCommand[] { new PageCommand.Power(1), new PageCommand.PowerType(1) }, page.Sent);
+        page.Open(YardView(Yard(isChinese)));
+
+        return page;
+    }
+
+    private static string Count(PageScript page, string selector) => page.Text($"document.querySelectorAll('{selector}').length");
+
+    [Fact]
+    public void The_yard_is_drawn_as_its_squares_with_a_number_on_each_row_saying_how_many_wait_for_repair()
+    {
+        var page = OpenYard();
+
+        Assert.Equal("6", Count(page, ".dm-cell"));
+        Assert.Equal("3", Count(page, ".dm-def"));
+        Assert.Equal("1", Count(page, ".dm-cell.dm-buy"));
+        Assert.Equal("12", page.Text("document.querySelectorAll('.dm-rlab')[0].textContent"));
+        Assert.Equal("2", page.Text("document.querySelectorAll('.dm-rlab')[1].textContent"));
+        Assert.Equal("Door", page.Text("document.querySelector('.dm-door').textContent"));
+    }
+
+    [Fact]
+    public void Picking_a_defense_shows_it_and_its_power_choices_set_it_alone_or_send_it_back_to_its_type()
+    {
+        var page = OpenYard();
+
+        page.Click("panelButtonWith('pick', '1')");
+
+        Assert.Equal("Row 1, square 1", page.Text("document.querySelector('.dm-ihd').querySelector('small').textContent"));
+        Assert.Equal("Same as every Tesla coil (Wave only)", page.Text("panelButtonWith('power', '1|none').textContent"));
+        Assert.True(page.Is("panelButtonWith('power', '1|none').classList.contains('dm-on')"));
+
+        page.Click("panelButtonWith('power', '1|Proximity')");
+        page.Status("Tesla coil set to Proximity.");
+        page.Click("panelButtonWith('power', '1|none')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.Power(1, PowerMode.Proximity), new PageCommand.Power(1, null) }, page.Sent);
+    }
+
+    /// <summary>Picking, tabs and going back only change what the panel shows, so they send nothing and are never held by a press.</summary>
+    [Fact]
+    public void Picking_and_switching_tabs_send_nothing_and_still_work_while_a_press_waits_for_its_answer()
+    {
+        var page = OpenYard();
+
+        page.Click("panelButton('repairall')");
+        page.Click("panelButtonWith('pick', '2')");
+
+        Assert.True(page.Is("panelButtonWith('remove', '2')"));
+
+        page.Click("panelButton('back')");
+        page.Click("panelButtonWith('tab', 'settings')");
+
+        Assert.True(page.Is("document.querySelector('.dm-sgrid')"));
+        Assert.Equal(new PageCommand[] { new PageCommand.RepairAll() }, page.Sent);
+    }
+
+    [Fact]
+    public void A_row_number_opens_the_row_and_its_button_repairs_just_that_row()
+    {
+        var page = OpenYard();
+
+        page.Click("panelButtonWith('row', '1')");
+
+        Assert.Equal("Repair row 1 (2)", page.Text("panelButton('repairrow').textContent"));
+
+        page.Click("panelButton('repairrow')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.RepairRow(1) }, page.Sent);
+    }
+
+    [Fact]
+    public void A_square_not_yet_yours_says_its_price()
+    {
+        var page = OpenYard();
+
+        page.Click("panelButtonWith('cell', '2:3')");
+
+        Assert.Equal("Unlock it from the Layout screen for 50 Survival Points.", page.Text("document.querySelector('.dm-desc').textContent"));
+        Assert.Empty(page.Sent);
+    }
+
+    [Fact]
+    public void The_power_tab_sets_a_whole_type_or_sends_it_back_to_the_global_mode()
+    {
+        var page = OpenYard();
+
+        page.Click("panelButtonWith('tab', 'power')");
+
+        Assert.Equal("Global (Wave only)", page.Text("panelButtonWith('powertype', '1|none').textContent"));
+
+        page.Click("panelButtonWith('powertype', '1|AlwaysOn')");
+        page.Status("Every Tesla coil set to Always on.");
+        page.Click("panelButtonWith('powertype', '1|none')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.PowerType(1, PowerMode.AlwaysOn), new PageCommand.PowerType(1, null) }, page.Sent);
+    }
+
+    [Fact]
+    public void The_settings_tab_steps_a_value_flips_a_toggle_and_greys_a_step_past_the_end()
+    {
+        var page = OpenYard();
+
+        page.Click("panelButtonWith('tab', 'settings')");
+
+        Assert.Equal("15 m", page.Text("document.querySelectorAll('.dm-stepper')[0].querySelector('b').textContent"));
+        Assert.Equal("30%", page.Text("document.querySelectorAll('.dm-stepper')[1].querySelector('b').textContent"));
+        Assert.True(page.Is("panelButtonWith('set', 'armoredcrawlerdodge|1.05').disabled"));
+
+        page.Click("panelButtonWith('set', 'proximityrange|16')");
+        page.Status("Setting saved.");
+        page.Click("panelButtonWith('set', 'crawlerdodge|0.25')");
+        page.Status("Setting saved.");
+        page.Click("panelButtonWith('set', 'layoutcontrols|0')");
+        page.Status("Setting saved.");
+        page.Click("panelButtonWith('set', 'defaultmode|Proximity')");
+
+        Assert.Equal(
+            new PageCommand[]
+            {
+                new PageCommand.Setting(new SettingChange.ProximityRange(16)),
+                new PageCommand.Setting(new SettingChange.CrawlerDodge(0.25f)),
+                new PageCommand.Setting(new SettingChange.LayoutControls(false)),
+                new PageCommand.Setting(new SettingChange.DefaultMode(PowerMode.Proximity)),
+            },
+            page.Sent);
+    }
+
+    [Fact]
+    public void In_a_chinese_game_the_panel_is_labelled_in_chinese()
+    {
+        var page = OpenYard(isChinese: true);
+
+        Assert.Equal("空地2", page.Text("panelButtonWith('tab', 'yard').textContent"));
+
+        page.Click("panelButtonWith('pick', '1')");
+
+        Assert.Equal("第 1 行，第 1 格", page.Text("document.querySelector('.dm-ihd').querySelector('small').textContent"));
+        Assert.Equal("与所有Tesla coil相同（仅尸潮）", page.Text("panelButtonWith('power', '1|none').textContent"));
+        Assert.Equal("僵尸靠近", page.Text("panelButtonWith('power', '1|Proximity').textContent"));
+    }
+
+    [Fact]
+    public void Without_a_grid_every_defense_is_still_listed_and_can_be_picked()
+    {
+        var game = Home();
+        var page = new PageScript();
+
+        page.Open(PanelView(game));
+
+        Assert.Equal("3", Count(page, ".dm-cell"));
+
+        page.Click("panelButtonWith('pick', '2')");
+
+        Assert.Equal("Not on the yard grid", page.Text("document.querySelector('.dm-ihd').querySelector('small').textContent"));
+    }
+
+    /// <summary>The page draws in English until the plugin's words arrive, so its own copy must say the same as Texts.</summary>
+    [Fact]
+    public void The_pages_own_english_words_are_the_same_as_the_plugins()
+    {
+        var source = PageScript.Source;
+        var block = source[source.IndexOf("var ENGLISH = {", StringComparison.Ordinal)..];
+        block = block[..block.IndexOf("  };", StringComparison.Ordinal)];
+        var english = System.Text.RegularExpressions.Regex.Matches(block, @"(\w+): '((?:[^'\\]|\\.)*)'")
+            .ToDictionary(match => match.Groups[1].Value, match => match.Groups[2].Value.Replace("\\'", "'"));
+
+        Assert.Equal(Texts.Page.ToDictionary(word => word.Key, word => word.Phrase.En), english);
     }
 }

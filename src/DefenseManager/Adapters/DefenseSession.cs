@@ -17,6 +17,7 @@ internal sealed class DefenseSession
     private readonly GameDefenses _game;
     private readonly PowerSession _power;
     private readonly WebPage _page;
+    private readonly PanelConfig _config;
     private KeyCode _panelKey;
     private bool _isLayoutBarEnabled;
     private readonly Action<string> _log;
@@ -33,11 +34,12 @@ internal sealed class DefenseSession
     private bool _hasReportedLayoutFailure;
     private bool _hasReportedPowerFailure;
 
-    public DefenseSession(GameDefenses game, PowerSession power, WebPage page, Action<string> log)
+    public DefenseSession(GameDefenses game, PowerSession power, WebPage page, PanelConfig config, Action<string> log)
     {
         _game = game;
         _power = power;
         _page = page;
+        _config = config;
         _log = log;
     }
 
@@ -131,6 +133,9 @@ internal sealed class DefenseSession
             case PageCommand.RepairAll:
                 Press("repair all", () => DefenseRun.RepairAll(_game));
                 break;
+            case PageCommand.RepairRow repairRow:
+                Press($"repair row {repairRow.Row}", () => DefenseRun.RepairRow(_game, repairRow.Row));
+                break;
             case PageCommand.ClearBroken:
                 Press("clear all broken", () => DefenseRun.ClearBroken(_game));
                 break;
@@ -141,10 +146,13 @@ internal sealed class DefenseSession
                 Press($"remove {remove.DefenseId}", () => DefenseRun.Remove(_game, remove.DefenseId));
                 break;
             case PageCommand.Power power:
-                PressPower(PowerTarget.Defense, power.DefenseId);
+                PressPower(PowerTarget.Defense, power.DefenseId, power.Mode);
                 break;
             case PageCommand.PowerType powerType:
-                PressPower(PowerTarget.Type, powerType.DefenseId);
+                PressPower(PowerTarget.Type, powerType.DefenseId, powerType.Mode);
+                break;
+            case PageCommand.Setting setting:
+                ChangeSetting(setting.Change);
                 break;
             case PageCommand.Ready:
                 _log("page script ready");
@@ -351,26 +359,47 @@ internal sealed class DefenseSession
     {
         _nextRefreshAt = Time.unscaledTime + RefreshSeconds;
 
-        return Presence.PanelView(_game.Locate(), _game.Read, _power.Policy(), GameLanguage.IsChinese());
+        return Presence.PanelView(_game.Locate(), _game.Read, _power.Policy(), GameLanguage.IsChinese(), _config.Read(KeyName()));
     }
 
     /// <summary>
     /// A power button: its reply goes to the status line, which also frees the page's buttons, and the panel is
     /// redrawn so the button shows its new setting at once. The switch itself follows on the next power pass.
     /// </summary>
-    private void PressPower(PowerTarget target, long defenseId)
+    private void PressPower(PowerTarget target, long defenseId, PowerMode? mode)
     {
         string message;
 
         try
         {
-            message = _power.Press(target, defenseId);
-            _log($"power {target} {defenseId}: {message}");
+            message = _power.Press(target, defenseId, mode);
+            _log($"power {target} {defenseId} {mode?.ToString() ?? "none"}: {message}");
         }
         catch (Exception ex)
         {
             message = FailedStatus;
             _log($"power {target} {defenseId} failed: {ex}");
+        }
+
+        _page.Status(message);
+
+        if (_isOpen) PushView();
+    }
+
+    /// <summary>A Settings tab change: saved to the config, applied at once, and the panel redrawn with it.</summary>
+    private void ChangeSetting(SettingChange change)
+    {
+        string message;
+
+        try
+        {
+            message = _config.Apply(change, GameLanguage.IsChinese());
+            _log($"setting {change}: {message}");
+        }
+        catch (Exception ex)
+        {
+            message = FailedStatus;
+            _log($"setting {change} failed: {ex}");
         }
 
         _page.Status(message);
