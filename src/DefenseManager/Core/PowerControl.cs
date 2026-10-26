@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DefenseManager.Core;
 
@@ -28,7 +27,10 @@ public readonly record struct GameLoad(long World, long Save);
 /// </summary>
 public sealed record PowerScene(IReadOnlyList<PowerUnit> Defenses, bool IsWaveRunning, IReadOnlyList<Spot> Zombies, int Clock, bool IsLocked, GameLoad Load);
 
-/// <summary>The game's power switches. None of these throws: a call that fails answers null.</summary>
+/// <summary>
+/// The game's power switches. None of these throws: a call that fails answers null. The one exception is a scene's
+/// zombies, read when the pass first looks at them: a read that fails throws there and stops the pass.
+/// </summary>
 public interface IPowerGame
 {
     /// <summary>The defenses and their surroundings, or null when no game is loaded.</summary>
@@ -67,8 +69,17 @@ public static class PowerPlanner
     };
 
     /// <summary>Range is measured along the ground: a zombie on a slope or a rooftop above a defense is still next to it.</summary>
-    public static bool IsNear(Spot defense, IEnumerable<Spot> zombies, double range) =>
-        zombies.Any(zombie => Square(zombie.X - defense.X) + Square(zombie.Z - defense.Z) <= range * range);
+    public static bool IsNear(Spot defense, IReadOnlyList<Spot> zombies, double range)
+    {
+        for (var i = 0; i < zombies.Count; i++)
+        {
+            var zombie = zombies[i];
+
+            if (Square(zombie.X - defense.X) + Square(zombie.Z - defense.Z) <= range * range) return true;
+        }
+
+        return false;
+    }
 
     /// <summary>A clock that went back (an earlier save loaded under the same name) ends the hold rather than stretching it.</summary>
     public static bool IsHeld(int? lastNearAt, int clock) => lastNearAt is { } at && clock >= at && clock - at < HoldSeconds;
@@ -112,14 +123,17 @@ public sealed class PowerControl
 
         if (scene.IsLocked) return Array.Empty<PowerSwitch>();
 
-        var switches = new List<PowerSwitch>();
+        List<PowerSwitch>? switches = null;
+        var defenses = scene.Defenses;
 
-        foreach (var unit in scene.Defenses.Where(unit => unit.IsManaged))
+        for (var i = 0; i < defenses.Count; i++)
         {
-            if (Settle(game, scene, unit, policy.ModeOf(unit.Key), range) is { } made) switches.Add(made);
+            var unit = defenses[i];
+
+            if (unit.IsManaged && Settle(game, scene, unit, policy.ModeOf(unit.Key), range) is { } made) (switches ??= new List<PowerSwitch>()).Add(made);
         }
 
-        return switches;
+        return switches ?? (IReadOnlyList<PowerSwitch>)Array.Empty<PowerSwitch>();
     }
 
     private void Follow(GameLoad load)
@@ -129,14 +143,22 @@ public sealed class PowerControl
         _load = load;
     }
 
+    /// <summary>
+    /// The zombies are looked at only by a mode that asks about them: where they are only in Proximity, and whether any
+    /// are at the base only in Wave only between waves. Reading each zombie's position costs a game call, so a base set
+    /// to Always on, Default, or Wave only during a wave never reads them. A zombie in range is remembered for the hold
+    /// only while the defense is in Proximity.
+    /// </summary>
     private PowerSwitch? Settle(IPowerGame game, PowerScene scene, PowerUnit unit, PowerMode mode, double range)
     {
-        var isNear = PowerPlanner.IsNear(unit.Position, scene.Zombies, range);
+        var isProximity = mode == PowerMode.Proximity;
+        var isNear = isProximity && PowerPlanner.IsNear(unit.Position, scene.Zombies, range);
 
         if (isNear) _lastNearAt[unit.Id] = scene.Clock;
 
-        var lastNearAt = _lastNearAt.TryGetValue(unit.Id, out var at) ? at : (int?)null;
-        var need = PowerPlanner.Need(mode, scene.IsWaveRunning, scene.Zombies.Count > 0, isNear, PowerPlanner.IsHeld(lastNearAt, scene.Clock));
+        var lastNearAt = isProximity && _lastNearAt.TryGetValue(unit.Id, out var at) ? at : (int?)null;
+        var areZombiesAtBase = mode == PowerMode.WaveOnly && !scene.IsWaveRunning && scene.Zombies.Count > 0;
+        var need = PowerPlanner.Need(mode, scene.IsWaveRunning, areZombiesAtBase, isNear, PowerPlanner.IsHeld(lastNearAt, scene.Clock));
 
         if (need.IsOn is not { } isWanted || isWanted == unit.IsOn)
         {

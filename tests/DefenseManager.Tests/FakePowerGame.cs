@@ -44,7 +44,17 @@ internal sealed class FakePowerGame : IPowerGame
 
     public int PowerUpsOf(long id) => PowerUps.GetValueOrDefault(id);
 
-    public PowerScene? ReadPower() => IsNoGame ? null : new PowerScene(Defenses.ToList(), IsWaveRunning, Zombies.ToList(), Clock, IsLocked, Load);
+    /// <summary>How many passes read the zombies. Like the game's, the zombies are read only when the pass looks at them.</summary>
+    public int ZombieReads { get; private set; }
+
+    public PowerScene? ReadPower() => IsNoGame ? null : new PowerScene(Defenses.ToList(), IsWaveRunning, new LazyList<Spot>(ReadZombies), Clock, IsLocked, Load);
+
+    private IReadOnlyList<Spot> ReadZombies()
+    {
+        ZombieReads++;
+
+        return Zombies.ToList();
+    }
 
     public bool? TrySwitch(long defenseId, bool isOn)
     {

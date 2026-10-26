@@ -50,6 +50,9 @@ public abstract record PageCommand
     /// <summary>The page has no script, usually because the web view reloaded.</summary>
     public sealed record NoScript : PageCommand;
 
+    /// <summary>The page was sent a row by its id alone and has no such row, so it asks for the whole view again.</summary>
+    public sealed record Resend : PageCommand;
+
     public sealed record Unknown(string Text) : PageCommand;
 
     public static bool IsOurs(string? message) => message is not null && message.StartsWith(Prefix, StringComparison.Ordinal);
@@ -75,6 +78,7 @@ public abstract record PageCommand
             ("set", 3) when SettingChange.Parse(parts[1], parts[2]) is { } change => new Setting(change),
             ("ready", 1) => new Ready(),
             ("noscript", 1) => new NoScript(),
+            ("resend", 1) => new Resend(),
             _ => new Unknown(message),
         };
     }

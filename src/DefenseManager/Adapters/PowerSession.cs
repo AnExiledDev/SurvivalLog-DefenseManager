@@ -19,6 +19,7 @@ internal sealed class PowerSession
     private double _range;
     private readonly Action<string> _log;
 
+    private PowerPolicy? _policy;
     private float _nextPassAt;
     private string? _reportedUnreadableSave;
 
@@ -44,7 +45,9 @@ internal sealed class PowerSession
 
         if (isInLayout() || Policy() is not { } policy) return;
 
-        foreach (var made in _control.Run(_game, policy, _range)) _log(Describe(made));
+        var made = _control.Run(_game, policy, _range);
+
+        for (var i = 0; i < made.Count; i++) _log(Describe(made[i]));
     }
 
     /// <summary>
@@ -60,7 +63,13 @@ internal sealed class PowerSession
 
         LogLoad(load);
 
-        return load is SettingsLoad.Read or SettingsLoad.AlreadyRead ? new PowerPolicy(_slot.Settings, _global) : null;
+        if (load is not (SettingsLoad.Read or SettingsLoad.AlreadyRead)) return null;
+
+        // Asked for on every pass and every refresh; the settings are replaced, never changed in place, so the policy
+        // is made again only when they or the global default are.
+        if (_policy is not { } kept || !ReferenceEquals(kept.Settings, _slot.Settings) || kept.Global != _global) _policy = new PowerPolicy(_slot.Settings, _global);
+
+        return _policy;
     }
 
     /// <summary>A power button press: the setting becomes the mode picked (null for none) and the reply says what it is now.</summary>

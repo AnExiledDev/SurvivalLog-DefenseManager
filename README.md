@@ -113,7 +113,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, create
 
 Tested on Survival Log 1.1.19611 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.7.1 started, device attack rate 1`, followed by `key F7, Layout controls on` and `power default WaveOnly, proximity range 15 m` (the words change with your settings, and a setting changed on the Mods screen writes its line again). The same lines, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.7.2 started, device attack rate 1`, followed by `key F7, Layout controls on` and `power default WaveOnly, proximity range 15 m` (the words change with your settings, and a setting changed on the Mods screen writes its line again). The same lines, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
 
 If an electrical defense is not switched, click it in the panel: a broken or not working defense is left alone, and a defense in Default mode is left to the game. If no defense shows power modes, look in `BepInEx\defense-manager.log` for a line about the power settings.
 

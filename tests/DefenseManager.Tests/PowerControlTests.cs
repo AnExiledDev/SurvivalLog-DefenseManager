@@ -373,4 +373,42 @@ public class PowerControlTests
         Assert.True(made.IsOn);
         Assert.Equal("Wave only, a wave is running", made.Reason);
     }
+
+    // ===== Cost of a pass =====
+
+    /// <summary>
+    /// The pass runs twice a second, and reading each zombie's position is a game call per zombie, so a mode that does
+    /// not ask where the zombies are must never read them; the switch it makes is still the right one.
+    /// </summary>
+    [Theory]
+    [InlineData(PowerMode.AlwaysOn, false, true)]
+    [InlineData(PowerMode.GameDefault, false, false)]
+    [InlineData(PowerMode.WaveOnly, true, true)]
+    public void A_mode_that_does_not_ask_about_zombies_never_reads_them(PowerMode mode, bool isWaveRunning, bool isOnAfter)
+    {
+        var game = Home(Unit(1));
+        game.IsWaveRunning = isWaveRunning;
+        game.Zombies.Add(new Spot(5, 0, 0));
+
+        new PowerControl().Run(game, Everywhere(mode), Range);
+
+        Assert.Equal(0, game.ZombieReads);
+        Assert.Equal(isOnAfter, game.IsOn(1));
+    }
+
+    /// <summary>The zombies are read once per pass, however many defenses ask about them.</summary>
+    [Fact]
+    public void Proximity_and_wave_only_between_waves_read_the_zombies_once_per_pass()
+    {
+        var game = Home(Unit(1), Unit(2, x: 30), Unit(3, configId: Lamp, x: 60));
+        var settings = PowerSettings.None.WithType(Lamp, PowerMode.WaveOnly);
+        game.Zombies.Add(new Spot(5, 0, 0));
+
+        new PowerControl().Run(game, new PowerPolicy(settings, PowerMode.Proximity), Range);
+
+        Assert.Equal(1, game.ZombieReads);
+        Assert.True(game.IsOn(1));
+        Assert.False(game.IsOn(2));
+        Assert.True(game.IsOn(3));
+    }
 }

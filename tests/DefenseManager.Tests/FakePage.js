@@ -52,6 +52,15 @@ var FakeElement = class {
 
   get parentNode() { return this.parentElement; }
 
+  // As in a browser: in its document, through its parents up to that document's head or body.
+  get isConnected() {
+    for (var element = this; element; element = element.parentElement) {
+      if (element.isRoot) return true;
+    }
+
+    return false;
+  }
+
   get firstChild() { return this.children.length ? this.children[0] : null; }
 
   get className() { return this.classes.join(' '); }
@@ -149,6 +158,8 @@ var FakeElement = class {
   }
 
   querySelectorAll(selector) {
+    searches++;
+
     return descendantsOf([this]).filter(function (element) { return element.matches(selector); });
   }
 
@@ -156,6 +167,10 @@ var FakeElement = class {
     return this.querySelectorAll(selector)[0] || null;
   }
 };
+
+// How many times anything searched a page (querySelector, querySelectorAll, getElementById), the helpers below
+// included, so a test reads it just before and after the call it is about.
+var searches = 0;
 
 // Compound selectors of a tag, classes, ids and attributes ("iframe", ".dm-hud-btn", "[data-act]"); the script uses
 // nothing else.
@@ -197,6 +212,8 @@ var FakeDocument = class {
   constructor() {
     this.head = new FakeElement('head');
     this.body = new FakeElement('body');
+    this.head.isRoot = true;
+    this.body.isRoot = true;
   }
 
   createElement(tagName) { return new FakeElement(tagName); }
@@ -214,10 +231,14 @@ var FakeDocument = class {
   createDocumentFragment() { return new FakeElement('#fragment'); }
 
   getElementById(id) {
+    searches++;
+
     return descendantsOf([this.head, this.body]).filter(function (element) { return element.id === id; })[0] || null;
   }
 
   querySelectorAll(selector) {
+    searches++;
+
     return descendantsOf([this.head, this.body]).filter(function (element) { return element.matches(selector); });
   }
 
@@ -285,6 +306,12 @@ function panelButton(action) {
 // The first panel element that does this action with these arguments.
 function panelButtonWith(action, args) {
   return document.querySelectorAll('[data-act]').filter(function (node) { return node.getAttribute('data-act') === action && node.getAttribute('data-args') === args; })[0];
+}
+
+// Everything a node and the nodes inside it show, as one string, so two drawings can be compared whole.
+function drawingOf(node) {
+  return node.tagName + '#' + node.id + '.' + node.className + JSON.stringify(node.attrs) + JSON.stringify(node.style) + (node.src || '') + (node.disabled ? '!' : '') +
+    '[' + node.text + '](' + node.children.map(drawingOf).join(',') + ')';
 }
 
 // A click as the game's click-through delivers one: dispatched on whatever is under the pointer, greyed buttons

@@ -15,6 +15,7 @@ public class PageCommandTests
         Assert.Equal(new PageCommand.ClearBroken(), PageCommand.Parse("slmod|defensemanager|clearbroken"));
         Assert.Equal(new PageCommand.Ready(), PageCommand.Parse("slmod|defensemanager|ready"));
         Assert.Equal(new PageCommand.NoScript(), PageCommand.Parse("slmod|defensemanager|noscript"));
+        Assert.Equal(new PageCommand.Resend(), PageCommand.Parse("slmod|defensemanager|resend"));
     }
 
     [Fact]

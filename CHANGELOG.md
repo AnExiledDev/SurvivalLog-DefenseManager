@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.2
+
+- Less lag: the game no longer freezes for a moment the first time the mod reads your defenses after a save loads.
+- Less stutter: while the panel is open, each refresh redraws only the defenses that changed.
+- Less stutter: the power check that runs twice a second skips defenses that use no power, and looks for zombies only when a power mode needs to know where they are.
+- Less stutter on the Layout screen: the Repair all and Clear all broken buttons are redrawn only when their numbers change.
+- Less stutter in fights: the crawler dodge chances for the Mechanical Chainsaw are checked at most once a frame instead of on every swing.
+- Right after a save loads, the panel can show the first letter of a defense's name for a second until its picture is ready.
+- Made for Survival Log 1.1.19611.
+
 ## 0.7.1
 
 - Less stutter: the power check looks up each kind of defense's name once instead of twice a second.

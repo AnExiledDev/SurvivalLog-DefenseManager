@@ -50,7 +50,20 @@ internal static class InputGate
         }
     }
 
-    private static bool SkipWhileBlocked() => !(_isPanelOpen || Time.frameCount <= _blockedThroughFrame);
+    /// <summary>
+    /// Runs before every frame of the game's hotkeys. The frame count is a call into Unity, so it is read only while the
+    /// frame after a close is still to come.
+    /// </summary>
+    private static bool SkipWhileBlocked()
+    {
+        if (_isPanelOpen) return false;
+        if (_blockedThroughFrame < 0) return true;
+        if (Time.frameCount <= _blockedThroughFrame) return false;
+
+        _blockedThroughFrame = -1;
+
+        return true;
+    }
 
     private static void RouteClicksToPanel(ref bool __result)
     {

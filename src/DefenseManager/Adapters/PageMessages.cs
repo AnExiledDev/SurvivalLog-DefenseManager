@@ -15,6 +15,9 @@ namespace DefenseManager.Adapters;
 internal static class PageMessages
 {
     private static readonly ConcurrentQueue<PageCommand> Queue = new();
+
+    // What an empty queue hands back, every frame, so it is made once.
+    private static readonly PageCommand Nothing = new PageCommand.Unknown("");
     private static Action<string> _log = _ => { };
     private static int _hasReportedFailure;
 
@@ -42,7 +45,7 @@ internal static class PageMessages
             return true;
         }
 
-        command = new PageCommand.Unknown("");
+        command = Nothing;
 
         return false;
     }

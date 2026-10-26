@@ -84,8 +84,9 @@ public sealed class Yard
         YardSquare? best = null;
         var bestDistance = MatchDistance * MatchDistance;
 
-        foreach (var square in Squares)
+        for (var i = 0; i < Squares.Count; i++)
         {
+            var square = Squares[i];
             var dx = square.X - spot.X;
             var dz = square.Z - spot.Z;
             var distance = dx * dx + dz * dz;

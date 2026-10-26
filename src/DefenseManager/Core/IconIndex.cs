@@ -43,7 +43,12 @@ public sealed class IconIndex
 
         var hint = named.Replace('\\', '/');
 
-        return paths.Find(path => hint.EndsWith(path, StringComparison.OrdinalIgnoreCase)) ?? paths[0];
+        for (var i = 0; i < paths.Count; i++)
+        {
+            if (hint.EndsWith(paths[i], StringComparison.OrdinalIgnoreCase)) return paths[i];
+        }
+
+        return paths[0];
     }
 
     private static string FileStem(string path)

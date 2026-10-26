@@ -17,13 +17,19 @@ internal sealed class GamePower : IPowerGame
     private readonly Action<string> _log;
     private readonly HashSet<string> _reportedFailures = new();
 
-    // The pass runs twice a second; a name is a table lookup and a translation, so each is kept per table and language.
-    private readonly Dictionary<int, string> _names = new();
-    private (long Config, bool IsChinese) _namesKey;
+    // The pass runs twice a second; a type's name is a table lookup and a translation, so each is kept per table and
+    // language. A type that has no power switch is kept as null and its defenses are not read at all.
+    private readonly RowCache<TableKey, string> _names = new();
+
+    // The zombies are read only if the pass asks about them (see PowerControl), from the game objects of the latest read.
+    private readonly Func<IReadOnlyList<Spot>> _readZombies;
+    private AgentManager? _agents;
+    private TowerWaveManager? _waves;
 
     public GamePower(Action<string> log)
     {
         _log = log;
+        _readZombies = ReadZombies;
     }
 
     public PowerScene? ReadPower()
@@ -77,14 +83,17 @@ internal sealed class GamePower : IPowerGame
 
         if (power == null || clock == null) return null;
 
-        return new PowerScene(ReadUnits(agents, config, power), waves?.IsWaveActive() ?? false, ReadZombies(agents, waves), clock.GetTotalSeconds(), power.IsLocked, ReadLoad(world));
+        _agents = agents;
+        _waves = waves;
+
+        return new PowerScene(ReadUnits(agents, config, power), waves?.IsWaveActive() ?? false, new LazyList<Spot>(_readZombies), clock.GetTotalSeconds(), power.IsLocked, ReadLoad(world));
     }
 
     /// <summary>
     /// The load, by the addresses of the game objects behind it. The world and the save data are both taken because it
     /// is not known whether the game builds a new world for every load, while a load reads its save into new save data.
     /// </summary>
-    private static GameLoad ReadLoad(BattleLogicWorld world)
+    internal static GameLoad ReadLoad(BattleLogicWorld world)
     {
         var save = GameSingleton.Existing<GameSaveManager>()?.gameSave;
 
@@ -95,13 +104,8 @@ internal sealed class GamePower : IPowerGame
     {
         var found = agents.GetHomeFurnituresBySlotType(GameDefenses.DefenseSlot);
         var units = new List<PowerUnit>();
-        var namesKey = (config.Pointer.ToInt64(), GameLanguage.IsChinese());
 
-        if (namesKey != _namesKey)
-        {
-            _names.Clear();
-            _namesKey = namesKey;
-        }
+        _names.Follow(new TableKey(config.Pointer.ToInt64(), GameLanguage.IsChinese(), IconIndex.Empty));
 
         for (var i = 0; found != null && i < found.Count; i++)
         {
@@ -122,57 +126,74 @@ internal sealed class GamePower : IPowerGame
         return units;
     }
 
-    /// <summary>A defense with no durability to read counts as broken, so it is never switched.</summary>
+    /// <summary>
+    /// A defense with no durability to read counts as broken, so it is never switched. Only electrical defenses are
+    /// read: the pass switches nothing else, and a power button on any other defense answers that it has no switch,
+    /// which is what a defense left out of the read answers too.
+    /// </summary>
     private PowerUnit? ReadUnit(Furniture furniture, ConfigManager config, PowerManager power)
     {
         var configId = furniture.AgentConfigId;
-        var row = config.Get_Config_Furniture(configId);
 
-        if (row == null || row.SlotType != GameDefenses.DefenseSlot) return null;
+        if (NameOfSwitched(config, configId) is not { } name) return null;
 
         var id = furniture.InstanceId;
-        var isElectrical = row.IsElectrical;
         var durability = AgentTools.GetAgentComponent<FurnitureDurabilityComponent>(furniture);
         var device = AgentTools.GetAgentComponent<TowerDeviceComponent>(furniture);
         var isBroken = durability == null || durability.IsBrokenTowerDevice();
         var isOperational = device != null && device.IsOperational();
 
-        return new PowerUnit(id, configId, Name(config, row, configId), GameDefenses.PositionOf(furniture), isElectrical, isBroken, isOperational, isElectrical && power.IsConsumerOn(id));
+        return new PowerUnit(id, configId, name, GameDefenses.PositionOf(furniture), IsElectrical: true, isBroken, isOperational, power.IsConsumerOn(id));
     }
 
-    private string Name(ConfigManager config, Config_Furniture row, int configId)
+    /// <summary>The name of an electrical defense type, or null for a type that is not one.</summary>
+    private string? NameOfSwitched(ConfigManager config, int configId)
     {
-        if (!_names.TryGetValue(configId, out var name)) _names[configId] = name = GameDefenses.NameOf(config, row, configId);
+        if (_names.TryGet(configId, out var known)) return known;
 
-        return name;
+        var row = GameDefenses.FurnitureRow(config, configId);
+        var isSwitched = row != null && row.SlotType == GameDefenses.DefenseSlot && row.IsElectrical;
+
+        return _names.Add(configId, isSwitched ? GameDefenses.NameOf(config, row!, configId) : null);
     }
 
     /// <summary>
     /// The living zombies at the base, read from the id list the wave manager keeps of them, which takes in stray
     /// zombies spawned between waves as well as a wave's (GetAliveZombieIds hands a list out as
     /// an IL2CPP IReadOnlyList, which is clumsier to walk from here). A zombie that is gone, dead or has no position is
-    /// skipped, never put at the map's origin where it would wake the defenses there.
+    /// skipped, never put at the map's origin where it would wake the defenses there. A read that throws stops the
+    /// pass, as a failed read of the rest of the scene does: switching on a guess about the zombies could turn a
+    /// defense off with zombies at the door.
     /// </summary>
-    private static List<Spot> ReadZombies(AgentManager agents, TowerWaveManager? waves)
+    private IReadOnlyList<Spot> ReadZombies()
     {
-        var ids = waves?.aliveZombieIds;
-        var spots = new List<Spot>();
-
-        for (var i = 0; ids != null && i < ids.Count; i++)
+        try
         {
-            var zombie = agents.GetAgent(ids[i]);
+            var ids = _waves?.aliveZombieIds;
+            var spots = new List<Spot>();
 
-            if (zombie == null || zombie.IsDead) continue;
+            for (var i = 0; _agents != null && ids != null && i < ids.Count; i++)
+            {
+                var zombie = _agents.GetAgent(ids[i]);
 
-            var transform = AgentTools.GetAgentComponent<TransformComponent>(zombie);
+                if (zombie == null || zombie.IsDead) continue;
 
-            if (transform == null) continue;
+                var transform = AgentTools.GetAgentComponent<TransformComponent>(zombie);
 
-            var position = transform.Position;
-            spots.Add(new Spot(position.x, position.y, position.z));
+                if (transform == null) continue;
+
+                var position = transform.Position;
+                spots.Add(new Spot(position.x, position.y, position.z));
+            }
+
+            return spots;
         }
+        catch (Exception ex)
+        {
+            ReportOnce("zombie read", ex);
 
-        return spots;
+            throw;
+        }
     }
 
     private void ReportOnce(string operation, Exception ex)

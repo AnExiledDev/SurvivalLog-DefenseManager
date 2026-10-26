@@ -26,12 +26,40 @@ public class LayoutBarTests
         Assert.Equal(JsonValueKind.Null, bar.GetProperty("locked").ValueKind);
     }
 
+    /// <summary>The bar gets its own small view, so its counts, note and locked reason must still be the panel's.</summary>
     [Fact]
-    public void The_bar_and_the_panel_draw_from_the_same_view_so_their_counts_never_disagree()
+    public void The_bar_and_the_panel_never_disagree_on_counts_note_or_locked_reason()
     {
-        var game = Home();
+        var wave = Home();
+        wave.IsWaveLocked = true;
+        var away = Home();
+        away.IsHome = false;
+        var notReady = Home();
+        notReady.NotReadyReason = "no character";
+        var queued = new FakeGame { Defenses = { Def(1, cur: 10), Def(2, cur: 0, broken: true), Def(3, cur: 20) } };
+        queued.Running.Add(new Act(Job.Repair, 1));
 
-        Assert.Equal(Presence.PanelView(Where.Home, game.Read), LayoutBar.View(isEnabled: true, isInLayout: true, Where.Home, game.Read));
+        foreach (var game in new[] { Home(), wave, away, notReady, queued })
+        {
+            var panel = Parse(Presence.PanelView(Where.Home, game.Read));
+            var bar = Parse(LayoutBar.View(isEnabled: true, isInLayout: true, Where.Home, game.Read));
+
+            foreach (var name in new[] { "note", "locked", "repairAll", "clearAll" })
+            {
+                Assert.Equal(panel.GetProperty(name).GetRawText(), bar.GetProperty(name).GetRawText());
+            }
+        }
+    }
+
+    /// <summary>The bar is sent again whenever its view changes, so a defense losing condition without changing a count must not change it.</summary>
+    [Fact]
+    public void A_defense_losing_condition_without_changing_a_count_leaves_the_bar_view_as_it_was()
+    {
+        var before = new FakeGame { Defenses = { Def(1, cur: 50), Def(2, cur: 0, broken: true) } };
+        var after = new FakeGame { Defenses = { Def(1, cur: 40), Def(2, cur: 0, broken: true) } };
+
+        Assert.NotEqual(Presence.PanelView(Where.Home, before.Read), Presence.PanelView(Where.Home, after.Read));
+        Assert.Equal(LayoutBar.View(true, true, Where.Home, before.Read), LayoutBar.View(true, true, Where.Home, after.Read));
     }
 
     [Fact]

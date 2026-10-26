@@ -20,6 +20,7 @@ internal sealed class WebPage
     private const string NoScriptReply = "window.vuplex&&window.vuplex.postMessage('" + PageCommand.Prefix + "noscript')";
 
     private readonly Action<string> _log;
+    private readonly WordsOnce _words = new();
     private string? _script;
     private float _nextCheckAt;
     private bool _hasReportedRunFailure;
@@ -37,14 +38,20 @@ internal sealed class WebPage
         Run("window.__sldefense||" + NoScriptReply);
     }
 
+    /// <summary>A page that needs the script put back has reloaded and lost the words with it.</summary>
     public void Install()
     {
+        _words.Forget();
+
         if (Run(Script())) _log("page script sent to the web UI");
     }
 
-    public void Open(string viewJson) => Call($"open({viewJson})");
+    /// <summary>The page says it just installed itself, so it holds no words yet.</summary>
+    public void ForgetWords() => _words.Forget();
 
-    public void Show(string viewJson) => Call($"setData({viewJson})");
+    public bool Open(string viewJson) => Call($"open({viewJson})");
+
+    public bool Show(string viewJson) => Call($"setData({viewJson})");
 
     public void Close() => Call("close()");
 
@@ -57,8 +64,20 @@ internal sealed class WebPage
     /// <summary>The view the bar on the game's Layout screen draws from, or null to take the bar away.</summary>
     public bool Layout(string? viewJson) => Call($"layout({viewJson ?? "null"})");
 
-    /// <summary>Every call hands the page its words first, so a switch of the game's language shows at the next redraw.</summary>
-    private bool Call(string expression) => Run($"{PageWords.Script(GameLanguage.IsChinese())}window.__sldefense?window.__sldefense.{expression}:{NoScriptReply}");
+    /// <summary>
+    /// A call hands the page its words first when it lacks them or holds the other language's, so a switch of the game's
+    /// language shows at the next redraw. The words are set even while the script is missing, as they run first.
+    /// </summary>
+    private bool Call(string expression)
+    {
+        var isChinese = GameLanguage.IsChinese();
+
+        if (!Run($"{_words.Prefix(isChinese)}window.__sldefense?window.__sldefense.{expression}:{NoScriptReply}")) return false;
+
+        _words.Sent(isChinese);
+
+        return true;
+    }
 
     private bool Run(string javaScript)
     {

@@ -20,7 +20,7 @@ public static class DefenseView
     public static string? Of(DefenseRead read, PowerPolicy? power = null, bool isChinese = false, PanelSettings? settings = null) => read switch
     {
         DefenseRead.Ready ready => Build(ready.Survey, power, settings),
-        DefenseRead.NotReady notReady => Empty(OutcomeMessage.Describe(new DefenseOutcome.NotReady(notReady.Reason), isChinese) ?? notReady.Reason, settings),
+        DefenseRead.NotReady notReady => Empty(NotReadyNote(notReady, isChinese), settings),
         DefenseRead.NoGame => null,
         _ => throw new InvalidOperationException("unknown defense read " + read),
     };
@@ -29,8 +29,8 @@ public static class DefenseView
     {
         var budget = MaterialBudget.Of(survey);
         var locked = LockedText(survey);
-        var toRepair = survey.Defenses.Where(defense => defense.IsDamaged && !defense.IsRepairQueued && !defense.IsRemovalQueued).ToList();
-        var toClear = survey.Defenses.Count(defense => defense.IsBroken && RemoveCheck.Judge(defense) is RemoveVerdict.Allowed);
+        var toRepair = survey.Defenses.Where(IsForRepairAll).ToList();
+        var toClear = survey.Defenses.Count(IsForClearAll);
         var materials = survey.Materials.OrderBy(entry => entry.Key).Select(entry => MaterialJson(entry.Value, budget.Left(entry.Key), NeededBy(toRepair, entry.Key)));
         var rows = survey.Defenses.OrderBy(defense => defense.Name, StringComparer.Ordinal).ThenBy(defense => defense.Id).Select(defense => RowJson(defense, survey, budget, locked is null, power));
 
@@ -40,6 +40,48 @@ public static class DefenseView
     /// <summary>The panel with no defenses and a note saying why, for when the game could not be read.</summary>
     public static string Empty(string note, PanelSettings? settings = null) =>
         Json(note, locked: null, repairAll: 0, clearAll: 0, Enumerable.Empty<string>(), Enumerable.Empty<string>(), "null", "null", SettingsJson(settings));
+
+    /// <summary>
+    /// What the Layout bar draws from: the panel view's note, locked reason and two top-button counts, worked out the
+    /// same way, so the bar and the panel never disagree. Only these go, so the bar is sent again only when one of them
+    /// changes, not whenever a defense's condition does. Null outside a game.
+    /// </summary>
+    public static string? Bar(DefenseRead read, bool isChinese = false)
+    {
+        switch (read)
+        {
+            case DefenseRead.Ready ready:
+                var defenses = ready.Survey.Defenses;
+                var toRepair = 0;
+                var toClear = 0;
+
+                for (var i = 0; i < defenses.Count; i++)
+                {
+                    if (IsForRepairAll(defenses[i])) toRepair++;
+                    if (IsForClearAll(defenses[i])) toClear++;
+                }
+
+                return BarJson(note: null, LockedText(ready.Survey), toRepair, toClear);
+            case DefenseRead.NotReady notReady:
+                return BarJson(NotReadyNote(notReady, isChinese), locked: null, repairAll: 0, clearAll: 0);
+            case DefenseRead.NoGame:
+                return null;
+            default:
+                throw new InvalidOperationException("unknown defense read " + read);
+        }
+    }
+
+    private static string BarJson(string? note, string? locked, int repairAll, int clearAll) =>
+        $"{{\"note\":{Str(note)},\"locked\":{Str(locked)},\"repairAll\":{Num(repairAll)},\"clearAll\":{Num(clearAll)}}}";
+
+    private static string NotReadyNote(DefenseRead.NotReady notReady, bool isChinese) =>
+        OutcomeMessage.Describe(new DefenseOutcome.NotReady(notReady.Reason), isChinese) ?? notReady.Reason;
+
+    /// <summary>Damaged and not queued for anything: what Repair all takes on.</summary>
+    private static bool IsForRepairAll(Defense defense) => defense.IsDamaged && !defense.IsRepairQueued && !defense.IsRemovalQueued;
+
+    /// <summary>Broken and allowed to come down: what Clear all broken takes on.</summary>
+    private static bool IsForClearAll(Defense defense) => defense.IsBroken && RemoveCheck.Judge(defense) is RemoveVerdict.Allowed;
 
     private static string? LockedText(Survey survey)
     {
@@ -118,11 +160,28 @@ public static class DefenseView
     /// <summary>
     /// The grid's size, every square by row and column with whether it is the player's and its price, and the door and
     /// window along the house wall by column (with a fraction, as they stand between square centres). Null without a grid.
+    /// The game side hands back the same grid until a square changes hands, so the text for the last grid is kept.
     /// </summary>
     private static string YardJson(Yard? yard)
     {
         if (yard is null || yard.Squares.Count == 0) return "null";
 
+        // Read and replaced as one reference, so views built on two threads at once (as tests are) never mix grids.
+        if (_yardText is { } kept && ReferenceEquals(kept.Yard, yard)) return kept.Json;
+
+        var json = BuildYardJson(yard);
+
+        _yardText = new YardText(yard, json);
+
+        return json;
+    }
+
+    private sealed record YardText(Yard Yard, string Json);
+
+    private static YardText? _yardText;
+
+    private static string BuildYardJson(Yard yard)
+    {
         var squares = yard.Squares.Select(square =>
         {
             var place = yard.PlaceOf(square);

@@ -13,7 +13,9 @@ namespace DefenseManager.Adapters;
 /// player's when the game's own TowerDefenseTagConstants.IsTowerSlotUnlocked says so; one with no unlock tag always
 /// is. Its price is the TowerRingCost global setting for the ring its tag names. The door and window are the house
 /// slots HomeBuildingPos07 and HomeBuildingPos08. Squares and points never change during a game, so they are read
-/// once; only who owns which square is read each time.
+/// once. Who owns which square is read each time, but only for squares not yet owned: a square once bought stays
+/// bought for the rest of that load, so it is asked about again only after a load. While no square changes hands the
+/// same grid is handed back.
 /// </summary>
 internal sealed class GameYard
 {
@@ -27,13 +29,17 @@ internal sealed class GameYard
     private List<WallFeature> _wall = new();
     private bool _reportedFailure;
 
+    private bool[] _owned = Array.Empty<bool>();
+    private GameLoad? _ownedLoad;
+    private Yard? _yard;
+
     public GameYard(Action<string> log)
     {
         _log = log;
     }
 
     /// <summary>The grid with who owns each square, or null away from home or when it cannot be read.</summary>
-    public Yard? Read(BattleLogicWorld world, ConfigManager config)
+    public Yard? Read(BattleLogicWorld world, ConfigManager config, GameLoad load)
     {
         try
         {
@@ -42,20 +48,44 @@ internal sealed class GameYard
             if (squares == null || squares.Count == 0)
             {
                 _squares = null;
+                _owned = Array.Empty<bool>();
 
                 return null;
             }
 
-            var tags = world._TagManager;
-            var owned = squares.Select(square => new YardSquare(
-                square.Name,
-                square.Row,
-                square.X,
-                square.Z,
-                square.Tag.Length == 0 || (tags != null && TowerDefenseTagConstants.IsTowerSlotUnlocked(tags, square.Name, square.Tag)),
-                square.Price)).ToList();
+            if (_ownedLoad != load || _owned.Length != squares.Count)
+            {
+                _owned = new bool[squares.Count];
+                _ownedLoad = load;
+                _yard = null;
+            }
 
-            return new Yard(owned, _wall);
+            var tags = world._TagManager;
+            var isChanged = false;
+
+            for (var i = 0; i < squares.Count; i++)
+            {
+                if (_owned[i]) continue;
+
+                var square = squares[i];
+
+                if (square.Tag.Length != 0 && (tags == null || !TowerDefenseTagConstants.IsTowerSlotUnlocked(tags, square.Name, square.Tag))) continue;
+
+                _owned[i] = true;
+                isChanged = true;
+            }
+
+            if (_yard != null && !isChanged) return _yard;
+
+            var owned = new YardSquare[squares.Count];
+
+            for (var i = 0; i < squares.Count; i++)
+            {
+                var square = squares[i];
+                owned[i] = new YardSquare(square.Name, square.Row, square.X, square.Z, _owned[i], square.Price);
+            }
+
+            return _yard = new Yard(owned, _wall);
         }
         catch (Exception ex)
         {

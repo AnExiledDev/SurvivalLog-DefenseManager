@@ -27,6 +27,10 @@ public static class Presence
     public static string? PanelView(Where where, Func<DefenseRead> read, PowerPolicy? power = null, bool isChinese = false, PanelSettings? settings = null) =>
         IsAtDefenses(where) ? DefenseView.Of(read(), power, isChinese, settings) : null;
 
+    /// <summary>The Layout bar's view, where the panel may open, or null. Away, nothing is read.</summary>
+    public static string? BarView(Where where, Func<DefenseRead> read, bool isChinese = false) =>
+        IsAtDefenses(where) ? DefenseView.Bar(read(), isChinese) : null;
+
     private static bool IsAtDefenses(Where where) => where switch
     {
         Where.Home => true,

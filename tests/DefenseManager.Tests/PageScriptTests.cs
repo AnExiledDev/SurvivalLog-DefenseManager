@@ -424,6 +424,148 @@ public class PageScriptTests
         Assert.Equal("Not on the yard grid", page.Text("document.querySelector('.dm-ihd').querySelector('small').textContent"));
     }
 
+    // ===== Refreshing the open panel =====
+
+    /// <summary>A view as the plugin sends it: trimmed to the rows the page does not hold yet, and then held by it.</summary>
+    private static string Through(ViewDelta delta, string view)
+    {
+        var next = delta.Next(view);
+        delta.Sent();
+
+        return next;
+    }
+
+    /// <summary>Drawing every square and list row again each second was most of what a refresh cost the page.</summary>
+    [Fact]
+    public void A_refresh_keeps_the_squares_that_did_not_change_and_draws_the_changed_defense_again()
+    {
+        var game = Yard();
+        var delta = new ViewDelta();
+        var page = new PageScript();
+
+        page.Open(Through(delta, YardView(game)));
+        page.Run("var intact = panelButtonWith('pick', '3'); var hit = panelButtonWith('pick', '2'); var forSale = panelButtonWith('cell', '2:3')");
+
+        game.Defenses[1] = Def(2, x: 0, z: 0, cur: 10);
+        page.Show(Through(delta, YardView(game)));
+
+        Assert.True(page.Is("panelButtonWith('pick', '3') === intact"));
+        Assert.True(page.Is("panelButtonWith('cell', '2:3') === forSale"));
+        Assert.False(page.Is("panelButtonWith('pick', '2') === hit"));
+        Assert.Empty(page.Sent);
+    }
+
+    /// <summary>Rows sent as their ids and nodes kept from the last drawing must come out exactly as a whole view drawn fresh.</summary>
+    [Fact]
+    public void A_refresh_sent_as_changed_rows_draws_the_panel_exactly_as_the_whole_view_would()
+    {
+        var game = Yard();
+        var delta = new ViewDelta();
+        var trimmed = new PageScript();
+
+        trimmed.Open(Through(delta, YardView(game)));
+        trimmed.Click("panelButtonWith('row', '1')");
+        game.Defenses[1] = Def(2, x: 0, z: 0, cur: 10);
+        trimmed.Show(Through(delta, YardView(game)));
+
+        var whole = new PageScript();
+
+        whole.Open(YardView(game));
+        whole.Click("panelButtonWith('row', '1')");
+
+        Assert.Equal(whole.Text("drawingOf(document.querySelector('#dm-root'))"), trimmed.Text("drawingOf(document.querySelector('#dm-root'))"));
+    }
+
+    /// <summary>A page that missed a view cannot fill in rows sent as ids, so it asks for everything again rather than show them wrong.</summary>
+    [Fact]
+    public void Rows_sent_as_ids_the_page_never_got_ask_for_the_whole_view_again()
+    {
+        var game = Yard();
+        var delta = new ViewDelta();
+        var page = new PageScript();
+
+        Through(delta, YardView(game));
+        page.Open(YardView(new FakeGame { Yard = TwoRows() }));
+        page.Show(Through(delta, YardView(game)));
+
+        Assert.Equal(new PageCommand[] { new PageCommand.Resend() }, page.Sent);
+        Assert.Equal("0", Count(page, ".dm-def"));
+    }
+
+    // ===== The page check =====
+
+    /// <summary>The check runs every 400 ms for the whole session; with the button and the bar up it must not search the pages.</summary>
+    [Fact]
+    public void Once_the_button_and_the_bar_are_up_the_page_check_searches_nothing()
+    {
+        var page = new PageScript();
+
+        page.OpenLayout();
+        page.Run("openHud()");
+        page.Live(true, "F7");
+        page.Layout(BarView(Home()));
+        page.Run("searches = 0");
+        page.Poll();
+        page.Poll();
+
+        Assert.Equal("0", page.Text("searches"));
+        Assert.True(page.Is("hudButton()"));
+        Assert.True(page.Is("bar()"));
+    }
+
+    [Fact]
+    public void Outside_a_game_the_page_check_searches_nothing()
+    {
+        var page = new PageScript();
+
+        page.Run("openHud(); searches = 0");
+        page.Poll();
+
+        Assert.Equal("0", page.Text("searches"));
+        Assert.False(page.Is("hudButton()"));
+    }
+
+    [Fact]
+    public void A_HUD_the_game_draws_in_a_new_iframe_gets_the_button_on_the_next_check()
+    {
+        var page = new PageScript();
+
+        page.Run("var old = openHud()");
+        page.Live(true, "F7");
+        page.Run("old.remove(); openHud()");
+        page.Poll();
+
+        Assert.True(page.Is("hudButton()"));
+    }
+
+    /// <summary>The old button still sits in the old document's column, so it looks placed unless the iframe's document is checked too.</summary>
+    [Fact]
+    public void A_HUD_iframe_that_loads_a_new_document_gets_the_button_on_the_next_check()
+    {
+        var page = new PageScript();
+
+        page.Run("var frame = openHud()");
+        page.Live(true, "F7");
+        page.Run("var fresh = openHud(); frame.contentDocument = fresh.contentDocument; fresh.remove()");
+        page.Poll();
+
+        Assert.True(page.Is("frame.contentDocument.querySelector('.dm-hud-btn')"));
+    }
+
+    /// <summary>With the HUD button still in place, only the bar's own check can notice its page was drawn again.</summary>
+    [Fact]
+    public void A_Layout_page_the_game_draws_again_gets_the_bar_on_the_next_check()
+    {
+        var page = InLayout(Home());
+
+        page.Run("openHud()");
+        page.Poll();
+        page.Run("document.querySelector('iframe').contentDocument = new FakeDocument()");
+        page.Poll();
+
+        Assert.Equal("Repair all (2)", Label(page, "repairall"));
+    }
+
     /// <summary>The page draws in English until the plugin's words arrive, so its own copy must say the same as Texts.</summary>
     [Fact]
     public void The_pages_own_english_words_are_the_same_as_the_plugins()

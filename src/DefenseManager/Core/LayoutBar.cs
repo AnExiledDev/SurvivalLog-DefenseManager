@@ -3,8 +3,9 @@ using System;
 namespace DefenseManager.Core;
 
 /// <summary>
-/// The Repair all / Clear all broken bar on the game's Layout screen. It draws from the same view as the panel, so its
-/// counts and its locked reason always match the panel's top buttons, and it shows only where the panel may open.
+/// The Repair all / Clear all broken bar on the game's Layout screen. Its counts and its locked reason are worked out
+/// the same way as the panel's top buttons, so they always match, and it shows only where the panel may open. It gets
+/// only those, not the panel's whole view.
 /// </summary>
 public static class LayoutBar
 {
@@ -13,6 +14,6 @@ public static class LayoutBar
     {
         if (!isEnabled || !isInLayout) return null;
 
-        return Presence.PanelView(where, read, isChinese: isChinese);
+        return Presence.BarView(where, read, isChinese);
     }
 }

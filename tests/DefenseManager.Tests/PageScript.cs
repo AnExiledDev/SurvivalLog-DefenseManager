@@ -51,6 +51,9 @@ internal sealed class PageScript
 
     public void Open(string viewJson) => Call($"open({viewJson})");
 
+    /// <summary>A refresh of the open panel, as WebPage.Show sends it.</summary>
+    public void Show(string viewJson) => Call($"setData({viewJson})");
+
     public void Status(string text) => Call($"status({JsText.Literal(text)})");
 
     private void Call(string expression) => Run("window.__sldefense." + expression);

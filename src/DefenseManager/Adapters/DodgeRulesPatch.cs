@@ -19,6 +19,7 @@ internal static class DodgeRulesPatch
     private static CrawlerDodge _dodge = new(0f, 0f);
     private static string? _written;
     private static bool _hasFailed;
+    private static int _checkedFrame = -1;
     private static Action<string> _log = _ => { };
 
     public static void Apply(Harmony harmony, Action<string> log)
@@ -46,16 +47,24 @@ internal static class DodgeRulesPatch
     {
         _dodge = dodge;
         _written = null;
+        _checkedFrame = -1;
         _log($"crawler dodge chances set: crawler {dodge.Crawler}, armored crawler {dodge.ArmoredCrawler}");
     }
 
     private static void UsePlayersChances()
     {
-        // RollDodge runs for every chainsaw target on every swing, so a write that keeps failing is tried and logged once.
+        // RollDodge runs for every chainsaw target on every swing, so a write that keeps failing is tried and logged once,
+        // and the rules are looked at no more than once a frame: each look is several calls into the game.
         if (_hasFailed) return;
 
         try
         {
+            var frame = UnityEngine.Time.frameCount;
+
+            if (frame == _checkedFrame) return;
+
+            _checkedFrame = frame;
+
             var rules = GameSingleton.Existing<ConfigManager>()?.TryGet_Config_GlobalSetting(RulesId);
             var current = rules?.Params3;
 

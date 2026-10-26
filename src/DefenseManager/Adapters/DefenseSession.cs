@@ -22,6 +22,13 @@ internal sealed class DefenseSession
     private bool _isLayoutBarEnabled;
     private readonly Action<string> _log;
 
+    // Made once: a method handed over as a delegate is a new delegate each time, and these are handed over every frame.
+    private readonly Func<bool> _isInLayout;
+    private readonly Func<DefenseRead> _read;
+
+    // The rows page.js already holds, so a refresh sends only the rows that changed.
+    private readonly ViewDelta _delta = new();
+
     private string _shownView = "";
     private float _nextRefreshAt;
     private float _nextLiveCheckAt;
@@ -41,6 +48,8 @@ internal sealed class DefenseSession
         _page = page;
         _config = config;
         _log = log;
+        _isInLayout = game.IsInLayout;
+        _read = game.Read;
     }
 
     /// <summary>
@@ -97,7 +106,7 @@ internal sealed class DefenseSession
     {
         try
         {
-            _power.Update(now, _game.IsInLayout);
+            _power.Update(now, _isInLayout);
         }
         catch (Exception ex)
         {
@@ -156,13 +165,24 @@ internal sealed class DefenseSession
                 break;
             case PageCommand.Ready:
                 _log("page script ready");
+                _page.ForgetWords();
+                _delta.Forget();
                 _sentLive = null;
                 _hasSentLayout = false;
                 _nextLiveCheckAt = 0f;
                 ReopenAfterReload();
                 break;
             case PageCommand.NoScript:
+                _delta.Forget();
                 _page.Install();
+                break;
+            case PageCommand.Resend:
+                _log("page asked for the whole view again");
+                _delta.Forget();
+                _shownView = "";
+
+                if (_isOpen) PushView();
+
                 break;
             case PageCommand.Unknown unknown:
                 _log("page said: " + unknown.Text);
@@ -229,7 +249,10 @@ internal sealed class DefenseSession
         {
             _wasInLayout = _game.IsInLayout();
 
-            return LayoutBar.View(_isLayoutBarEnabled, _wasInLayout, _game.Locate(), _game.Read, GameLanguage.IsChinese());
+            // Where the player is costs a game read, so it is asked only while the bar could show.
+            if (!_isLayoutBarEnabled || !_wasInLayout) return null;
+
+            return LayoutBar.View(isEnabled: true, isInLayout: true, _game.Locate(), _read, GameLanguage.IsChinese());
         }
         catch (Exception ex)
         {
@@ -266,9 +289,17 @@ internal sealed class DefenseSession
 
         _isOpen = true;
         InputGate.PanelOpened();
-        _shownView = view;
-        _page.Open(view);
+        SendWhole(view);
         _log("panel opened");
+    }
+
+    /// <summary>Opening draws the panel from scratch, so every row goes whole.</summary>
+    private void SendWhole(string view)
+    {
+        _shownView = view;
+        _delta.Forget();
+
+        if (_page.Open(_delta.Next(view))) _delta.Sent();
     }
 
     private void Close()
@@ -281,7 +312,8 @@ internal sealed class DefenseSession
     }
 
     /// <summary>
-    /// Sends the view only when it changed, so an idle panel costs one read a second and nothing more. A read that
+    /// Sends the view only when it changed, and then only the rows that changed, so an idle panel costs one read a
+    /// second and nothing more. A read that
     /// throws shuts the panel, so the game gets its input back instead of a panel that can no longer update; so does
     /// leaving home, for an expedition or out of the game.
     /// </summary>
@@ -304,7 +336,8 @@ internal sealed class DefenseSession
         if (view == _shownView) return;
 
         _shownView = view;
-        _page.Show(view);
+
+        if (_page.Show(_delta.Next(view))) _delta.Sent();
     }
 
     /// <summary>A reloaded web view starts with the panel shut, so a panel the game side thinks is open is drawn again.</summary>
@@ -326,8 +359,7 @@ internal sealed class DefenseSession
             return;
         }
 
-        _shownView = view;
-        _page.Open(view);
+        SendWhole(view);
     }
 
     /// <summary>A panel that cannot read the defenses is shut rather than left holding the game's input.</summary>
@@ -359,7 +391,7 @@ internal sealed class DefenseSession
     {
         _nextRefreshAt = Time.unscaledTime + RefreshSeconds;
 
-        return Presence.PanelView(_game.Locate(), _game.Read, _power.Policy(), GameLanguage.IsChinese(), _config.Read(KeyName()));
+        return Presence.PanelView(_game.Locate(), _read, _power.Policy(), GameLanguage.IsChinese(), _config.Read(KeyName()));
     }
 
     /// <summary>

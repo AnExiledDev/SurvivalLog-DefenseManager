@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using DefenseManager.Core;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
@@ -37,15 +37,32 @@ internal sealed class GameDefenses : IDefenseGame
     /// <summary>Defense id to the actions its own menu would line up, from the latest read. Every press reads before it queues.</summary>
     private readonly Dictionary<long, (int Repair, int Remove)> _actions = new();
 
-    private IconIndex? _icons;
+    private static readonly Func<Task<(IconIndex Icons, string Note)>> ScanIcons = WebIcons.StartScan;
+
+    private readonly IconLoad _icons;
     private readonly GameYard _yard;
     private int _loggedDefenseCount = -1;
+
+    // The panel reads every second. What a defense or a material shows (its name, icon and the actions behind its
+    // buttons) comes from table rows that never change, so each is read once per table, language and icon set.
+    private readonly RowCache<TableKey, FurnitureFacts> _furniture = new();
+    private readonly RowCache<TableKey, ItemFacts> _items = new();
+    private int? _staminaRule;
+
+    /// <summary>The world as last found, so the Layout check, made every frame, does not ask the game for it each time.</summary>
+    private BattleLogicWorld? _world;
 
     public GameDefenses(Action<string> log)
     {
         _log = log;
+        _icons = new IconLoad(log);
         _yard = new GameYard(log);
     }
+
+    /// <summary>What a furniture row gives a defense, or null for a row that is not a defense.</summary>
+    private sealed record FurnitureFacts(string Name, string? Icon, bool IsElectrical, bool HasRepair, int RepairConditionSetId, int RepairAction, int RemoveAction);
+
+    private sealed record ItemFacts(string Name, string? Icon);
 
     public DefenseRead Read()
     {
@@ -132,6 +149,7 @@ internal sealed class GameDefenses : IDefenseGame
         try
         {
             var game = LoadedGame();
+            _world = game?.World;
 
             if (game == null) return Where.NoGame;
 
@@ -147,13 +165,22 @@ internal sealed class GameDefenses : IDefenseGame
 
     /// <summary>
     /// True while the game's Layout screen (its plan mode) is up. Layout pauses the game's logic, so jobs lined up there
-    /// are kept but wait until the player leaves it.
+    /// are kept but wait until the player leaves it. Asked every frame, so the world is kept between frames rather than
+    /// asked of the game each time (each ask makes a new wrapper object); <see cref="Locate"/>, run every second, picks
+    /// up a new world after a load, and a world the game has let go is dropped at once.
     /// </summary>
     public bool IsInLayout()
     {
         try
         {
-            return GameSingleton.Existing<BattleLogicWorld>()?.IsPlanMode ?? false;
+            if (!BaseSingleton<BattleLogicWorld>.IsInstanceCreated)
+            {
+                _world = null;
+
+                return false;
+            }
+
+            return (_world ??= BaseSingleton<BattleLogicWorld>.Instance)?.IsPlanMode ?? false;
         }
         catch (Exception ex)
         {
@@ -176,11 +203,19 @@ internal sealed class GameDefenses : IDefenseGame
         if (actions == null || conditions == null) return new DefenseRead.NotReady(NoWorld);
 
         _actions.Clear();
+        _icons.Start(ScanIcons);
 
-        var defenses = ReadDefenses(agents, config, actions, conditions, world._PowerManager, role.InstanceId);
-        var materials = ReadMaterials(config, defenses);
+        var isChinese = GameLanguage.IsChinese();
+        var tables = new TableKey(config.Pointer.ToInt64(), isChinese, _icons.Current);
+
+        if (_furniture.Follow(tables)) _staminaRule = null;
+
+        _items.Follow(tables);
+
+        var defenses = ReadDefenses(agents, config, actions, conditions, world._PowerManager, role.InstanceId, tables.Icons);
+        var materials = ReadMaterials(config, defenses, tables.Icons);
         var isWaveLocked = world._TowerWaveManager?.IsWaveOperationLocked() ?? false;
-        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role), GameLanguage.IsChinese(), _yard.Read(world, config));
+        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role), isChinese, _yard.Read(world, config, GamePower.ReadLoad(world)));
 
         LogDefenseCount(defenses.Count);
 
@@ -207,7 +242,7 @@ internal sealed class GameDefenses : IDefenseGame
     private static bool IsAfterDisaster(BattleLogicWorld world) => world._GameTimeManager?.WorldStateType == WorldStateType.PostDisaster;
 
     /// <summary>One defense that cannot be read is left out of the panel; the rest still are.</summary>
-    private List<Defense> ReadDefenses(AgentManager agents, ConfigManager config, ActionManager actions, ConditionSetManager conditions, PowerManager? power, long roleId)
+    private List<Defense> ReadDefenses(AgentManager agents, ConfigManager config, ActionManager actions, ConditionSetManager conditions, PowerManager? power, long roleId, IconIndex icons)
     {
         var found = agents.GetHomeFurnituresBySlotType(DefenseSlot);
         var defenses = new List<Defense>();
@@ -220,7 +255,7 @@ internal sealed class GameDefenses : IDefenseGame
 
             try
             {
-                if (ReadDefense(furniture, config, actions, conditions, power, roleId) is { } defense) defenses.Add(defense);
+                if (ReadDefense(furniture, config, actions, conditions, power, roleId, icons) is { } defense) defenses.Add(defense);
             }
             catch (Exception ex)
             {
@@ -235,37 +270,77 @@ internal sealed class GameDefenses : IDefenseGame
     /// The slot is checked against the furniture table too: the game's own Repair button test
     /// (Furniture.ShouldShowTowerRepairBtn) does the same before it reads the durability.
     /// </summary>
-    private Defense? ReadDefense(Furniture furniture, ConfigManager config, ActionManager actions, ConditionSetManager conditions, PowerManager? power, long roleId)
+    private Defense? ReadDefense(Furniture furniture, ConfigManager config, ActionManager actions, ConditionSetManager conditions, PowerManager? power, long roleId, IconIndex icons)
     {
         var configId = furniture.AgentConfigId;
-        var row = config.Get_Config_Furniture(configId);
+        var facts = FactsOf(config, configId, icons);
+
+        if (facts == null) return null;
+
         var durability = AgentTools.GetAgentComponent<FurnitureDurabilityComponent>(furniture);
 
-        if (row == null || row.SlotType != DefenseSlot || durability == null) return null;
+        if (durability == null) return null;
 
         var id = furniture.InstanceId;
         var current = durability.CurrentDurability;
         var max = durability.MaxDurability;
-        var repairFunc = Contains(row.FurnitureFunc, RepairFunc) ? config.Get_Config_FurnitureFunc(RepairFunc) : null;
-        var repairAction = First(repairFunc?.ActionIds) ?? DefaultRepairAction;
-        var removeAction = First(config.Get_Config_FurnitureFunc(First(row.RemoveFunc) ?? DefaultRemoveFunc)?.ActionIds) ?? DefaultRemoveAction;
-        var (cost, blockedReason) = max > 0 && current < max ? ReadRepair(furniture, config, conditions, repairFunc, current, max) : (NoCost, null);
-        _actions[id] = (repairAction, removeAction);
+        var (cost, blockedReason) = max > 0 && current < max ? ReadRepair(furniture, config, conditions, facts, current, max) : (NoCost, null);
+        _actions[id] = (facts.RepairAction, facts.RemoveAction);
 
         return new Defense(
             id,
             configId,
-            NameOf(config, row, configId),
-            Icons().Resolve(row.ICON),
+            facts.Name,
+            facts.Icon,
             current,
             max,
             durability.IsBrokenTowerDevice(),
             PositionOf(furniture),
             cost,
             blockedReason,
-            actions.HasActionInQueue(roleId, repairAction, id),
-            IsRemovalQueued(actions, roleId, id, removeAction),
-            row.IsElectrical ? ReadPower(furniture, power) : null);
+            actions.HasActionInQueue(roleId, facts.RepairAction, id),
+            IsRemovalQueued(actions, roleId, id, facts.RemoveAction),
+            facts.IsElectrical ? ReadPower(furniture, power) : null);
+    }
+
+    /// <summary>
+    /// A furniture type's name, icon, power and the actions behind its Repair and Remove buttons, read once per table,
+    /// language and icon set. Null, and kept as null, for a row that is not a defense.
+    /// </summary>
+    private FurnitureFacts? FactsOf(ConfigManager config, int configId, IconIndex icons)
+    {
+        if (_furniture.TryGet(configId, out var known)) return known;
+
+        var row = FurnitureRow(config, configId);
+
+        if (row == null || row.SlotType != DefenseSlot) return _furniture.Add(configId, null);
+
+        var repairFunc = Contains(row.FurnitureFunc, RepairFunc) ? FurnitureFunc(config, RepairFunc) : null;
+        var removeFunc = FurnitureFunc(config, First(row.RemoveFunc) ?? DefaultRemoveFunc);
+
+        return _furniture.Add(configId, new FurnitureFacts(
+            NameOf(config, row, configId),
+            icons.Resolve(row.ICON),
+            row.IsElectrical,
+            repairFunc != null,
+            repairFunc?.ConditionSetId ?? 0,
+            First(repairFunc?.ActionIds) ?? DefaultRepairAction,
+            First(removeFunc?.ActionIds) ?? DefaultRemoveAction));
+    }
+
+    /// <summary>The furniture table's row, read the way the game's own lookup reads it, without its error line for a missing id.</summary>
+    internal static Config_Furniture? FurnitureRow(ConfigManager config, int configId)
+    {
+        var rows = config._Config_Furniture_Dict;
+
+        return rows != null && rows.TryGetValue(configId, out var row) ? row : null;
+    }
+
+    private static Config_FurnitureFunc? FurnitureFunc(ConfigManager config, int funcId)
+    {
+        var funcs = config._Config_FurnitureFunc_Dict;
+
+        return funcs != null && funcs.TryGetValue(funcId, out var func) ? func : null;
     }
 
     /// <summary>The defense's name in the player's language, falling back to the table's own text, then to its furniture id.</summary>
@@ -304,15 +379,15 @@ internal sealed class GameDefenses : IDefenseGame
     /// What a full repair costs now and the game's reason for refusing it, null when it would allow it. A cost or a
     /// check that cannot be read blocks the repair rather than letting it through on a guess.
     /// </summary>
-    private (IReadOnlyDictionary<int, int> Cost, string? BlockedReason) ReadRepair(Furniture furniture, ConfigManager config, ConditionSetManager conditions, Config_FurnitureFunc? repairFunc, int current, int max)
+    private (IReadOnlyDictionary<int, int> Cost, string? BlockedReason) ReadRepair(Furniture furniture, ConfigManager config, ConditionSetManager conditions, FurnitureFacts facts, int current, int max)
     {
-        if (repairFunc == null) return (NoCost, NoRepair);
+        if (!facts.HasRepair) return (NoCost, NoRepair);
 
         var cost = ReadCost(furniture, max - current, max);
 
         if (cost == null) return (NoCost, CostUnreadable);
 
-        return (cost, WhyRepairRefused(config, conditions, repairFunc.ConditionSetId, furniture.InstanceId));
+        return (cost, WhyRepairRefused(config, conditions, facts.RepairConditionSetId, furniture.InstanceId));
     }
 
     /// <summary>
@@ -381,8 +456,7 @@ internal sealed class GameDefenses : IDefenseGame
     {
         try
         {
-            var conditionSetId = config.Get_Config_FurnitureFunc(RepairFunc)?.ConditionSetId ?? 0;
-            var neededToStart = conditionSetId > 0 ? StaminaRule(config.Get_Config_ConditionSet(conditionSetId)) : 0;
+            var neededToStart = _staminaRule ??= ReadStaminaRule(config);
             var attributes = AgentTools.GetAgentComponent<AttributeComponent>(role);
 
             if (neededToStart <= 0 || attributes == null) return null;
@@ -397,6 +471,15 @@ internal sealed class GameDefenses : IDefenseGame
 
             return null;
         }
+    }
+
+    /// <summary>The repair's stamina rule from the tables, 0 when it has none. Kept with the other table reads.</summary>
+    private static int ReadStaminaRule(ConfigManager config)
+    {
+        var conditionSetId = FurnitureFunc(config, RepairFunc)?.ConditionSetId ?? 0;
+        var conditionSets = config._Config_ConditionSet_Dict;
+
+        return conditionSetId > 0 && conditionSets != null && conditionSets.TryGetValue(conditionSetId, out var conditionSet) ? StaminaRule(conditionSet) : 0;
     }
 
     /// <summary>The stamina the condition set asks for before a repair starts; it is a minimum, not what the repair spends.</summary>
@@ -414,20 +497,38 @@ internal sealed class GameDefenses : IDefenseGame
     }
 
     /// <summary>The materials the defenses' repairs use, with what the game counts as available for a tower repair.</summary>
-    private Dictionary<int, Material> ReadMaterials(ConfigManager config, IEnumerable<Defense> defenses)
+    private Dictionary<int, Material> ReadMaterials(ConfigManager config, List<Defense> defenses, IconIndex icons)
     {
         var materials = new Dictionary<int, Material>();
 
-        foreach (var itemId in defenses.SelectMany(defense => defense.Cost.Keys).Distinct())
+        for (var i = 0; i < defenses.Count; i++)
         {
-            var item = config.Get_Config_Item(itemId);
-            var name = item == null ? null : Translate(config, item.ItemName) ?? NonEmpty(item.ItemName_Local) ?? NonEmpty(item.ItemName);
-            var icon = Icons().Resolve(NonEmpty(item?.WebIcon) ?? NonEmpty(item?.Icon));
+            foreach (var itemId in defenses[i].Cost.Keys)
+            {
+                if (materials.ContainsKey(itemId)) continue;
 
-            materials[itemId] = new Material(name ?? $"Item {itemId}", icon, TowerRepairMaterial.CountAvailable(itemId));
+                var item = ItemOf(config, itemId, icons);
+
+                materials[itemId] = new Material(item.Name, item.Icon, TowerRepairMaterial.CountAvailable(itemId));
+            }
         }
 
         return materials;
+    }
+
+    /// <summary>A material's name and icon, read once per table, language and icon set; only its stock is read every time.</summary>
+    private ItemFacts ItemOf(ConfigManager config, int itemId, IconIndex icons)
+    {
+        if (_items.TryGet(itemId, out var known) && known != null) return known;
+
+        var items = config._Config_Item_Dict;
+        var item = items != null && items.TryGetValue(itemId, out var found) ? found : null;
+        var name = item == null ? null : Translate(config, item.ItemName) ?? NonEmpty(item.ItemName_Local) ?? NonEmpty(item.ItemName);
+        var facts = new ItemFacts(name ?? $"Item {itemId}", icons.Resolve(NonEmpty(item?.WebIcon) ?? NonEmpty(item?.Icon)));
+
+        _items.Add(itemId, facts);
+
+        return facts;
     }
 
     /// <summary>
@@ -473,8 +574,6 @@ internal sealed class GameDefenses : IDefenseGame
 
         return new Spot(position.x, position.y, position.z);
     }
-
-    private IconIndex Icons() => _icons ??= WebIcons.Load(_log);
 
     /// <summary>The panel reads every second, so the count is only logged when it changes.</summary>
     private void LogDefenseCount(int count)

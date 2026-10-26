@@ -486,7 +486,48 @@
   }
 
   function byId(id) {
-    return defenses().filter(function (defense) { return defense.id === id; })[0] || null;
+    return looked().ids[id] || null;
+  }
+
+  // What the drawing looks up per square and per row, worked out once per view instead of once per square: the square
+  // at each place, the defense drawn there (the worst off when more than one stands there, the first of those on a
+  // tie), each row's owned squares and waiting defenses, and the first defense with each id.
+  var lookup = null;
+
+  function looked() {
+    var data = state.data;
+
+    if (lookup && lookup.data === data) return lookup;
+
+    var found = { data: data, squares: Object.create(null), worst: Object.create(null), owned: Object.create(null), waiting: Object.create(null), ids: Object.create(null) };
+    var list = squares();
+    var all = defenses();
+    var i;
+
+    for (i = 0; i < list.length; i++) {
+      var square = list[i];
+      var at = square.r + ':' + square.c;
+
+      if (!(at in found.squares)) found.squares[at] = square;
+      if (square.own) found.owned[square.r] = true;
+    }
+
+    for (i = 0; i < all.length; i++) {
+      var defense = all[i];
+
+      if (!(defense.id in found.ids)) found.ids[defense.id] = defense;
+      if (!isOnGrid(defense)) continue;
+
+      var place = defense.row + ':' + defense.col;
+      var worst = found.worst[place];
+
+      if (!worst || ratio(defense) < ratio(worst)) found.worst[place] = defense;
+      if (needsRepair(defense)) found.waiting[defense.row] = (found.waiting[defense.row] || 0) + 1;
+    }
+
+    lookup = found;
+
+    return found;
   }
 
   // Damaged and not yet queued for anything: what Repair all would take on.
@@ -519,12 +560,12 @@
   }
 
   function squareAt(row, col) {
-    return squares().filter(function (square) { return square.r === row && square.c === col; })[0] || null;
+    return looked().squares[row + ':' + col] || null;
   }
 
   // The defense drawn on a square: the worst off when more than one stands there.
   function defenseAt(row, col) {
-    return worstFirst(defenses().filter(function (defense) { return isOnGrid(defense) && defense.row === row && defense.col === col; }))[0] || null;
+    return looked().worst[row + ':' + col] || null;
   }
 
   function modeWord(name) {
@@ -533,7 +574,42 @@
 
   // ===== Drawing =====
 
+  // Squares and list rows from the last redraw, by place or defense id. A defense row the plugin sent unchanged is the
+  // same object as before (see withHeldRows), so a node drawn from the same row with the same marks is put back as it
+  // is instead of being drawn again. New words draw everything again.
+  var drawn = {};
+  var drawing = {};
+  var drawnWords = null;
+
+  function reused(key, owner, marks, make) {
+    var kept = drawn[key];
+
+    // The same key twice in one redraw (two rows with one id) gets a node of its own: one node cannot stand in two places.
+    if (drawing[key]) return make();
+
+    if (kept && kept.owner === owner && kept.marks === marks) {
+      drawing[key] = kept;
+
+      return kept.node;
+    }
+
+    var node = make();
+
+    drawing[key] = { owner: owner, marks: marks, node: node };
+
+    return node;
+  }
+
   function render() {
+    var words = window.__sldefenseWords || ENGLISH;
+
+    if (words !== drawnWords) {
+      drawnWords = words;
+      drawn = {};
+    }
+
+    drawing = {};
+
     var scrolls = {};
 
     SCROLLERS.forEach(function (name) {
@@ -558,6 +634,7 @@
       if (node && scrolls[name]) node.scrollTop = scrolls[name];
     });
 
+    drawn = drawing;
     renderKeys();
   }
 
@@ -653,8 +730,8 @@
   }
 
   function rowLabel(row) {
-    var hasSquare = squares().some(function (square) { return square.r === row && square.own; });
-    var waiting = defenses().filter(function (defense) { return isOnGrid(defense) && defense.row === row && needsRepair(defense); }).length;
+    var hasSquare = !!looked().owned[row];
+    var waiting = looked().waiting[row] || 0;
     var node = act(el('div', 'dm-rlab' + (state.row === row ? ' dm-on' : '') + (hasSquare ? '' : ' dm-none'), String(row)), 'row', row);
 
     if (waiting > 0) node.appendChild(el('i', '', String(waiting)));
@@ -668,12 +745,19 @@
     var defense = defenseAt(row, col);
     var marks = (state.row === row ? ' dm-inrow' : '') + (state.cell === key ? ' dm-sel' : '');
 
-    if (defense) return defenseCell(defense, marks);
+    if (defense) return reused('c' + key, defense, marks + (state.sel === defense.id ? '|sel' : ''), function () { return defenseCell(defense, marks); });
 
+    var own = !!(square && square.own);
+    var price = square ? square.price : 0;
+
+    return reused('c' + key, null, marks + '|' + own + '|' + price, function () { return emptyCell(key, own, price, marks); });
+  }
+
+  function emptyCell(key, own, price, marks) {
     var inner = el('div', 'dm-in');
 
-    if (!square || !square.own) {
-      if (square && square.price > 0) inner.appendChild(el('span', 'dm-price', String(square.price)));
+    if (!own) {
+      if (price > 0) inner.appendChild(el('span', 'dm-price', String(price)));
 
       return add(act(el('div', 'dm-cell dm-buy' + marks), 'cell', key), inner);
     }
@@ -702,7 +786,9 @@
     var box = el('div', 'dm-other');
 
     box.appendChild(el('span', 'dm-olab', say('offGridLabel')));
-    list.forEach(function (defense) { box.appendChild(defenseCell(defense, '')); });
+    list.forEach(function (defense) {
+      box.appendChild(reused('o' + defense.id, defense, state.sel === defense.id ? 'sel' : '', function () { return defenseCell(defense, ''); }));
+    });
 
     return box;
   }
@@ -753,8 +839,13 @@
     return box;
   }
 
-  // One defense in a list. Its Repair button stays quiet beside the one bright button of the panel.
+  // One defense in a list. Its Repair button stays quiet beside the one bright button of the panel. Where it stands
+  // reads differently with and without a grid, so that is part of what it was drawn from.
   function repairRow(defense) {
+    return reused('r' + defense.id, defense, state.data.yard ? 'grid' : 'nogrid', function () { return drawRepairRow(defense); });
+  }
+
+  function drawRepairRow(defense) {
     var node = act(el('div', 'dm-rrow'), 'pick', defense.id);
     var name = el('div', 'dm-nm');
 
@@ -1020,9 +1111,35 @@
     ui.keys.textContent = state.key ? say('keyClose', state.key) : say('escClose');
   }
 
+  // A defense row the page was last sent unchanged comes as its id alone; it is the row the page already holds, so the
+  // one in the view shown now takes its place. An id with no such row (a view the page never got) is left out and the
+  // whole view asked for again.
+  function withHeldRows(data) {
+    var list = data && data.defenses;
+
+    if (!list) return data;
+
+    var held = looked().ids;
+    var isMissing = false;
+
+    for (var i = 0; i < list.length; i++) {
+      if (typeof list[i] !== 'string') continue;
+
+      if (list[i] in held) list[i] = held[list[i]];
+      else isMissing = true;
+    }
+
+    if (isMissing) {
+      data.defenses = list.filter(function (row) { return typeof row !== 'string'; });
+      send('resend');
+    }
+
+    return data;
+  }
+
   function open(data) {
     build();
-    state.data = data || state.data;
+    state.data = withHeldRows(data) || state.data;
     state.isOpen = true;
     state.sel = null;
     state.row = null;
@@ -1034,7 +1151,7 @@
   }
 
   function setData(data) {
-    state.data = data || state.data;
+    state.data = withHeldRows(data) || state.data;
 
     if (state.isOpen) render();
   }
@@ -1092,6 +1209,9 @@
   function patchPages() {
     var frames = document.querySelectorAll('iframe');
 
+    placedHud = null;
+    placedBar = null;
+
     for (var i = 0; i < frames.length; i++) {
       var src = frames[i].src || '';
       var isHud = /CoreUI1\.html/.test(src);
@@ -1110,8 +1230,8 @@
         continue;
       }
 
-      if (isHud) placeHudButton(doc);
-      else placeLayoutBar(doc);
+      if (isHud) placeHudButton(frames[i], doc);
+      else placeLayoutBar(frames[i], doc);
     }
   }
 
@@ -1121,9 +1241,41 @@
     } catch (e) {}
   }
 
+  // What this script last put on the game's pages, with the iframe and document it went into. The 400 ms check looks
+  // for iframes only when one of them is gone or out of date; outside a game, with nothing placed, it does nothing.
+  var placedHud = null;
+  var placedBar = null;
+
+  function checkPages() {
+    try {
+      if (!state.isLive && !placedHud && !placedBar) return;
+      if (isHudPlaced() && (state.layout ? isBarPlaced() : !placedBar)) return;
+
+      patchPages();
+    } catch (e) {}
+  }
+
+  // A node in an iframe the game dropped, or in a document the iframe has since replaced, still reads as connected to
+  // its own document, so the iframe and its document are checked too.
+  function isStillIn(placed) {
+    return placed.frame.isConnected && placed.frame.contentDocument === placed.doc;
+  }
+
+  function isHudPlaced() {
+    var placed = placedHud;
+
+    return !!placed && state.isLive && isStillIn(placed) && placed.column.isConnected && placed.node.parentNode === placed.column && placed.node.getAttribute('data-key') === state.key;
+  }
+
+  function isBarPlaced() {
+    var placed = placedBar;
+
+    return !!placed && state.isLive && !!state.layout && isStillIn(placed) && placed.node.isConnected && placed.node.getAttribute('data-version') === String(layoutVersion);
+  }
+
   // First in the tool column: the column is anchored at the bottom, so the first child sits on top and the game's own
   // buttons do not move. The column hides itself in build mode, and the button with it.
-  function placeHudButton(doc) {
+  function placeHudButton(frame, doc) {
     var column = doc.querySelector('.vertical-tools');
     var existing = doc.querySelector('.' + HUD_CLASS);
 
@@ -1133,13 +1285,19 @@
       return;
     }
 
-    if (existing && existing.parentNode === column && existing.getAttribute('data-key') === state.key) return;
+    if (existing && existing.parentNode === column && existing.getAttribute('data-key') === state.key) {
+      placedHud = { frame: frame, doc: doc, column: column, node: existing };
+
+      return;
+    }
+
     if (existing) existing.remove();
 
     var node = hudButton(doc);
 
     node.setAttribute('data-etk-dock', DOCK_ORDER);
     column.insertBefore(node, column.firstChild);
+    placedHud = { frame: frame, doc: doc, column: column, node: node };
 
     if (!hasReportedHudPlaced) send('diag|HUD button placed in the tool column');
     hasReportedHudPlaced = true;
@@ -1213,7 +1371,7 @@
 
   // The bar is drawn again only when its view or the panel key changed, so the game's hover and click state on it is
   // not reset every poll. It goes away whenever Layout closes or the game is left.
-  function placeLayoutBar(doc) {
+  function placeLayoutBar(frame, doc) {
     var existing = doc.getElementById(LAYOUT_ID);
 
     if (!state.layout || !state.isLive || !doc.body) {
@@ -1222,7 +1380,11 @@
       return;
     }
 
-    if (existing && existing.getAttribute('data-version') === String(layoutVersion)) return;
+    if (existing && existing.getAttribute('data-version') === String(layoutVersion)) {
+      placedBar = { frame: frame, doc: doc, node: existing };
+
+      return;
+    }
 
     addLayoutStyle(doc);
 
@@ -1230,6 +1392,8 @@
 
     if (existing) existing.parentNode.replaceChild(bar, existing);
     else doc.body.appendChild(bar);
+
+    placedBar = { frame: frame, doc: doc, node: bar };
 
     if (!hasReportedLayoutPlaced) send('diag|Layout bar placed on the Layout screen');
     hasReportedLayoutPlaced = true;
@@ -1292,7 +1456,7 @@
     return node;
   }
 
-  setInterval(patchPagesSafely, 400);
+  setInterval(checkPages, 400);
 
   window.__sldefense = { open: open, setData: setData, close: close, status: status, live: live, layout: layout };
   send('ready');
