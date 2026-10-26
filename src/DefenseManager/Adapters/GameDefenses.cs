@@ -173,14 +173,20 @@ internal sealed class GameDefenses : IDefenseGame
     {
         try
         {
-            if (!BaseSingleton<BattleLogicWorld>.IsInstanceCreated)
+            // The world's address and its plan mode flag are read as fields: the game's IsInstanceCreated and IsPlanMode
+            // only return them, but through interop each call boxes its answer, every frame.
+            var pointer = GameSingleton.Pointer<BattleLogicWorld>();
+
+            if (pointer == IntPtr.Zero)
             {
                 _world = null;
 
                 return false;
             }
 
-            return (_world ??= BaseSingleton<BattleLogicWorld>.Instance)?.IsPlanMode ?? false;
+            if (_world is not { } world || world.Pointer != pointer) _world = world = BaseSingleton<BattleLogicWorld>.Instance;
+
+            return world._IsPlanMode_k__BackingField;
         }
         catch (Exception ex)
         {

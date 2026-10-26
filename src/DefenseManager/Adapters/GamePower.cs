@@ -23,6 +23,7 @@ internal sealed class GamePower : IPowerGame
 
     // The zombies are read only if the pass asks about them (see PowerControl), from the game objects of the latest read.
     private readonly Func<IReadOnlyList<Spot>> _readZombies;
+    private readonly Func<bool> _hasZombies;
     private AgentManager? _agents;
     private TowerWaveManager? _waves;
 
@@ -30,6 +31,7 @@ internal sealed class GamePower : IPowerGame
     {
         _log = log;
         _readZombies = ReadZombies;
+        _hasZombies = HasZombies;
     }
 
     public PowerScene? ReadPower()
@@ -86,7 +88,7 @@ internal sealed class GamePower : IPowerGame
         _agents = agents;
         _waves = waves;
 
-        return new PowerScene(ReadUnits(agents, config, power), waves?.IsWaveActive() ?? false, new LazyList<Spot>(_readZombies), clock.GetTotalSeconds(), power.IsLocked, ReadLoad(world));
+        return new PowerScene(ReadUnits(agents, config, power), waves?.IsWaveActive() ?? false, new LazyList<Spot>(_readZombies), clock.GetTotalSeconds(), power.IsLocked, ReadLoad(world)) { HasZombies = _hasZombies };
     }
 
     /// <summary>
@@ -111,7 +113,7 @@ internal sealed class GamePower : IPowerGame
         {
             var furniture = found[i];
 
-            if (furniture == null || furniture.IsDead) continue;
+            if (furniture == null || furniture._IsDead_k__BackingField) continue;
 
             try
             {
@@ -133,11 +135,11 @@ internal sealed class GamePower : IPowerGame
     /// </summary>
     private PowerUnit? ReadUnit(Furniture furniture, ConfigManager config, PowerManager power)
     {
-        var configId = furniture.AgentConfigId;
+        var configId = furniture._AgentConfigId_k__BackingField;
 
         if (NameOfSwitched(config, configId) is not { } name) return null;
 
-        var id = furniture.InstanceId;
+        var id = furniture._InstanceId_k__BackingField;
         var durability = AgentTools.GetAgentComponent<FurnitureDurabilityComponent>(furniture);
         var device = AgentTools.GetAgentComponent<TowerDeviceComponent>(furniture);
         var isBroken = durability == null || durability.IsBrokenTowerDevice();
@@ -176,7 +178,7 @@ internal sealed class GamePower : IPowerGame
             {
                 var zombie = _agents.GetAgent(ids[i]);
 
-                if (zombie == null || zombie.IsDead) continue;
+                if (zombie == null || zombie._IsDead_k__BackingField) continue;
 
                 var transform = AgentTools.GetAgentComponent<TransformComponent>(zombie);
 
@@ -187,6 +189,33 @@ internal sealed class GamePower : IPowerGame
             }
 
             return spots;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("zombie read", ex);
+
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Whether <see cref="ReadZombies"/> would find any zombie, without reading positions: it skips the same zombies and
+    /// stops at the first one it would keep. A read that throws stops the pass, as there.
+    /// </summary>
+    private bool HasZombies()
+    {
+        try
+        {
+            var ids = _waves?.aliveZombieIds;
+
+            for (var i = 0; _agents != null && ids != null && i < ids.Count; i++)
+            {
+                var zombie = _agents.GetAgent(ids[i]);
+
+                if (zombie != null && !zombie._IsDead_k__BackingField && AgentTools.GetAgentComponent<TransformComponent>(zombie) != null) return true;
+            }
+
+            return false;
         }
         catch (Exception ex)
         {

@@ -47,7 +47,17 @@ internal sealed class FakePowerGame : IPowerGame
     /// <summary>How many passes read the zombies. Like the game's, the zombies are read only when the pass looks at them.</summary>
     public int ZombieReads { get; private set; }
 
-    public PowerScene? ReadPower() => IsNoGame ? null : new PowerScene(Defenses.ToList(), IsWaveRunning, new LazyList<Spot>(ReadZombies), Clock, IsLocked, Load);
+    /// <summary>How many times a pass asked only whether there are any zombies, which reads no positions.</summary>
+    public int ZombieChecks { get; private set; }
+
+    public PowerScene? ReadPower() => IsNoGame ? null : new PowerScene(Defenses.ToList(), IsWaveRunning, new LazyList<Spot>(ReadZombies), Clock, IsLocked, Load) { HasZombies = AnyZombie };
+
+    private bool AnyZombie()
+    {
+        ZombieChecks++;
+
+        return Zombies.Count > 0;
+    }
 
     private IReadOnlyList<Spot> ReadZombies()
     {

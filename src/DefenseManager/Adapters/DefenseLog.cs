@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using BepInEx.Logging;
 using DefenseManager.Core;
 
@@ -7,19 +8,33 @@ namespace DefenseManager.Adapters;
 
 /// <summary>
 /// Writes to the BepInEx log and to an append-only file that survives restarts
-/// (LogOutput.log is overwritten on the next launch).
+/// (LogOutput.log is overwritten on the next launch). The file is written by a worker thread, so a frame that logs
+/// (a wave start switching defenses) never waits on the disk; the worker never writes to the BepInEx console.
 /// </summary>
 internal sealed class DefenseLog
 {
+    private const int QuitWaitMilliseconds = 2000;
+
     private readonly ManualLogSource _bepinex;
     private readonly string _path;
     private readonly object _gate = new();
-    private StreamWriter? _file;
+    private readonly LogLines _lines = new();
+    private readonly AutoResetEvent _wake = new(false);
 
     public DefenseLog(ManualLogSource bepinex, string path)
     {
         _bepinex = bepinex;
         _path = path;
+
+        try
+        {
+            new Thread(WriteLoop) { IsBackground = true, Name = "Defense Manager log" }.Start();
+            AppDomain.CurrentDomain.ProcessExit += WriteOnQuit;
+        }
+        catch (Exception)
+        {
+            // Without the worker the lines wait in memory; the BepInEx log still has every one.
+        }
     }
 
     /// <summary>Never throws: a logger that can fail would take down whatever it was asked to report on.</summary>
@@ -35,39 +50,70 @@ internal sealed class DefenseLog
             // The file copy below still has a chance.
         }
 
-        lock (_gate) AppendToFile($"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {message}");
-    }
-
-    /// <summary>One writer stays open so a busy frame is not paying for an open and close per line.</summary>
-    private void AppendToFile(string line)
-    {
         try
         {
-            _file ??= OpenFile();
-            _file.WriteLine(line);
+            _lines.Add(DateTime.UtcNow, message);
+            _wake.Set();
         }
         catch (Exception)
         {
-            // The BepInEx log already has the line; the writer is dropped so the next line tries a fresh one.
-            CloseFile();
+            // A line lost from the file copy costs nothing else.
         }
     }
 
-    /// <summary>Shared for reading so the log can be tailed while the game runs; flushed per line so a crash loses nothing.</summary>
-    private StreamWriter OpenFile() =>
-        new(new FileStream(_path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)) { AutoFlush = true };
-
-    private void CloseFile()
+    private void WriteLoop()
     {
         try
         {
-            _file?.Dispose();
+            while (true)
+            {
+                _wake.WaitOne();
+                WriteWaiting();
+            }
         }
         catch (Exception)
         {
-            // A writer that failed to write can fail to close too; it is being thrown away either way.
+            // The file copy stops; the BepInEx log still has every line.
         }
+    }
 
-        _file = null;
+    /// <summary>The game is closing: the lines still waiting are written, giving up after a short wait for a write in progress.</summary>
+    private void WriteOnQuit(object? sender, EventArgs e)
+    {
+        if (!Monitor.TryEnter(_gate, QuitWaitMilliseconds)) return;
+
+        try
+        {
+            WriteWaitingLocked();
+        }
+        finally
+        {
+            Monitor.Exit(_gate);
+        }
+    }
+
+    private void WriteWaiting()
+    {
+        lock (_gate) WriteWaitingLocked();
+    }
+
+    /// <summary>The file is opened shared for reading, so the log can be tailed while the game runs.</summary>
+    private void WriteWaitingLocked()
+    {
+        try
+        {
+            var text = _lines.Take();
+
+            if (text == null) return;
+
+            using var file = new FileStream(_path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+            using var writer = new StreamWriter(file);
+
+            writer.Write(text);
+        }
+        catch (Exception)
+        {
+            // A locked or read-only file costs the file copy, never the plugin.
+        }
     }
 }

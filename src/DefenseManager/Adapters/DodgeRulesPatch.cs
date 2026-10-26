@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using DefenseManager.Core;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
@@ -20,6 +21,7 @@ internal static class DodgeRulesPatch
     private static string? _written;
     private static bool _hasFailed;
     private static int _checkedFrame = -1;
+    private static long _nextCheckAt;
     private static Action<string> _log = _ => { };
 
     public static void Apply(Harmony harmony, Action<string> log)
@@ -48,18 +50,25 @@ internal static class DodgeRulesPatch
         _dodge = dodge;
         _written = null;
         _checkedFrame = -1;
+        _nextCheckAt = 0;
         _log($"crawler dodge chances set: crawler {dodge.Crawler}, armored crawler {dodge.ArmoredCrawler}");
     }
 
     private static void UsePlayersChances()
     {
         // RollDodge runs for every chainsaw target on every swing, so a write that keeps failing is tried and logged once,
-        // and the rules are looked at no more than once a frame: each look is several calls into the game.
+        // and the rules are looked at no more than once a frame: each look is several calls into the game and copies the
+        // rules text. Once they hold the player's chances they are looked at again only once a second, in case the game
+        // loaded its own text back.
         if (_hasFailed) return;
 
         try
         {
-            var frame = UnityEngine.Time.frameCount;
+            var now = Stopwatch.GetTimestamp();
+
+            if (now < _nextCheckAt) return;
+
+            var frame = UnityFrame.Count();
 
             if (frame == _checkedFrame) return;
 
@@ -68,7 +77,11 @@ internal static class DodgeRulesPatch
             var rules = GameSingleton.Existing<ConfigManager>()?.TryGet_Config_GlobalSetting(RulesId);
             var current = rules?.Params3;
 
-            if (rules == null || string.IsNullOrEmpty(current) || current == _written) return;
+            if (rules == null || string.IsNullOrEmpty(current)) return;
+
+            _nextCheckAt = now + Stopwatch.Frequency;
+
+            if (current == _written) return;
 
             _written = _dodge.Rewrite(current);
             rules.Params3 = _written;

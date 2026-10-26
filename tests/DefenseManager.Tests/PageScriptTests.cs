@@ -492,6 +492,59 @@ public class PageScriptTests
         Assert.Equal("0", Count(page, ".dm-def"));
     }
 
+    /// <summary>The head draws only from the view, the tab and the words, so a pick must not build it again; anything it shows must.</summary>
+    [Fact]
+    public void A_pick_leaves_the_head_as_drawn_and_a_new_view_or_tab_draws_it_again()
+    {
+        var game = Yard();
+        var page = new PageScript();
+
+        page.Open(YardView(game));
+        page.Run("var logo = document.querySelector('.dm-logo')");
+        page.Click("panelButtonWith('pick', '1')");
+
+        Assert.True(page.Is("document.querySelector('.dm-logo') === logo"));
+
+        page.Click("panelButtonWith('tab', 'power')");
+
+        Assert.False(page.Is("document.querySelector('.dm-logo') === logo"));
+        Assert.True(page.Is("panelButtonWith('tab', 'power').classList.contains('dm-on')"));
+
+        page.Run("logo = document.querySelector('.dm-logo')");
+        game.Defenses.RemoveAt(2);
+        page.Show(YardView(game));
+
+        Assert.False(page.Is("document.querySelector('.dm-logo') === logo"));
+        Assert.Equal("2 placed, 5 of 6 squares yours", page.Text("document.querySelector('.dm-ttl').querySelector('small').textContent"));
+    }
+
+    /// <summary>Opening the panel again sends only the rows that changed while it was shut, and must draw it as a whole view would.</summary>
+    [Fact]
+    public void A_panel_opened_again_takes_the_rows_it_holds_as_ids_and_draws_as_the_whole_view_would()
+    {
+        var game = Yard();
+        var delta = new ViewDelta();
+        var page = new PageScript();
+
+        page.Open(Through(delta, YardView(game)));
+        page.Run("var intact = panelButtonWith('pick', '3'); window.__sldefense.close()");
+        game.Defenses[1] = Def(2, x: 0, z: 0, cur: 10);
+
+        var again = Through(delta, YardView(game));
+
+        page.Open(again);
+
+        Assert.DoesNotContain("{\"id\":\"3\"", again);
+        Assert.True(page.Is("panelButtonWith('pick', '3') === intact"));
+        Assert.Empty(page.Sent);
+
+        var whole = new PageScript();
+
+        whole.Open(YardView(game));
+
+        Assert.Equal(whole.Text("drawingOf(document.querySelector('#dm-root'))"), page.Text("drawingOf(document.querySelector('#dm-root'))"));
+    }
+
     // ===== The page check =====
 
     /// <summary>The check runs every 400 ms for the whole session; with the button and the bar up it must not search the pages.</summary>

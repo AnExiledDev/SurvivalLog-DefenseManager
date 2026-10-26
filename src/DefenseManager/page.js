@@ -638,7 +638,15 @@
     renderKeys();
   }
 
+  // The head draws only from the view, the tab and the words, so a click that picks a square or a row, which redraws
+  // the body, leaves it as it is.
+  var drawnHead = null;
+
   function renderHead() {
+    var kept = drawnHead;
+
+    if (kept && kept.head === ui.head && kept.data === state.data && kept.tab === state.tab && kept.words === drawnWords) return;
+
     var all = defenses();
     var owned = squares().filter(function (square) { return square.own; }).length;
     var ttl = el('div', 'dm-ttl', say('title'));
@@ -666,6 +674,7 @@
 
     ui.head.textContent = '';
     add(ui.head, logo, ttl, el('div', 'dm-sp'), have, tabs, button('X', 'close', null, true, 'dm-x'));
+    drawnHead = { head: ui.head, data: state.data, tab: state.tab, words: drawnWords };
   }
 
   // ===== The yard =====

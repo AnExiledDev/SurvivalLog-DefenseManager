@@ -12,6 +12,7 @@ namespace DefenseManager.Adapters;
 internal sealed class DefenseSession
 {
     private const float RefreshSeconds = 1f;
+    private const float LiveCheckOffset = 0.25f;
     private static string FailedStatus => Texts.Failed.Pick(GameLanguage.IsChinese());
 
     private readonly GameDefenses _game;
@@ -31,7 +32,7 @@ internal sealed class DefenseSession
 
     private string _shownView = "";
     private float _nextRefreshAt;
-    private float _nextLiveCheckAt;
+    private float _nextLiveCheckAt = LiveCheckOffset;
     private bool? _sentLive;
     private bool? _loggedLive;
     private bool _isOpen;
@@ -65,7 +66,7 @@ internal sealed class DefenseSession
 
     public void Update()
     {
-        var now = Time.unscaledTime;
+        var now = Clock.Now();
         _page.KeepInstalled(now);
 
         while (PageMessages.TryTake(out var command)) HandleSafely(command);
@@ -82,7 +83,10 @@ internal sealed class DefenseSession
             SyncLayout();
         }
 
-        if (_panelKey != KeyCode.None && Input.GetKeyDown(_panelKey))
+        // One ask of Unity in a frame with no key going down, rather than one per key the panel listens for.
+        var isAnyKeyDown = (_panelKey != KeyCode.None || _isOpen) && Input.anyKeyDown;
+
+        if (isAnyKeyDown && _panelKey != KeyCode.None && Input.GetKeyDown(_panelKey))
         {
             Toggle();
 
@@ -91,7 +95,7 @@ internal sealed class DefenseSession
 
         if (!_isOpen) return;
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (isAnyKeyDown && Input.GetKeyDown(KeyCode.Escape))
         {
             Close();
 
@@ -199,7 +203,11 @@ internal sealed class DefenseSession
     /// </summary>
     private void SendLive(float now)
     {
-        _nextLiveCheckAt = now + RefreshSeconds;
+        // On its own beat, a quarter second off the power pass and the page check, so their work never shares a frame
+        // (see PowerSession and WebPage); a long stall starts the beat again.
+        _nextLiveCheckAt += RefreshSeconds;
+
+        if (_nextLiveCheckAt <= now) _nextLiveCheckAt = now + RefreshSeconds;
         var where = _game.Locate();
         var isLive = Presence.ShowsButton(where);
 
@@ -289,15 +297,17 @@ internal sealed class DefenseSession
 
         _isOpen = true;
         InputGate.PanelOpened();
-        SendWhole(view);
+        SendOpen(view);
         _log("panel opened");
     }
 
-    /// <summary>Opening draws the panel from scratch, so every row goes whole.</summary>
-    private void SendWhole(string view)
+    /// <summary>
+    /// The page keeps its rows and their drawn nodes while the panel is shut, so a reopen sends only the rows that
+    /// changed since, like a refresh. A reloaded page has lost them, and its ready message forgets them here too.
+    /// </summary>
+    private void SendOpen(string view)
     {
         _shownView = view;
-        _delta.Forget();
 
         if (_page.Open(_delta.Next(view))) _delta.Sent();
     }
@@ -359,7 +369,7 @@ internal sealed class DefenseSession
             return;
         }
 
-        SendWhole(view);
+        SendOpen(view);
     }
 
     /// <summary>A panel that cannot read the defenses is shut rather than left holding the game's input.</summary>
@@ -389,7 +399,7 @@ internal sealed class DefenseSession
 
     private string? ReadView()
     {
-        _nextRefreshAt = Time.unscaledTime + RefreshSeconds;
+        _nextRefreshAt = Clock.Now() + RefreshSeconds;
 
         return Presence.PanelView(_game.Locate(), _read, _power.Policy(), GameLanguage.IsChinese(), _config.Read(KeyName()));
     }

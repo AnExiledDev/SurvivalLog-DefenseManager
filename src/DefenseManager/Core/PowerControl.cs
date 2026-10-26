@@ -25,7 +25,15 @@ public readonly record struct GameLoad(long World, long Save);
 /// the game clock in game seconds, whether the game's power switches are locked (a switch then does nothing), and
 /// which load of the game this is.
 /// </summary>
-public sealed record PowerScene(IReadOnlyList<PowerUnit> Defenses, bool IsWaveRunning, IReadOnlyList<Spot> Zombies, int Clock, bool IsLocked, GameLoad Load);
+public sealed record PowerScene(IReadOnlyList<PowerUnit> Defenses, bool IsWaveRunning, IReadOnlyList<Spot> Zombies, int Clock, bool IsLocked, GameLoad Load)
+{
+    /// <summary>
+    /// Whether any living zombie is at the base, asked without reading where each one is: it stops at the first. Null
+    /// counts <see cref="Zombies"/> instead. Like the zombies, it is asked only when a mode needs it, and a read that
+    /// fails throws and stops the pass.
+    /// </summary>
+    public Func<bool>? HasZombies { get; init; }
+}
 
 /// <summary>
 /// The game's power switches. None of these throws: a call that fails answers null. The one exception is a scene's
@@ -101,6 +109,7 @@ public sealed class PowerControl
     private readonly Dictionary<long, int> _lastNearAt = new();
     private readonly HashSet<long> _failing = new();
     private GameLoad? _load;
+    private bool? _hasZombies;
 
     /// <summary>A new save has its own clock and its own defenses, so nothing carries over.</summary>
     public void Forget()
@@ -110,11 +119,23 @@ public sealed class PowerControl
     }
 
     /// <summary>
-    /// One pass. Returns the switches worth logging: each one made, and a switch the game refused, the first time only,
-    /// so a defense that will not switch does not fill the log twice a second.
+    /// True when the last pass stopped at its switch limit with defenses still to settle; the next pass picks them up,
+    /// as it reads the scene again and skips the defenses already in the state they want.
     /// </summary>
-    public IReadOnlyList<PowerSwitch> Run(IPowerGame game, PowerPolicy policy, double range)
+    public bool IsUnfinished { get; private set; }
+
+    /// <summary>
+    /// One pass. Returns the switches worth logging: each one made, and a switch the game refused, the first time only,
+    /// so a defense that will not switch does not fill the log twice a second. A switch the game takes costs it a
+    /// recount of the grid and a redraw of its power panel, so a caller can cap how many one pass makes
+    /// (<paramref name="maxSwitches"/>) and spread the rest over the next frames; a refused switch does not count, so
+    /// one defense the game will not switch never holds the others back.
+    /// </summary>
+    public IReadOnlyList<PowerSwitch> Run(IPowerGame game, PowerPolicy policy, double range, int maxSwitches = int.MaxValue)
     {
+        IsUnfinished = false;
+        _hasZombies = null;
+
         var scene = game.ReadPower();
 
         if (scene == null) return Array.Empty<PowerSwitch>();
@@ -125,12 +146,22 @@ public sealed class PowerControl
 
         List<PowerSwitch>? switches = null;
         var defenses = scene.Defenses;
+        var done = 0;
 
         for (var i = 0; i < defenses.Count; i++)
         {
             var unit = defenses[i];
 
-            if (unit.IsManaged && Settle(game, scene, unit, policy.ModeOf(unit.Key), range) is { } made) (switches ??= new List<PowerSwitch>()).Add(made);
+            if (!unit.IsManaged || Settle(game, scene, unit, policy.ModeOf(unit.Key), range) is not { } made) continue;
+
+            (switches ??= new List<PowerSwitch>()).Add(made);
+
+            if (made.IsDone && ++done >= maxSwitches && i < defenses.Count - 1)
+            {
+                IsUnfinished = true;
+
+                break;
+            }
         }
 
         return switches ?? (IReadOnlyList<PowerSwitch>)Array.Empty<PowerSwitch>();
@@ -146,7 +177,7 @@ public sealed class PowerControl
     /// <summary>
     /// The zombies are looked at only by a mode that asks about them: where they are only in Proximity, and whether any
     /// are at the base only in Wave only between waves. Reading each zombie's position costs a game call, so a base set
-    /// to Always on, Default, or Wave only during a wave never reads them. A zombie in range is remembered for the hold
+    /// to Always on, Default, or Wave only never reads them. A zombie in range is remembered for the hold
     /// only while the defense is in Proximity.
     /// </summary>
     private PowerSwitch? Settle(IPowerGame game, PowerScene scene, PowerUnit unit, PowerMode mode, double range)
@@ -157,7 +188,7 @@ public sealed class PowerControl
         if (isNear) _lastNearAt[unit.Id] = scene.Clock;
 
         var lastNearAt = isProximity && _lastNearAt.TryGetValue(unit.Id, out var at) ? at : (int?)null;
-        var areZombiesAtBase = mode == PowerMode.WaveOnly && !scene.IsWaveRunning && scene.Zombies.Count > 0;
+        var areZombiesAtBase = mode == PowerMode.WaveOnly && !scene.IsWaveRunning && HasZombies(scene);
         var need = PowerPlanner.Need(mode, scene.IsWaveRunning, areZombiesAtBase, isNear, PowerPlanner.IsHeld(lastNearAt, scene.Clock));
 
         if (need.IsOn is not { } isWanted || isWanted == unit.IsOn)
@@ -175,4 +206,10 @@ public sealed class PowerControl
 
         return new PowerSwitch(unit, isWanted, $"{PowerModes.Label(mode)}, {need.Reason}", isDone);
     }
+
+    /// <summary>
+    /// Wave only between waves needs only whether there are any zombies, so it never reads where they are. Asked of the
+    /// game once per pass however many defenses ask.
+    /// </summary>
+    private bool HasZombies(PowerScene scene) => _hasZombies ??= scene.HasZombies is { } any ? any() : scene.Zombies.Count > 0;
 }

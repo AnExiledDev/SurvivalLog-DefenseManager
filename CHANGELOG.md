@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.3
+
+- Less lag when a wave starts or a save loads: defenses now turn on or off one at a time over a few frames instead of all in the same frame.
+- Less stutter between waves: Wave only defenses now just check whether any zombie is around, instead of looking up where every zombie is.
+- Less stutter while the panel is open: picking a defense or a row no longer redraws the top of the panel.
+- Less stutter when you open the panel again: only the defenses that changed since you closed it are sent and redrawn.
+- Less stutter in fights: the crawler dodge chances for the Mechanical Chainsaw are checked once a second instead of once a frame.
+- Less stutter overall: the mod writes its log file in the background.
+- Made for Survival Log 1.1.19611.
+
 ## 0.7.2
 
 - Less lag: the game no longer freezes for a moment the first time the mod reads your defenses after a save loads.

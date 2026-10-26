@@ -11,6 +11,7 @@ namespace DefenseManager.Adapters;
 internal sealed class PowerSession
 {
     private const float PassSeconds = 0.5f;
+    private const int MaxSwitchesPerFrame = 1;
 
     private readonly GamePower _game;
     private readonly PowerSlot _slot;
@@ -21,6 +22,7 @@ internal sealed class PowerSession
 
     private PowerPolicy? _policy;
     private float _nextPassAt;
+    private bool _isContinuing;
     private string? _reportedUnreadableSave;
 
     public PowerSession(GamePower game, PowerSlot slot, Action<string> log)
@@ -39,13 +41,26 @@ internal sealed class PowerSession
 
     public void Update(float now, Func<bool> isInLayout)
     {
-        if (now < _nextPassAt) return;
+        if (!_isContinuing)
+        {
+            if (now < _nextPassAt) return;
 
-        _nextPassAt = now + PassSeconds;
+            // Kept on its own beat rather than counted from this frame, so it does not drift onto the frames of the
+            // page check and the button check (see DefenseSession); a long stall starts the beat again.
+            _nextPassAt += PassSeconds;
+
+            if (_nextPassAt <= now) _nextPassAt = now + PassSeconds;
+        }
+
+        _isContinuing = false;
 
         if (isInLayout() || Policy() is not { } policy) return;
 
-        var made = _control.Run(_game, policy, _range);
+        // One switch a frame: each one the game takes recounts its power grid, rebuilds and sends its power panel's data
+        // and writes a warning to its log, so a wave start that turns every defense on in one frame can stall it. The
+        // rest follow on the next frames.
+        var made = _control.Run(_game, policy, _range, MaxSwitchesPerFrame);
+        _isContinuing = _control.IsUnfinished;
 
         for (var i = 0; i < made.Count; i++) _log(Describe(made[i]));
     }

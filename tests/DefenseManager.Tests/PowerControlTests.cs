@@ -411,4 +411,102 @@ public class PowerControlTests
         Assert.False(game.IsOn(2));
         Assert.True(game.IsOn(3));
     }
+
+    /// <summary>
+    /// Wave only is the default mode, and between waves it needs only whether any zombie is at the base, so it must not
+    /// read every zombie's position for that, and asks once per pass however many defenses it runs.
+    /// </summary>
+    [Fact]
+    public void Wave_only_between_waves_asks_once_whether_any_zombie_is_there_and_never_reads_where()
+    {
+        var game = Home(Unit(1), Unit(2, x: 30), Unit(3, x: 60));
+        game.Zombies.Add(new Spot(200, 0, 0));
+
+        new PowerControl().Run(game, Everywhere(PowerMode.WaveOnly), Range);
+
+        Assert.Equal(0, game.ZombieReads);
+        Assert.Equal(1, game.ZombieChecks);
+        Assert.True(game.IsOn(1) && game.IsOn(2) && game.IsOn(3));
+    }
+
+    // ===== Switches spread over frames =====
+
+    /// <summary>
+    /// Each switch the game takes recounts its grid and redraws its power panel, so a wave start that flips every
+    /// defense in one frame stutters. With a limit the pass stops at it, says it is unfinished, and the next passes
+    /// finish the job.
+    /// </summary>
+    [Fact]
+    public void A_pass_with_a_switch_limit_stops_at_it_and_the_next_passes_finish_the_rest()
+    {
+        var game = Home(Unit(1), Unit(2, x: 30), Unit(3, x: 60));
+        var control = new PowerControl();
+        game.IsWaveRunning = true;
+
+        var first = control.Run(game, Everywhere(PowerMode.WaveOnly), Range, maxSwitches: 1);
+
+        Assert.Single(first);
+        Assert.True(control.IsUnfinished);
+        Assert.Equal(new[] { true, false, false }, new[] { game.IsOn(1), game.IsOn(2), game.IsOn(3) });
+
+        control.Run(game, Everywhere(PowerMode.WaveOnly), Range, maxSwitches: 1);
+        var last = control.Run(game, Everywhere(PowerMode.WaveOnly), Range, maxSwitches: 1);
+
+        Assert.Single(last);
+        Assert.False(control.IsUnfinished);
+        Assert.True(game.IsOn(1) && game.IsOn(2) && game.IsOn(3));
+        Assert.Equal(1, game.PowerUpsOf(1));
+    }
+
+    /// <summary>Spreading the switches must end where one unlimited pass ends: the same defenses on and off.</summary>
+    [Fact]
+    public void Limited_passes_end_with_every_defense_where_one_unlimited_pass_puts_it()
+    {
+        PowerUnit[] Base() => new[] { Unit(1), Unit(2, x: 30, isOn: true), Unit(3, configId: Lamp, x: 60), Unit(4, x: 90, isBroken: true), Unit(5, x: 120) };
+        var settings = PowerSettings.None.WithType(Lamp, PowerMode.AlwaysOn);
+        var whole = Home(Base());
+        var spread = Home(Base());
+        var control = new PowerControl();
+        var passes = 0;
+
+        new PowerControl().Run(whole, new PowerPolicy(settings, PowerMode.WaveOnly), Range);
+
+        do
+        {
+            control.Run(spread, new PowerPolicy(settings, PowerMode.WaveOnly), Range, maxSwitches: 1);
+            passes++;
+        }
+        while (control.IsUnfinished && passes < 10);
+
+        Assert.False(control.IsUnfinished);
+        Assert.Equal(whole.Defenses.Select(defense => defense.IsOn), spread.Defenses.Select(defense => defense.IsOn));
+    }
+
+    /// <summary>A defense the game will not switch must not use up the limit, or it would hold the others back forever.</summary>
+    [Fact]
+    public void A_refused_switch_does_not_count_toward_the_limit()
+    {
+        var game = Home(Unit(1), Unit(2, x: 30));
+        var control = new PowerControl();
+        game.Refuses.Add(1);
+
+        var made = control.Run(game, Everywhere(PowerMode.AlwaysOn), Range, maxSwitches: 1);
+
+        Assert.Equal(new[] { false, true }, made.Select(switched => switched.IsDone));
+        Assert.True(game.IsOn(2));
+        Assert.False(control.IsUnfinished);
+    }
+
+    /// <summary>A pass that reached its limit on the last defense left nothing undone, so no extra pass follows.</summary>
+    [Fact]
+    public void Reaching_the_limit_on_the_last_defense_finishes_the_pass()
+    {
+        var game = Home(Unit(1, isOn: true), Unit(2, x: 30));
+        var control = new PowerControl();
+
+        control.Run(game, Everywhere(PowerMode.AlwaysOn), Range, maxSwitches: 1);
+
+        Assert.True(game.IsOn(2));
+        Assert.False(control.IsUnfinished);
+    }
 }

@@ -16,13 +16,14 @@ namespace DefenseManager.Adapters;
 internal sealed class WebPage
 {
     private const float CheckSeconds = 2f;
+    private const float CheckOffset = 0.6f;
     private const string ScriptResource = "DefenseManager.page.js";
     private const string NoScriptReply = "window.vuplex&&window.vuplex.postMessage('" + PageCommand.Prefix + "noscript')";
 
     private readonly Action<string> _log;
     private readonly WordsOnce _words = new();
     private string? _script;
-    private float _nextCheckAt;
+    private float _nextCheckAt = CheckOffset;
     private bool _hasReportedRunFailure;
 
     public WebPage(Action<string> log)
@@ -34,7 +35,12 @@ internal sealed class WebPage
     {
         if (now < _nextCheckAt) return;
 
-        _nextCheckAt = now + CheckSeconds;
+        // On its own beat, off the frames of the power pass and the button check (see DefenseSession), so the three
+        // never land in one frame; a long stall starts the beat again.
+        _nextCheckAt += CheckSeconds;
+
+        if (_nextCheckAt <= now) _nextCheckAt = now + CheckSeconds;
+
         Run("window.__sldefense||" + NoScriptReply);
     }
 
