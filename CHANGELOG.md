@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.7.0
+## 0.7.1
+
+- Less stutter: the power check looks up each kind of defense's name once instead of twice a second.
 
 - A new panel. Your yard shows as its real grid of squares, row by row out from the house, with each defense on the square it stands on, colored by its state. Squares you have not unlocked yet show their Survival Points price.
 - Click a defense to see its condition, repair cost, Repair and Remove, and its power mode. Click a row number to see that row and repair everything in it with **Repair row**. Click an empty square to see whether it is yours.

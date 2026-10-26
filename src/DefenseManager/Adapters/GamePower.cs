@@ -17,6 +17,10 @@ internal sealed class GamePower : IPowerGame
     private readonly Action<string> _log;
     private readonly HashSet<string> _reportedFailures = new();
 
+    // The pass runs twice a second; a name is a table lookup and a translation, so each is kept per table and language.
+    private readonly Dictionary<int, string> _names = new();
+    private (long Config, bool IsChinese) _namesKey;
+
     public GamePower(Action<string> log)
     {
         _log = log;
@@ -91,6 +95,13 @@ internal sealed class GamePower : IPowerGame
     {
         var found = agents.GetHomeFurnituresBySlotType(GameDefenses.DefenseSlot);
         var units = new List<PowerUnit>();
+        var namesKey = (config.Pointer.ToInt64(), GameLanguage.IsChinese());
+
+        if (namesKey != _namesKey)
+        {
+            _names.Clear();
+            _namesKey = namesKey;
+        }
 
         for (var i = 0; found != null && i < found.Count; i++)
         {
@@ -112,7 +123,7 @@ internal sealed class GamePower : IPowerGame
     }
 
     /// <summary>A defense with no durability to read counts as broken, so it is never switched.</summary>
-    private static PowerUnit? ReadUnit(Furniture furniture, ConfigManager config, PowerManager power)
+    private PowerUnit? ReadUnit(Furniture furniture, ConfigManager config, PowerManager power)
     {
         var configId = furniture.AgentConfigId;
         var row = config.Get_Config_Furniture(configId);
@@ -126,7 +137,14 @@ internal sealed class GamePower : IPowerGame
         var isBroken = durability == null || durability.IsBrokenTowerDevice();
         var isOperational = device != null && device.IsOperational();
 
-        return new PowerUnit(id, configId, GameDefenses.NameOf(config, row, configId), GameDefenses.PositionOf(furniture), isElectrical, isBroken, isOperational, isElectrical && power.IsConsumerOn(id));
+        return new PowerUnit(id, configId, Name(config, row, configId), GameDefenses.PositionOf(furniture), isElectrical, isBroken, isOperational, isElectrical && power.IsConsumerOn(id));
+    }
+
+    private string Name(ConfigManager config, Config_Furniture row, int configId)
+    {
+        if (!_names.TryGetValue(configId, out var name)) _names[configId] = name = GameDefenses.NameOf(config, row, configId);
+
+        return name;
     }
 
     /// <summary>
