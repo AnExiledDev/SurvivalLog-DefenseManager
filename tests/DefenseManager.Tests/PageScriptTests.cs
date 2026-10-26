@@ -619,6 +619,64 @@ public class PageScriptTests
         Assert.Equal("Repair all (2)", Label(page, "repairall"));
     }
 
+    // ===== UI size (Exiled's Toolkit) =====
+
+    /// <summary>A stand-in for the Toolkit's ExiledUi that records what each mod hands it.</summary>
+    private const string FakeUi = "var handed = []; window.ExiledUi = { size: function (el, options) { handed.push({ el: el, options: options }); } }";
+
+    /// <summary>
+    /// The mask fills the screen at any zoom, so a window measured by the mask would never be shrunk to fit; the window
+    /// itself is what must fit. The notice is never shrunk. Each is handed once, however often the panel opens.
+    /// </summary>
+    [Fact]
+    public void The_panels_window_is_what_must_fit_the_screen_and_the_notice_is_never_shrunk()
+    {
+        var game = Yard();
+        var page = new PageScript();
+
+        page.Run(FakeUi);
+        page.Open(YardView(game));
+        page.Show(YardView(game));
+        page.Run("window.__sldefense.close()");
+        page.Open(YardView(game));
+
+        Assert.Equal("2", page.Text("handed.length"));
+        Assert.Equal("dm-root", page.Text("handed[0].el.id"));
+        Assert.True(page.Is("handed[0].options.fit === document.querySelector('.dm-plate')"));
+        Assert.Equal("dm-toast", page.Text("handed[1].el.id"));
+        Assert.True(page.Is("handed[1].options.fit === false"));
+    }
+
+    /// <summary>The Toolkit drops a panel taken out of its page, so the panel drawn again in its place must be handed again.</summary>
+    [Fact]
+    public void A_panel_drawn_again_after_the_page_lost_it_is_handed_again()
+    {
+        var game = Yard();
+        var page = new PageScript();
+
+        page.Run(FakeUi);
+        page.Open(YardView(game));
+        page.Run("document.getElementById('dm-root').remove(); document.getElementById('dm-toast').remove()");
+        page.Open(YardView(game));
+
+        Assert.Equal("4", page.Text("handed.length"));
+        Assert.True(page.Is("handed[2].el !== handed[0].el && handed[2].el === document.getElementById('dm-root')"));
+        Assert.True(page.Is("handed[2].options.fit === document.querySelector('.dm-plate')"));
+    }
+
+    /// <summary>The Toolkit's script can load after this one; the panel waits in the list it reads when it starts.</summary>
+    [Fact]
+    public void Before_the_toolkit_has_loaded_the_panel_waits_for_it()
+    {
+        var page = new PageScript();
+
+        page.Open(YardView(Yard()));
+
+        Assert.Equal("2", page.Text("window.__exiledUiWait.length"));
+        Assert.Equal("dm-root", page.Text("window.__exiledUiWait[0][0].id"));
+        Assert.True(page.Is("window.__exiledUiWait[0][1].fit === document.querySelector('.dm-plate')"));
+    }
+
     /// <summary>The page draws in English until the plugin's words arrive, so its own copy must say the same as Texts.</summary>
     [Fact]
     public void The_pages_own_english_words_are_the_same_as_the_plugins()

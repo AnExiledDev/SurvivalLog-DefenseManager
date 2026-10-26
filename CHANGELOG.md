@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.4
+
+- The panel and its pop-up messages can be drawn bigger or smaller with the UI size setting of Exiled's Toolkit 0.10.0 or newer. A change shows at once, and the panel only grows as far as it still fits on the screen.
+- The HUD button and the Layout screen buttons keep the game's size, like the game's own buttons around them.
+- Made for Survival Log 1.1.19611.
+
 ## 0.7.3
 
 - Less lag when a wave starts or a save loads: defenses now turn on or off one at a time over a few frames instead of all in the same frame.

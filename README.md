@@ -24,6 +24,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 - **Game hotkeys paused**: the game's own hotkeys are off while the panel is open and come back when it closes, so keys you press in the panel do not reach the game.
 - **Device attack rate**: `DeviceAttackRate` in the config sets how often defense devices strike. 2 strikes twice as often. A powered device uses power on every strike, so a faster rate uses more power. It is 1, the game's own rate, by default.
 - **Crawlers can be hit by the chainsaw**: in the base game crawler zombies always dodge the Mechanical Chainsaw, so its blade never hits them. With the mod they dodge it only 25% of the time. `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` in the config set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
+- **UI size**: with Exiled's Toolkit 0.10.0 or newer, its UI size setting (`UiScale`) draws the panel and its pop-up messages bigger or smaller, as far as the panel still fits on the screen. The HUD button and the Layout screen buttons keep the game's size, like the game's own buttons around them.
 - **Log file**: every press and what came of it is written to `BepInEx\defense-manager.log`.
 
 Every repair and removal is the game's own action, the same one the defense's menu lines up, so the game's own walking, timing and material use apply. Only defenses outside your home are listed; doors and windows are not touched.
@@ -89,7 +90,7 @@ The mod checks the defenses about twice a second whenever a game is loaded, with
 
 - Survival Log 1.1.19611. Built and tested on this version; a game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
-- Optional: [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start. With 0.6.0 or newer, the HUD's tool buttons are also laid out four high, in columns, when there are more than four.
+- Optional: [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start. With 0.6.0 or newer, the HUD's tool buttons are also laid out four high, in columns, when there are more than four. With 0.10.0 or newer, its UI size setting also sizes the panel.
 
 ## Install
 
@@ -113,7 +114,7 @@ Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, create
 
 Tested on Survival Log 1.1.19611 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.7.3 started, device attack rate 1`, followed by `key F7, Layout controls on` and `power default WaveOnly, proximity range 15 m` (the words change with your settings, and a setting changed on the Mods screen writes its line again). The same lines, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.7.4 started, device attack rate 1`, followed by `key F7, Layout controls on` and `power default WaveOnly, proximity range 15 m` (the words change with your settings, and a setting changed on the Mods screen writes its line again). The same lines, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
 
 If an electrical defense is not switched, click it in the panel: a broken or not working defense is left alone, and a defense in Default mode is left to the game. If no defense shows power modes, look in `BepInEx\defense-manager.log` for a line about the power settings.
 

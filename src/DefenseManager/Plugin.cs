@@ -14,7 +14,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.7.3";
+    private const string Version = "0.7.4";
     private const string PowerFileName = Guid + ".power.txt";
 
     public override void Load()

@@ -377,6 +377,11 @@
     document.body.appendChild(root);
     document.body.appendChild(toast);
 
+    // Drawn at the player's UI size (Exiled's Toolkit). The full-screen mask always fills the screen, so the window on
+    // it is what must fit; the short notice is never shrunk.
+    uiSize(root, { fit: plate });
+    uiSize(toast, { fit: false });
+
     root.addEventListener('click', onClick);
     // Clicks inside the plate must not reach the game pages underneath; the mask itself closes nothing on purpose.
     root.addEventListener('mousedown', function (e) { e.stopPropagation(); });
@@ -388,6 +393,21 @@
     }, true);
 
     ui = { root: root, head: head, body: body, status: status, keys: keys, toast: toast };
+  }
+
+  // Hands a panel to Exiled's Toolkit to be drawn at the player's UI size. Before the Toolkit's script has loaded it
+  // waits in a list the Toolkit reads; without the Toolkit nothing happens.
+  function uiSize(node, options) {
+    var toolkit = window.ExiledUi;
+
+    if (toolkit) {
+      toolkit.size(node, options);
+      return;
+    }
+
+    var waiting = window.__exiledUiWait = window.__exiledUiWait || [];
+    waiting.push([node, options]);
+    if (waiting.length > 32) waiting.shift();
   }
 
   // The style outlives a lost panel root, so a rebuild must not stack another copy of it.

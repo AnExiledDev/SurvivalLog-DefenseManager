@@ -23,6 +23,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Per defense, per type, or for all[/b]: pick a mode for one defense when you click it, or for every defense of a type on the [b]Power[/b] tab. Anything without a setting follows its type, and a type without one follows the global mode (Wave only unless you change it).[/*]
 [*][b]Settings tab[/b]: change the Layout screen buttons, the global power mode, the Proximity range, the crawler dodge chances and the device attack rate right in the panel.[/*]
 [*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. With the mod they dodge it 25% of the time, and the chance for each kind of crawler can be set in the config.[/*]
+[*][b]UI size[/b]: with Exiled's Toolkit 0.10.0 or newer, its UI size setting draws the panel bigger or smaller, as far as it still fits on the screen.[/*]
 [/list]
 
 [size=5]Hotkeys[/size]
@@ -59,7 +60,7 @@ Works in English and Chinese.
 [list]
 [*]Survival Log 1.1.19611. A game update can break it until the mod is updated.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
-[*]Optional: [url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start.[/*]
+[*]Optional: [url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. With 0.10.0 or newer, its UI size setting also sizes the panel. Without it, settings take effect at the next game start.[/*]
 [/list]
 
 [size=5]Installation[/size]
@@ -106,6 +107,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*][b]单个、同类或全部[/b]：点击防御设施可以单独设置它的模式，在「供电」标签页可以设置同类的全部。没有单独设置的跟随它的类型，类型也没有设置的跟随全局模式（默认是仅尸潮）。[/*]
 [*][b]「设置」标签页[/b]：直接在面板里修改「规划模式」界面按钮、全局供电模式、靠近触发的范围、爬行者闪避概率和防御设施攻击频率。[/*]
 [*][b]电锯能打到爬行者[/b]：原版游戏中爬行者总能闪避「机械电锯」。本模组把闪避概率降到 25%，每种爬行者的概率都可以在配置里设置。[/*]
+[*][b]界面大小[/b]：安装 Exiled's Toolkit 0.10.0 或更新版本后，可以用它的界面大小设置放大或缩小面板，最大放到面板仍能完整显示在屏幕上为止。[/*]
 [/list]
 
 [size=5]快捷键[/size]
@@ -141,7 +143,7 @@ F7 可以在配置中修改或停用。面板打开时游戏自己的快捷键�
 [list]
 [*]Survival Log 1.1.19611。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]，请先安装。[/*]
-[*]可选：[url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 或更新版本。装了它，在 Mod Manager 的「模组」界面改动的设置无需重启游戏即可生效；没装的话，改动在下次启动游戏时生效。[/*]
+[*]可选：[url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 或更新版本。装了它，在 Mod Manager 的「模组」界面改动的设置无需重启游戏即可生效，0.10.0 或更新版本还能用它的界面大小设置调整面板的大小；没装的话，改动在下次启动游戏时生效。[/*]
 [/list]
 
 [size=5]安装[/size]
