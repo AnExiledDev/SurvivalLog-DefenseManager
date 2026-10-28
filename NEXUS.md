@@ -2,6 +2,8 @@ Name: Defense Manager
 Summary: Repair every damaged trap and barricade in one press, clear all the broken ones in another, or handle them one by one on a grid of your yard, in a panel on F7 or a HUD button. Electrical defenses switch on only when zombies show up, and crawlers dodge the chainsaw 25% of the time instead of always. Repair all is on the Layout screen too.
 
 Description (BBCode):
+[center][img]https://sldb.core-directive.com/media/save/1-save-safe.png[/img][/center]
+
 Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel, so you can repair or clear them in one press.
 
 [size=5]Main features[/size]
