@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using DefenseManager.Core;
+using ExiledToolkit;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.ReduxUI;
 using Vuplex.WebView;
@@ -61,8 +62,18 @@ internal sealed class WebPage
 
     public void Close() => Call("close()");
 
-    /// <summary>A result line: in the panel's footer while it is open, as a toast otherwise.</summary>
-    public void Status(string text) => Call($"status({JsText.Literal(text)})");
+    /// <summary>
+    /// A result line: in the panel's footer while it is open, as an Exiled's Toolkit toast otherwise. The page hears it
+    /// either way, as it frees the button that was pressed.
+    /// </summary>
+    public void Status(string text, bool isPanelOpen, ToastKind kind)
+    {
+        Call($"status({JsText.Literal(text)})");
+
+        if (isPanelOpen || string.IsNullOrEmpty(text)) return;
+
+        Toasts.Show(new ToastRequest(Texts.Source.Pick(GameLanguage.IsChinese()), text) { Kind = kind });
+    }
 
     /// <summary>Whether a game is loaded (the HUD button shows only then) and the panel key's name, "" for none.</summary>
     public bool Live(bool isLive, string keyName) => Call($"live({(isLive ? "true" : "false")},{JsText.Literal(keyName)})");

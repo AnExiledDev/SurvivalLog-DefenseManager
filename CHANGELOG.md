@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.1
+
+- Results shown while the panel is closed, such as a press on the Layout screen bar, are now Exiled's Toolkit toasts, so they appear beside the game's HUD and in the Notifications history.
+- Exiled's Toolkit 0.11.0 or newer is now required.
+- Made for Survival Log 1.1.19611.
+
 ## 0.8.0
 
 - New: `UiScale` under Interface sets the size of Defense Manager's own windows on their own, from 75% to 200%, whatever Exiled's Toolkit's UI size is. At 0, the default, they follow the Toolkit's. Needs Exiled's Toolkit 0.11.0 or newer.

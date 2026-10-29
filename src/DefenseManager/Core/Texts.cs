@@ -101,6 +101,9 @@ public static class Texts
     public static readonly Phrase CostUnreadable = new("its repair cost could not be read", "无法读取它的修理费用");
     public static readonly Phrase CheckFailed = new("the game's repair check failed, see " + Log, "游戏的修理检查出错，详见 " + Log);
 
+    /// <summary>Who a toast is from, on its first line.</summary>
+    public static readonly Phrase Source = new("Defense Manager", "防御管理");
+
     public static readonly Phrase Failed = new("Defense Manager failed, see " + Log + ".", "Defense Manager 出错，详见 " + Log + "。");
 
     // Power settings.

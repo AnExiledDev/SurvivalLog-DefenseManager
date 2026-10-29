@@ -626,10 +626,10 @@ public class PageScriptTests
 
     /// <summary>
     /// The mask fills the screen at any zoom, so a window measured by the mask would never be shrunk to fit; the window
-    /// itself is what must fit. The notice is never shrunk. Each is handed once, however often the panel opens.
+    /// itself is what must fit. It is handed once, however often the panel opens.
     /// </summary>
     [Fact]
-    public void The_panels_window_is_what_must_fit_the_screen_and_the_notice_is_never_shrunk()
+    public void The_panels_window_is_what_must_fit_the_screen()
     {
         var game = Yard();
         var page = new PageScript();
@@ -640,12 +640,23 @@ public class PageScriptTests
         page.Run("window.__sldefense.close()");
         page.Open(YardView(game));
 
-        Assert.Equal("2", page.Text("handed.length"));
-        Assert.Equal("2", page.Text("handed.filter(function (h) { return h.options.mod === 'DefenseManager'; }).length"));
+        Assert.Equal("1", page.Text("handed.length"));
+        Assert.Equal("DefenseManager", page.Text("handed[0].options.mod"));
         Assert.Equal("dm-root", page.Text("handed[0].el.id"));
         Assert.True(page.Is("handed[0].options.fit === document.querySelector('.dm-plate')"));
-        Assert.Equal("dm-toast", page.Text("handed[1].el.id"));
-        Assert.True(page.Is("handed[1].options.fit === false"));
+    }
+
+    /// <summary>With the panel closed a result line is the plugin's Toolkit toast, so the page draws no box of its own.</summary>
+    [Fact]
+    public void A_result_with_the_panel_closed_draws_nothing_on_the_page()
+    {
+        var page = new PageScript();
+
+        page.Run(FakeUi);
+        page.Run("window.__sldefense.status('Repaired 3 devices')");
+
+        Assert.False(page.Is("document.getElementById('dm-toast')"));
+        Assert.False(page.Is("document.body.textContent.indexOf('Repaired 3 devices') >= 0"));
     }
 
     /// <summary>The Toolkit drops a panel taken out of its page, so the panel drawn again in its place must be handed again.</summary>
@@ -657,12 +668,12 @@ public class PageScriptTests
 
         page.Run(FakeUi);
         page.Open(YardView(game));
-        page.Run("document.getElementById('dm-root').remove(); document.getElementById('dm-toast').remove()");
+        page.Run("document.getElementById('dm-root').remove()");
         page.Open(YardView(game));
 
-        Assert.Equal("4", page.Text("handed.length"));
-        Assert.True(page.Is("handed[2].el !== handed[0].el && handed[2].el === document.getElementById('dm-root')"));
-        Assert.True(page.Is("handed[2].options.fit === document.querySelector('.dm-plate')"));
+        Assert.Equal("2", page.Text("handed.length"));
+        Assert.True(page.Is("handed[1].el !== handed[0].el && handed[1].el === document.getElementById('dm-root')"));
+        Assert.True(page.Is("handed[1].options.fit === document.querySelector('.dm-plate')"));
     }
 
     /// <summary>The Toolkit's script can load after this one; the panel waits in the list it reads when it starts.</summary>
@@ -673,7 +684,7 @@ public class PageScriptTests
 
         page.Open(YardView(Yard()));
 
-        Assert.Equal("2", page.Text("window.__exiledUiWait.length"));
+        Assert.Equal("1", page.Text("window.__exiledUiWait.length"));
         Assert.Equal("dm-root", page.Text("window.__exiledUiWait[0][0].id"));
         Assert.True(page.Is("window.__exiledUiWait[0][1].fit === document.querySelector('.dm-plate')"));
     }

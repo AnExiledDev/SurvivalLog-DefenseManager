@@ -14,7 +14,6 @@
   var LAYOUT_ID = 'dm-layout';
   var LAYOUT_STYLE_ID = 'dm-layout-style';
   var BUSY_TIMEOUT_MS = 5000;
-  var TOAST_MS = 3500;
   var SVG_NS = 'http://www.w3.org/2000/svg';
   // A shield, drawn on the 24-unit grid the game's HUD icons use.
   var SHIELD_PATH = 'M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3zm0 2.14L6 6.39V11c0 4.1 2.5 7.67 6 8.9 3.5-1.23 6-4.8 6-8.9V6.39l-6-2.25zM11 8h2v3h3v2h-3v3h-2v-3H8v-2h3z';
@@ -75,7 +74,6 @@
 
   var state = { data: emptyData(), isOpen: false, isLive: false, key: '', layout: null, tab: 'yard', sel: null, row: null, cell: null };
   var ui = null;
-  var toastTimer = 0;
   var isBusy = false;
   var busyTimer = 0;
   var layoutVersion = 0;
@@ -349,8 +347,7 @@
     '.dm-stepper button:disabled{opacity:.4;cursor:default}',
     '.dm-stepper b{padding:3px 10px;color:var(--dm-accent);font-weight:600;min-width:58px;text-align:center}',
     '.dm-foot{display:flex;gap:14px;align-items:center;font-size:13px;color:var(--dm-text3);border-top:1px solid var(--dm-soft);padding-top:10px}',
-    '.dm-status{flex:1;color:var(--dm-text2)}',
-    '#dm-toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:2147483001;pointer-events:none;display:none;max-width:640px;text-align:center;padding:10px 18px;border-radius:4px;border:1px solid rgba(255,200,58,.6);background:linear-gradient(180deg,rgba(64,52,40,.97),rgba(44,36,28,.97));color:#f0e8d8;font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",sans-serif;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.6)}'
+    '.dm-status{flex:1;color:var(--dm-text2)}'
   ].join('\n');
 
   function build() {
@@ -371,16 +368,11 @@
     add(plate, head, body, foot);
     root.appendChild(plate);
 
-    var toast = el('div');
-    toast.id = 'dm-toast';
-
     document.body.appendChild(root);
-    document.body.appendChild(toast);
 
     // Drawn at the player's UI size (Exiled's Toolkit). The full-screen mask always fills the screen, so the window on
-    // it is what must fit; the short notice is never shrunk.
+    // it is what must fit.
     uiSize(root, { fit: plate });
-    uiSize(toast, { fit: false });
 
     root.addEventListener('click', onClick);
     // Clicks inside the plate must not reach the game pages underneath; the mask itself closes nothing on purpose.
@@ -392,7 +384,7 @@
       if (img && img.tagName === 'IMG' && img.parentNode) img.parentNode.textContent = img.getAttribute('data-letter') || '?';
     }, true);
 
-    ui = { root: root, head: head, body: body, status: status, keys: keys, toast: toast };
+    ui = { root: root, head: head, body: body, status: status, keys: keys };
   }
 
   // Hands a panel to Exiled's Toolkit to be drawn at the player's UI size. Before the Toolkit's script has loaded it
@@ -1175,7 +1167,6 @@
     state.row = null;
     state.cell = null;
     ui.status.textContent = '';
-    ui.toast.style.display = 'none';
     ui.root.style.display = 'flex';
     render();
   }
@@ -1196,23 +1187,8 @@
     build();
     clearBusy();
 
-    if (state.isOpen) {
-      ui.status.textContent = text;
-
-      return;
-    }
-
-    // An empty status only clears the line; as a toast it would be an empty box.
-    if (!text) {
-      ui.toast.style.display = 'none';
-
-      return;
-    }
-
-    ui.toast.textContent = text;
-    ui.toast.style.display = 'block';
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { ui.toast.style.display = 'none'; }, TOAST_MS);
+    // With the panel closed the plugin shows the line as an Exiled's Toolkit toast instead.
+    if (state.isOpen) ui.status.textContent = text;
   }
 
   // Whether a game the panel can manage is loaded, and the key that opens the panel ('' when none): the HUD button is

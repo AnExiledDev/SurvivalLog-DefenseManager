@@ -1,5 +1,6 @@
 using System;
 using DefenseManager.Core;
+using ExiledToolkit;
 using UnityEngine;
 
 namespace DefenseManager.Adapters;
@@ -372,11 +373,14 @@ internal sealed class DefenseSession
         SendOpen(view);
     }
 
+    /// <summary>A result line, in the panel while it is open and as a toast otherwise; a failure shows as an error.</summary>
+    private void Status(string message) => _page.Status(message, _isOpen, message == FailedStatus ? ToastKind.Error : ToastKind.Info);
+
     /// <summary>A panel that cannot read the defenses is shut rather than left holding the game's input.</summary>
     private void GiveUpOnFailedRead()
     {
         Close();
-        _page.Status(FailedStatus);
+        Status(FailedStatus);
     }
 
     /// <summary>False when the read threw; otherwise the view JSON, or null when the player is not at home to manage it.</summary>
@@ -423,7 +427,7 @@ internal sealed class DefenseSession
             _log($"power {target} {defenseId} failed: {ex}");
         }
 
-        _page.Status(message);
+        Status(message);
 
         if (_isOpen) PushView();
     }
@@ -444,7 +448,7 @@ internal sealed class DefenseSession
             _log($"setting {change} failed: {ex}");
         }
 
-        _page.Status(message);
+        Status(message);
 
         if (_isOpen) PushView();
     }
@@ -470,7 +474,7 @@ internal sealed class DefenseSession
             _log($"{name} failed: {ex}");
         }
 
-        if (message != null) _page.Status(message);
+        if (message != null) Status(message);
         if (_isOpen) PushView();
 
         SyncLayout();

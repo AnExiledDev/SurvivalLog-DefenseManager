@@ -1,6 +1,6 @@
 # Defense Manager settings
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once except `DeviceAttackRate`, which takes effect at the next game start. Every setting but `PanelKey` can also be changed on the panel's Settings tab, which saves to this file at once (`DeviceAttackRate` still takes effect at the next game start). Delete the file to get the defaults back. Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
+Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once except `DeviceAttackRate`, which takes effect at the next game start. Every setting but `PanelKey` can also be changed on the panel's Settings tab, which saves to this file at once (`DeviceAttackRate` still takes effect at the next game start). Delete the file to get the defaults back.
 
 ## Controls
 
