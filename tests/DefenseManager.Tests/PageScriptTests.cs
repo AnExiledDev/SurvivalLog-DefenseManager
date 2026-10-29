@@ -350,6 +350,37 @@ public class PageScriptTests
     }
 
     [Fact]
+    public void An_empty_square_of_yours_lists_the_packed_defenses_and_installing_one_sends_the_square_and_the_defense()
+    {
+        var game = Yard();
+        game.Packages.Add(new DefensePackage(36005, "Spikes", null, new long[] { 7, 8 }, 1));
+        game.Packages.Add(new DefensePackage(36007, "Barbed wire", null, Array.Empty<long>(), 3));
+        var page = new PageScript();
+        page.Open(YardView(game));
+
+        page.Click("panelButtonWith('cell', '1:2')");
+
+        Assert.Equal("Install a packed defense here:", page.Text("document.querySelector('.dm-desc').textContent"));
+        Assert.Equal("2 in the yard, 1 in Package Bank", page.Text("document.querySelectorAll('.dm-rrow')[1].querySelector('small').textContent"));
+        Assert.Equal("3 in Package Bank", page.Text("document.querySelectorAll('.dm-rrow')[0].querySelector('small').textContent"));
+
+        page.Click("panelButtonWith('install', 'b|36005')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.Install("b", 36005) }, page.Sent);
+    }
+
+    [Fact]
+    public void An_empty_square_with_no_package_anywhere_points_to_the_layout_screen()
+    {
+        var page = OpenYard();
+
+        page.Click("panelButtonWith('cell', '1:2')");
+
+        Assert.Equal("No defense packages in the yard or in Package Bank. Build a defense here from the Layout screen.", page.Text("document.querySelector('.dm-desc').textContent"));
+        Assert.Empty(page.Sent);
+    }
+
+    [Fact]
     public void The_power_tab_sets_a_whole_type_or_sends_it_back_to_the_global_mode()
     {
         var page = OpenYard();
@@ -383,6 +414,8 @@ public class PageScriptTests
         page.Click("panelButtonWith('set', 'layoutcontrols|0')");
         page.Status("Setting saved.");
         page.Click("panelButtonWith('set', 'defaultmode|Proximity')");
+        page.Status("Setting saved.");
+        page.Click("panelButtonWith('set', 'wavework|1')");
 
         Assert.Equal(
             new PageCommand[]
@@ -391,6 +424,7 @@ public class PageScriptTests
                 new PageCommand.Setting(new SettingChange.CrawlerDodge(0.25f)),
                 new PageCommand.Setting(new SettingChange.LayoutControls(false)),
                 new PageCommand.Setting(new SettingChange.DefaultMode(PowerMode.Proximity)),
+                new PageCommand.Setting(new SettingChange.AllowDuringWaves(true)),
             },
             page.Sent);
     }

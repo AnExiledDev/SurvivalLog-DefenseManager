@@ -159,6 +159,9 @@ internal sealed class DefenseSession
             case PageCommand.Remove remove:
                 Press($"remove {remove.DefenseId}", () => DefenseRun.Remove(_game, remove.DefenseId));
                 break;
+            case PageCommand.Install install:
+                Press($"install {install.ConfigId} on {install.Square}", () => DefenseRun.Install(_game, install.Square, install.ConfigId));
+                break;
             case PageCommand.Power power:
                 PressPower(PowerTarget.Defense, power.DefenseId, power.Mode);
                 break;

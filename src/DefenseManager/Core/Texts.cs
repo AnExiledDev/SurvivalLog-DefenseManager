@@ -32,7 +32,7 @@ public static class Texts
 
     // Press results and the reasons beside a disabled button.
     public static readonly Phrase NotReady = new("Can't manage defenses right now: {0}.", "现在无法管理防御设施：{0}。");
-    public static readonly Phrase WaveLocked = new("A zombie wave is on: defenses can't be repaired or removed until it ends.", "尸潮正在进行：结束前无法修理或拆除防御设施。");
+    public static readonly Phrase WaveLocked = new("A zombie wave is on: defenses can't be repaired or removed until it ends. Work during waves in Settings lifts this.", "尸潮正在进行：结束前无法修理或拆除防御设施。可在设置中开启「尸潮期间操作」。");
     public static readonly Phrase AwayFromHome = new("Go home first: your defenses are there.", "请先回家：你的防御设施在那里。");
     public static readonly Phrase InLayout = new("Work starts when you leave Layout.", "离开「规划模式」后开始工作。");
     public static readonly Phrase QueueBusy = new("Finish or cancel your queued actions first.", "请先完成或取消已排队的行动。");
@@ -52,6 +52,14 @@ public static class Texts
     public static readonly Phrase RemovalJobs = new("removals", "拆除工作");
     public static readonly Phrase QueuedRepair = new("Repairing {0}.", "正在修理{0}。");
     public static readonly Phrase QueuedRemoval = new("Removing {0}.", "正在拆除{0}。");
+    public static readonly Phrase SquareTaken = new("That square is not free any more.", "这个格子已经不是空格了。");
+    public static readonly Phrase NoPackage = new("No package of that defense in the yard or in Package Bank.", "院子里和 Package Bank 中都没有这个防御设施的包裹。");
+    public static readonly Phrase InstallBusy = new("Already installing something: let it finish first.", "正在安装别的东西：请等它完成。");
+    public static readonly Phrase NoFreeSpot = new("{0} is in Package Bank, but every yard package spot is full.", "{0}在 Package Bank 中，但院子里的包裹位都满了。");
+    public static readonly Phrase BankFailed = new("Package Bank would not give {0} back, see " + Log + ".", "Package Bank 没能取出{0}，详见 " + Log + "。");
+    public static readonly Phrase NotInstalled = new("The game would not install {0} there.", "游戏无法在这里安装{0}。");
+    public static readonly Phrase Installing = new("Installing {0}.", "正在安装{0}。");
+    public static readonly Phrase TakenOutOfBank = new("Took it out of Package Bank, it is in the yard now.", "已从 Package Bank 取出，现在在院子里。");
     public static readonly Phrase NothingRepaired = new("Nothing repaired.", "没有修理任何防御设施。");
     public static readonly Counted AlreadyRepairing = new(new("Already repairing: 1 repair still queued.", "已在修理：还有 {0} 项修理在排队。"), new("Already repairing: {0} repairs still queued.", "已在修理：还有 {0} 项修理在排队。"));
     public static readonly Counted Repairing = new(new("Repairing 1 defense.", "正在修理 {0} 个防御设施。"), new("Repairing {0} defenses.", "正在修理 {0} 个防御设施。"));
@@ -183,6 +191,11 @@ public static class Texts
         ("emptySquare", new("Empty square", "空格")),
         ("notYours", new("Not yours yet", "尚未解锁")),
         ("buildHere", new("Build a defense here from the Layout screen.", "可在「规划模式」中在这里建造防御设施。")),
+        ("installHere", new("Install a packed defense here:", "在这里安装已打包的防御设施：")),
+        ("install", new("Install", "安装")),
+        ("inYard", new("{0} in the yard", "院子里 {0} 个")),
+        ("inBank", new("{0} in Package Bank", "Package Bank 中 {0} 个")),
+        ("noPackages", new("No defense packages in the yard or in Package Bank.", "院子里和 Package Bank 中都没有防御设施包裹。")),
         ("unlockFor", new("Unlock it from the Layout screen for {0} Survival Points.", "可在「规划模式」中花费 {0} 生存点解锁。")),
         ("everyType", new("Every {0}", "所有{0}")),
         ("global", new("Global ({0})", "全局（{0}）")),
@@ -213,6 +226,8 @@ public static class Texts
         ("setArmoredDesc", new("Chance an Armored Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.", "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率。原版游戏为 100%。")),
         ("setRate", new("Device attack rate", "防御设施攻击频率")),
         ("setRateDesc", new("How often defense devices strike, 0.25 to 10. Takes effect at the next game start.", "防御设施攻击的频率，0.25 到 10。下次启动游戏时生效。")),
+        ("setWaves", new("Work during waves", "尸潮期间操作")),
+        ("setWavesDesc", new("Repair, remove, install and move defenses while a zombie wave is on. The base game locks them until it ends.", "尸潮进行时也可修理、拆除、安装和移动防御设施。原版游戏在尸潮结束前禁止这些操作。")),
         ("keyClose", new("{0} or Esc to close", "按 {0} 或 Esc 关闭")),
         ("noSettings", new("Settings are not available right now.", "现在无法读取设置。")),
     };
@@ -230,6 +245,7 @@ public static class Texts
         {
             NotReady, WaveLocked, AwayFromHome, InLayout, QueueBusy, AllRepaired, NoneBroken, Gone, NotQueued, StartFailed,
             RepairJob, RepairJobs, RemovalJob, RemovalJobs, QueuedRepair, QueuedRemoval, NothingRepaired, NothingCleared,
+            SquareTaken, NoPackage, InstallBusy, NoFreeSpot, BankFailed, NotInstalled, Installing, TakenOutOfBank,
             BeingRemoved, BeingRepaired, RefusedByQueue, ShortOfMaterials, ShortfallNamed, AndMore, CantRepairCount, CantRepairCountWhy,
             AlreadyQueuedRepair, QueuedForRemoval, NeedsNoRepair, CantRepairWhy, CantRepair, CantRepairShort, AlreadyQueuedRemoval,
             QueuedForRepair, NotAllowed, Needs, RepairQueuedFirst, NeedItem, OutOfStamina, UnnamedItem,

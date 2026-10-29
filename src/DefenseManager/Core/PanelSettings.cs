@@ -5,7 +5,8 @@ namespace DefenseManager.Core;
 
 /// <summary>
 /// The config values the panel's Settings tab shows. Key is the panel key's name, "" for none. AttackRate is the saved
-/// value, which the game picks up at its next start.
+/// value, which the game picks up at its next start. AllowDuringWaves lets defenses be repaired, removed, installed and
+/// moved while a zombie wave is on.
 /// </summary>
 public sealed record PanelSettings(
     string Key,
@@ -14,7 +15,8 @@ public sealed record PanelSettings(
     float ProximityRange,
     float CrawlerDodge,
     float ArmoredCrawlerDodge,
-    float AttackRate);
+    float AttackRate,
+    bool AllowDuringWaves = false);
 
 /// <summary>
 /// One change from the Settings tab. The page sends a setting's name and the value it wants; a number is pulled into
@@ -43,6 +45,8 @@ public abstract record SettingChange
 
     public sealed record AttackRate(float Rate) : SettingChange;
 
+    public sealed record AllowDuringWaves(bool IsAllowed) : SettingChange;
+
     /// <summary>The change a setting's name and value stand for, or null for a name or value that does not parse.</summary>
     public static SettingChange? Parse(string name, string value) => name switch
     {
@@ -50,6 +54,12 @@ public abstract record SettingChange
         {
             "1" => new LayoutControls(true),
             "0" => new LayoutControls(false),
+            _ => null,
+        },
+        "wavework" => value switch
+        {
+            "1" => new AllowDuringWaves(true),
+            "0" => new AllowDuringWaves(false),
             _ => null,
         },
         "defaultmode" => PowerModes.Parse(value) is { } mode ? new DefaultMode(mode) : null,

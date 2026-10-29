@@ -12,7 +12,8 @@ namespace DefenseManager.Core;
 /// refused carries the reason as visible text, since the web view draws no hover tips. Ids are sent as strings because
 /// a JavaScript number cannot hold every long. An electrical defense's row also carries its power: the switch as it
 /// stands, its own setting and its type's, when there are power settings to show. Each row also says which square of the
-/// yard grid it stands on, and the view carries the grid itself and the Settings tab's values.
+/// yard grid it stands on, and the view carries the grid itself (each square by its game name too, which an Install
+/// press names), the Settings tab's values and the defense packages the player could install.
 /// </summary>
 public static class DefenseView
 {
@@ -34,12 +35,14 @@ public static class DefenseView
         var materials = survey.Materials.OrderBy(entry => entry.Key).Select(entry => MaterialJson(entry.Value, budget.Left(entry.Key), NeededBy(toRepair, entry.Key)));
         var rows = survey.Defenses.OrderBy(defense => defense.Name, StringComparer.Ordinal).ThenBy(defense => defense.Id).Select(defense => RowJson(defense, survey, budget, locked is null, power));
 
-        return Json(note: null, locked, toRepair.Count, toClear, materials, rows, YardJson(survey.Yard), PowerModeJson(power?.Global, survey.IsChinese), SettingsJson(settings));
+        var packages = (survey.Packages ?? Array.Empty<DefensePackage>()).Where(package => package.Count > 0).OrderBy(package => package.Name, StringComparer.Ordinal).Select(PackageJson);
+
+        return Json(note: null, locked, toRepair.Count, toClear, materials, rows, YardJson(survey.Yard), PowerModeJson(power?.Global, survey.IsChinese), SettingsJson(settings), packages);
     }
 
     /// <summary>The panel with no defenses and a note saying why, for when the game could not be read.</summary>
     public static string Empty(string note, PanelSettings? settings = null) =>
-        Json(note, locked: null, repairAll: 0, clearAll: 0, Enumerable.Empty<string>(), Enumerable.Empty<string>(), "null", "null", SettingsJson(settings));
+        Json(note, locked: null, repairAll: 0, clearAll: 0, Enumerable.Empty<string>(), Enumerable.Empty<string>(), "null", "null", SettingsJson(settings), Enumerable.Empty<string>());
 
     /// <summary>
     /// What the Layout bar draws from: the panel view's note, locked reason and two top-button counts, worked out the
@@ -91,7 +94,7 @@ public static class DefenseView
         return null;
     }
 
-    private static string Json(string? note, string? locked, int repairAll, int clearAll, IEnumerable<string> materials, IEnumerable<string> rows, string yard, string global, string settings)
+    private static string Json(string? note, string? locked, int repairAll, int clearAll, IEnumerable<string> materials, IEnumerable<string> rows, string yard, string global, string settings, IEnumerable<string> packages)
     {
         var json = new StringBuilder(4096);
 
@@ -104,10 +107,15 @@ public static class DefenseView
             .Append("],\"yard\":").Append(yard)
             .Append(",\"global\":").Append(global)
             .Append(",\"settings\":").Append(settings)
-            .Append('}');
+            .Append(",\"packages\":[").AppendJoin(',', packages)
+            .Append("]}");
 
         return json.ToString();
     }
+
+    /// <summary>A packed defense the Install list offers: how many lie in the yard and how many wait in Package Bank.</summary>
+    private static string PackageJson(DefensePackage package) =>
+        $"{{\"type\":{Num(package.ConfigId)},\"name\":{Str(package.Name)},\"icon\":{Str(package.Icon)},\"yard\":{Num(package.YardBags.Count)},\"bank\":{Num(package.Banked)}}}";
 
     private static string MaterialJson(Material material, int free, int need) =>
         $"{{\"name\":{Str(material.Name)},\"icon\":{Str(material.Icon)},\"free\":{Num(free)},\"need\":{Num(need)}}}";
@@ -186,7 +194,7 @@ public static class DefenseView
         {
             var place = yard.PlaceOf(square);
 
-            return $"{{\"r\":{Num(place.Row)},\"c\":{Num(place.Column)},\"own\":{Bool(square.IsOwned)},\"price\":{Num(square.Price)}}}";
+            return $"{{\"n\":{Str(square.Name)},\"r\":{Num(place.Row)},\"c\":{Num(place.Column)},\"own\":{Bool(square.IsOwned)},\"price\":{Num(square.Price)}}}";
         });
         var wall = yard.Wall.Select(feature => $"{{\"kind\":{Str(feature.Kind == WallFeatureKind.Door ? "door" : "window")},\"at\":{Dec(yard.ColumnAt(feature.X))}}}");
 
@@ -196,7 +204,7 @@ public static class DefenseView
     private static string SettingsJson(PanelSettings? settings) => settings is null
         ? "null"
         : $"{{\"key\":{Str(settings.Key)},\"layout\":{Bool(settings.LayoutControls)},\"mode\":{Str(PowerModes.ConfigName(settings.DefaultMode))}"
-            + $",\"range\":{Dec(settings.ProximityRange)},\"crawler\":{Dec(settings.CrawlerDodge)},\"armored\":{Dec(settings.ArmoredCrawlerDodge)},\"rate\":{Dec(settings.AttackRate)}}}";
+            + $",\"range\":{Dec(settings.ProximityRange)},\"crawler\":{Dec(settings.CrawlerDodge)},\"armored\":{Dec(settings.ArmoredCrawlerDodge)},\"rate\":{Dec(settings.AttackRate)},\"waves\":{Bool(settings.AllowDuringWaves)}}}";
 
     private static string Dec(double value) => Math.Round(value, 2).ToString("0.##", CultureInfo.InvariantCulture);
 

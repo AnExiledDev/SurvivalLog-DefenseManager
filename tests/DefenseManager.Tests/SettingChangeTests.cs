@@ -14,6 +14,8 @@ public class SettingChangeTests
         Assert.Equal(new SettingChange.CrawlerDodge(0.3f), SettingChange.Parse("crawlerdodge", "0.3"));
         Assert.Equal(new SettingChange.ArmoredCrawlerDodge(0f), SettingChange.Parse("armoredcrawlerdodge", "0"));
         Assert.Equal(new SettingChange.AttackRate(2.5f), SettingChange.Parse("attackrate", "2.5"));
+        Assert.Equal(new SettingChange.AllowDuringWaves(true), SettingChange.Parse("wavework", "1"));
+        Assert.Equal(new SettingChange.AllowDuringWaves(false), SettingChange.Parse("wavework", "0"));
     }
 
     /// <summary>A stepper pressed past the end of a range stays at the end instead of saving a value the config refuses.</summary>
@@ -51,6 +53,7 @@ public class SettingChangeTests
     [InlineData("proximityrange", "far")]
     [InlineData("crawlerdodge", "NaN")]
     [InlineData("attackrate", "Infinity")]
+    [InlineData("wavework", "true")]
     [InlineData("panelkey", "F8")]
     public void A_name_or_value_that_does_not_parse_changes_nothing(string name, string value)
     {

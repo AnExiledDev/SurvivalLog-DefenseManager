@@ -220,12 +220,120 @@ internal sealed class GameDefenses : IDefenseGame
 
         var defenses = ReadDefenses(agents, config, actions, conditions, world._PowerManager, role.InstanceId, tables.Icons);
         var materials = ReadMaterials(config, defenses, tables.Icons);
-        var isWaveLocked = world._TowerWaveManager?.IsWaveOperationLocked() ?? false;
-        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role), isChinese, _yard.Read(world, config, GamePower.ReadLoad(world)));
+        var isWaveLocked = !WaveLockPatch.AllowsWaves && (world._TowerWaveManager?.IsWaveOperationLocked() ?? false);
+        var plans = world._InstallPlanManager;
+        var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role), isChinese, _yard.Read(world, config, GamePower.ReadLoad(world)),
+            ReadPackages(config, agents, role, plans, tables.Icons), IsInstalling(plans));
 
         LogDefenseCount(defenses.Count);
 
         return new DefenseRead.Ready(survey);
+    }
+
+    /// <summary>
+    /// Takes one banked package of the defense out of Package Bank onto a free yard spot, through that mod's own take-out.
+    /// </summary>
+    public long TakeOutOfBank(int configId)
+    {
+        var id = OptionalBank.TakeOut(configId, _log);
+
+        _log(id > 0 ? $"took defense {configId} out of Package Bank as package {id}" : $"Package Bank gave no package of defense {configId} ({id})");
+
+        return id;
+    }
+
+    /// <summary>
+    /// Picks the square for the package the way the Layout screen does after the player picks a package: the game runs
+    /// every install check, shows its own reason when it refuses, and otherwise has the character carry the package over
+    /// and install it. The package is set as the pending one only for this call, so a later click in Layout installs
+    /// nothing by surprise. It worked when the game has the package bound for that square afterwards.
+    /// </summary>
+    public bool TryInstall(long bagId, string square)
+    {
+        InstallPlanManager? plans = null;
+
+        try
+        {
+            plans = GameSingleton.Existing<BattleLogicWorld>()?._InstallPlanManager;
+
+            if (plans == null) return false;
+
+            plans._PendingBagFurnitureId_k__BackingField = bagId;
+            plans.OnSelectBuildingPos(square, Vector3.zero);
+
+            var targets = plans.PendingInstallTargets;
+            var isBound = targets != null && targets.TryGetValue(bagId, out var node) && node == square;
+
+            _log(isBound ? $"installing package {bagId} on {square}" : $"the game would not install package {bagId} on {square}");
+
+            return isBound;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("install", ex);
+
+            return false;
+        }
+        finally
+        {
+            ClearPending(plans, bagId);
+        }
+    }
+
+    private void ClearPending(InstallPlanManager? plans, long bagId)
+    {
+        try
+        {
+            if (plans != null && plans._PendingBagFurnitureId_k__BackingField == bagId) plans._PendingBagFurnitureId_k__BackingField = -1;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("clear the pending install", ex);
+        }
+    }
+
+    /// <summary>
+    /// The defense packages in the yard's package spots that are not already bound for a square, and those banked in
+    /// Package Bank when it is installed. A spot whose package cannot be read is skipped.
+    /// </summary>
+    private IReadOnlyList<DefensePackage> ReadPackages(ConfigManager config, AgentManager agents, LeadingRole role, InstallPlanManager? plans, IconIndex icons)
+    {
+        var yard = new List<(int ConfigId, long BagId)>();
+        var points = AgentTools.GetAgentComponent<BuildComponent>(role)?._PackagePointMap_k__BackingField;
+        var bound = plans?.PendingInstallTargets;
+
+        if (points != null)
+        {
+            foreach (var point in points)
+            {
+                if (!PackageSpots.IsYardSpot(point.Value) || (bound != null && bound.ContainsKey(point.Key))) continue;
+
+                var bag = agents.GetAgent(point.Key)?.TryCast<BagFurniture>();
+
+                if (bag == null || bag._IsDoorBox_k__BackingField) continue;
+
+                yard.Add((bag._FurnitureConfigId_k__BackingField, point.Key));
+            }
+        }
+
+        yard.Sort((a, b) => a.BagId.CompareTo(b.BagId));
+
+        return PackageSpots.Gather(yard, OptionalBank.Banked(_log), configId => FactsOf(config, configId, icons) is { } facts ? (facts.Name, facts.Icon) : null);
+    }
+
+    /// <summary>The game runs one install at a time; a failed check counts as not installing, and the game's own check still stops a second one.</summary>
+    private bool IsInstalling(InstallPlanManager? plans)
+    {
+        try
+        {
+            return plans?.IsInstallInProgress() ?? false;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("install check", ex);
+
+            return false;
+        }
     }
 
     /// <summary>Null on the title screen, while a save loads and in the prologue.</summary>

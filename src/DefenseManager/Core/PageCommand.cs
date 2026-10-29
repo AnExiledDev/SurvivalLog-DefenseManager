@@ -5,7 +5,7 @@ namespace DefenseManager.Core;
 
 /// <summary>
 /// What the panel and HUD button scripts ask for. They send "slmod|defensemanager|" followed by a verb and its
-/// arguments (a defense id, a row, a power mode, a setting and its value); anything else parses to Unknown so it can
+/// arguments (a defense id, a row, a yard square and a packed defense, a power mode, a setting and its value); anything else parses to Unknown so it can
 /// be logged rather than acted on (the script's "diag|..." notes land there on purpose).
 /// </summary>
 public abstract record PageCommand
@@ -34,6 +34,9 @@ public abstract record PageCommand
     public sealed record Repair(long DefenseId) : PageCommand;
 
     public sealed record Remove(long DefenseId) : PageCommand;
+
+    /// <summary>Install a packed defense, by its furniture id, on a yard square, by the game's name for the square.</summary>
+    public sealed record Install(string Square, int ConfigId) : PageCommand;
 
     /// <summary>A power mode picked for that one defense; null lets it follow its type.</summary>
     public sealed record Power(long DefenseId, PowerMode? Mode) : PageCommand;
@@ -73,6 +76,7 @@ public abstract record PageCommand
             ("repairrow", 2) when TryRow(parts[1], out var row) => new RepairRow(row),
             ("repair", 2) when TryId(parts[1], out var id) => new Repair(id),
             ("remove", 2) when TryId(parts[1], out var id) => new Remove(id),
+            ("install", 3) when parts[1].Length > 0 && TryConfigId(parts[2], out var configId) => new Install(parts[1], configId),
             ("power", 3) when TryId(parts[1], out var id) && TryMode(parts[2], out var mode) => new Power(id, mode),
             ("powertype", 3) when TryId(parts[1], out var id) && TryMode(parts[2], out var mode) => new PowerType(id, mode),
             ("set", 3) when SettingChange.Parse(parts[1], parts[2]) is { } change => new Setting(change),
@@ -84,6 +88,8 @@ public abstract record PageCommand
     }
 
     private static bool TryId(string text, out long id) => long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out id);
+
+    private static bool TryConfigId(string text, out int configId) => int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out configId) && configId > 0;
 
     private static bool TryRow(string text, out int row) => int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out row) && row > 0;
 

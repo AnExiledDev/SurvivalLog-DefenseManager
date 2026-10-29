@@ -289,6 +289,38 @@ public class DefenseViewTests
     }
 
     [Fact]
+    public void Each_square_carries_the_games_name_for_it_so_an_install_can_say_where()
+    {
+        var names = View(WithYard(Array.Empty<Defense>())).GetProperty("yard").GetProperty("squares").EnumerateArray().Select(square => square.GetProperty("n").GetString());
+
+        Assert.Equal(new[] { "A", "B", "C", "D", "E", "F" }, names.OrderBy(name => name));
+    }
+
+    [Fact]
+    public void The_install_list_holds_only_defenses_with_a_package_somewhere_in_name_order()
+    {
+        var packages = new[]
+        {
+            new DefensePackage(30, "Spikes", "s.png", new long[] { 7, 8 }, 1),
+            new DefensePackage(20, "Barbed wire", null, Array.Empty<long>(), 2),
+            new DefensePackage(40, "Tesla coil", null, Array.Empty<long>(), 0),
+        };
+        var view = View(WithYard(Array.Empty<Defense>()) with { Packages = packages }).GetProperty("packages").EnumerateArray().ToList();
+
+        Assert.Equal(new[] { "Barbed wire", "Spikes" }, view.Select(package => package.GetProperty("name").GetString()));
+        Assert.Equal(30, view[1].GetProperty("type").GetInt32());
+        Assert.Equal(2, view[1].GetProperty("yard").GetInt32());
+        Assert.Equal(1, view[1].GetProperty("bank").GetInt32());
+        Assert.Equal(0, view[0].GetProperty("yard").GetInt32());
+    }
+
+    [Fact]
+    public void An_empty_panel_offers_nothing_to_install()
+    {
+        Assert.Empty(JsonDocument.Parse(DefenseView.Empty("Load a game first.")).RootElement.GetProperty("packages").EnumerateArray());
+    }
+
+    [Fact]
     public void Without_a_grid_the_view_says_so()
     {
         Assert.Equal(JsonValueKind.Null, View(SurveyOf(new[] { Def(1) })).GetProperty("yard").ValueKind);
@@ -297,7 +329,7 @@ public class DefenseViewTests
     [Fact]
     public void The_settings_tab_gets_the_saved_values_even_when_the_game_could_not_be_read()
     {
-        var settings = new PanelSettings("F7", false, PowerMode.Proximity, 15, 0.25f, 0.3f, 1.5f);
+        var settings = new PanelSettings("F7", false, PowerMode.Proximity, 15, 0.25f, 0.3f, 1.5f, AllowDuringWaves: true);
         var view = JsonDocument.Parse(DefenseView.Empty("Load a game first.", settings)).RootElement.GetProperty("settings");
 
         Assert.Equal("F7", view.GetProperty("key").GetString());
@@ -306,5 +338,6 @@ public class DefenseViewTests
         Assert.Equal(15, view.GetProperty("range").GetDouble());
         Assert.Equal(0.3, view.GetProperty("armored").GetDouble(), 3);
         Assert.Equal(1.5, view.GetProperty("rate").GetDouble());
+        Assert.True(view.GetProperty("waves").GetBoolean());
     }
 }

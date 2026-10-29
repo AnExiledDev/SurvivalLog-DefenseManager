@@ -48,6 +48,23 @@ internal sealed class FakeGame : IDefenseGame
 
     public Spot Character { get; set; }
 
+    /// <summary>The defense packages the read hands out, none by default.</summary>
+    public List<DefensePackage> Packages { get; } = new();
+
+    public bool IsInstalling { get; set; }
+
+    /// <summary>What Package Bank answers the next take-out: a new package id, or one of the BankTakeOut answers.</summary>
+    public long BankAnswer { get; set; } = 900;
+
+    /// <summary>The game's install refuses everything, as it does for a square its own checks turn down.</summary>
+    public bool RefusesInstall { get; set; }
+
+    /// <summary>Every install the game took: the package and the square.</summary>
+    public List<(long BagId, string Square)> Installed { get; } = new();
+
+    /// <summary>The furniture ids Package Bank was asked to take out.</summary>
+    public List<int> TakenOut { get; } = new();
+
     /// <summary>The defenses as they stand; their queued flags are ignored, the queue below says what is queued.</summary>
     public List<Defense> Defenses { get; } = new();
 
@@ -121,7 +138,7 @@ internal sealed class FakeGame : IDefenseGame
         var defenses = Defenses.Select(defense => defense with { IsRepairQueued = queue.Contains(new Act(Job.Repair, defense.Id)), IsRemovalQueued = queue.Contains(new Act(Job.Remove, defense.Id)) }).ToList();
         var materials = Stock.ToDictionary(entry => entry.Key, entry => new Material(NameOf(entry.Key), null, entry.Value));
 
-        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina, IsChinese, Yard));
+        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina, IsChinese, Yard, Packages.ToList(), IsInstalling));
     }
 
     /// <summary>Like the game's own queue, this takes any job it is handed, whatever the materials or the repair check say.</summary>
@@ -142,6 +159,22 @@ internal sealed class FakeGame : IDefenseGame
         else Running.AddRange(LinedUp);
 
         LinedUp.Clear();
+
+        return true;
+    }
+
+    public long TakeOutOfBank(int configId)
+    {
+        TakenOut.Add(configId);
+
+        return BankAnswer;
+    }
+
+    public bool TryInstall(long bagId, string square)
+    {
+        if (RefusesInstall) return false;
+
+        Installed.Add((bagId, square));
 
         return true;
     }

@@ -54,7 +54,8 @@
     rowOut1: '1 row out from the house', rowsOut: '{0} rows out from the house',
     rowInfo: 'Defenses: {0}. Squares yours: {1} of {2}.', rowPrice: 'The other squares cost {0} Survival Points each.',
     repairRow: 'Repair row {0} ({1})', emptySquare: 'Empty square', notYours: 'Not yours yet',
-    buildHere: 'Build a defense here from the Layout screen.', unlockFor: 'Unlock it from the Layout screen for {0} Survival Points.',
+    buildHere: 'Build a defense here from the Layout screen.', installHere: 'Install a packed defense here:', install: 'Install',
+    inYard: '{0} in the yard', inBank: '{0} in Package Bank', noPackages: 'No defense packages in the yard or in Package Bank.', unlockFor: 'Unlock it from the Layout screen for {0} Survival Points.',
     everyType: 'Every {0}', global: 'Global ({0})', ownList: 'Set on their own', followType: 'Follow the type',
     noneOwn: 'None. Pick one in the Yard tab to set it alone.', noPower: 'No powered defenses yet.',
     powerNote: 'Wave only: on during waves and while zombies are at the base. Proximity: on while a zombie is in range. Always on: never turns off. Default: the game\'s own power switch decides.',
@@ -69,6 +70,7 @@
     setArmored: 'Armored crawler dodge chance',
     setArmoredDesc: 'Chance an Armored Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.',
     setRate: 'Device attack rate', setRateDesc: 'How often defense devices strike, 0.25 to 10. Takes effect at the next game start.',
+    setWaves: 'Work during waves', setWavesDesc: 'Repair, remove, install and move defenses while a zombie wave is on. The base game locks them until it ends.',
     keyClose: '{0} or Esc to close', noSettings: 'Settings are not available right now.'
   };
 
@@ -832,9 +834,16 @@
 
     if (picked) return inspector(picked);
     if (state.row != null && state.data.yard) return rowPanel(state.row);
-    if (state.cell != null && state.data.yard) return squarePanel(state.cell);
+    // A square that has since been built on (an install finished) goes back to the repair list.
+    if (state.cell != null && state.data.yard && !isBuiltOn(state.cell)) return squarePanel(state.cell);
 
     return repairsPanel();
+  }
+
+  function isBuiltOn(key) {
+    var at = key.split(':').map(Number);
+
+    return defenses().some(function (defense) { return isOnGrid(defense) && defense.row === at[0] && defense.col === at[1]; });
   }
 
   function side() {
@@ -1014,7 +1023,32 @@
     add(info, el('b', '', say(isMine ? 'emptySquare' : 'notYours')), el('small', '', say('where', at[0], at[1])));
     add(head, mark, info);
 
-    return add(box, back(), head, el('p', 'dm-desc', isMine ? say('buildHere') : say('unlockFor', square ? square.price : '?')));
+    if (!isMine) return add(box, back(), head, el('p', 'dm-desc', say('unlockFor', square ? square.price : '?')));
+
+    var packages = state.data.packages || [];
+
+    if (packages.length === 0) return add(box, back(), head, el('p', 'dm-desc', say('noPackages') + ' ' + say('buildHere')));
+
+    var rows = el('div', 'dm-rlist');
+
+    packages.forEach(function (pack) { rows.appendChild(installRow(square, pack)); });
+
+    return add(box, back(), head, el('p', 'dm-desc', say('installHere')), rows);
+  }
+
+  // One packed defense the square could take: where its packages are, and its Install button.
+  function installRow(square, pack) {
+    var node = el('div', 'dm-rrow');
+    var name = el('div', 'dm-nm');
+    var counts = [];
+
+    if (pack.yard > 0) counts.push(say('inYard', pack.yard));
+    if (pack.bank > 0) counts.push(say('inBank', pack.bank));
+
+    add(name, el('b', '', pack.name), el('small', '', counts.join(', ')));
+    add(node, icon(pack, 'dm-i30'), name, button(say('install'), 'install', square.n + '|' + pack.type, !isLocked(), 'dm-sm dm-quiet'));
+
+    return node;
   }
 
   // ===== The Power tab =====
@@ -1081,7 +1115,7 @@
     var left = el('div', 'dm-col');
     var right = el('div', 'dm-col');
     var modes = el('div', 'dm-seg');
-    var toggle = act(el('button', 'dm-tog' + (s.layout ? ' dm-on' : '')), 'set', 'layoutcontrols|' + (s.layout ? '0' : '1'));
+    var toggle = onOff('layoutcontrols', s.layout);
 
     MODES.forEach(function (name) { modes.appendChild(option(modeWord(name), 'set', 'defaultmode|' + name, s.mode === name)); });
 
@@ -1096,9 +1130,14 @@
       sect(say('setCombat')),
       setRow('setCrawler', 'setCrawlerDesc', stepper('crawlerdodge', s.crawler, percent)),
       setRow('setArmored', 'setArmoredDesc', stepper('armoredcrawlerdodge', s.armored, percent)),
-      setRow('setRate', 'setRateDesc', stepper('attackrate', s.rate, function (v) { return v + 'x'; })));
+      setRow('setRate', 'setRateDesc', stepper('attackrate', s.rate, function (v) { return v + 'x'; })),
+      setRow('setWaves', 'setWavesDesc', onOff('wavework', s.waves)));
 
     return add(box, add(grid, left, right));
+  }
+
+  function onOff(name, isOn) {
+    return act(el('button', 'dm-tog' + (isOn ? ' dm-on' : '')), 'set', name + '|' + (isOn ? '0' : '1'));
   }
 
   function percent(value) {

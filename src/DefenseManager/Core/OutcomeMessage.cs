@@ -35,6 +35,13 @@ public static class OutcomeMessage
         DefenseOutcome.StartFailed failed => Texts.StartFailed.Say(isChinese, JobNoun(failed.Job, failed.Count, isChinese)),
         DefenseOutcome.Queued { Job: Job.Repair } queued => Texts.QueuedRepair.Say(isChinese, queued.Name),
         DefenseOutcome.Queued { Job: Job.Remove } queued => Texts.QueuedRemoval.Say(isChinese, queued.Name),
+        DefenseOutcome.SquareTaken => Texts.SquareTaken.Pick(isChinese),
+        DefenseOutcome.NoPackage => Texts.NoPackage.Pick(isChinese),
+        DefenseOutcome.InstallBusy => Texts.InstallBusy.Pick(isChinese),
+        DefenseOutcome.NoFreeSpot noSpot => Texts.NoFreeSpot.Say(isChinese, noSpot.Name),
+        DefenseOutcome.BankFailed failed => Texts.BankFailed.Say(isChinese, failed.Name),
+        DefenseOutcome.NotInstalled refused => FromBank(Texts.NotInstalled.Say(isChinese, refused.Name), refused.FromBank, isChinese),
+        DefenseOutcome.Installing installing => FromBank(Texts.Installing.Say(isChinese, installing.Name), installing.FromBank, isChinese),
         DefenseOutcome.Repaired repaired => Describe(repaired.Tally, isChinese),
         DefenseOutcome.Cleared cleared => Describe(cleared.Tally, isChinese),
         _ => throw new InvalidOperationException("unknown defense outcome " + outcome),
@@ -70,14 +77,19 @@ public static class OutcomeMessage
 
     private static bool LeavesWorkQueued(DefenseOutcome outcome) => outcome switch
     {
-        DefenseOutcome.Queued => true,
+        DefenseOutcome.Queued or DefenseOutcome.Installing => true,
         DefenseOutcome.Repaired repaired => repaired.Tally.Queued + repaired.Tally.AlreadyQueued > 0,
         DefenseOutcome.Cleared cleared => cleared.Tally.Queued + cleared.Tally.AlreadyQueued > 0,
         DefenseOutcome.NoGame or DefenseOutcome.NotReady or DefenseOutcome.WaveLocked or DefenseOutcome.AwayFromHome or DefenseOutcome.QueueBusy
             or DefenseOutcome.NothingToDo or DefenseOutcome.Gone or DefenseOutcome.RepairRefused or DefenseOutcome.RemoveRefused
-            or DefenseOutcome.NotQueued or DefenseOutcome.StartFailed => false,
+            or DefenseOutcome.NotQueued or DefenseOutcome.StartFailed or DefenseOutcome.SquareTaken or DefenseOutcome.NoPackage
+            or DefenseOutcome.InstallBusy or DefenseOutcome.NoFreeSpot or DefenseOutcome.BankFailed or DefenseOutcome.NotInstalled => false,
         _ => throw new InvalidOperationException("unknown defense outcome " + outcome),
     };
+
+    /// <summary>A package that came out of the bank stays in the yard whatever happens next, so the line says where it went.</summary>
+    private static string FromBank(string message, bool isFromBank, bool isChinese) =>
+        isFromBank ? Texts.Sentences(isChinese, new[] { message, Texts.TakenOutOfBank.Pick(isChinese) }) : message;
 
     private static string Describe(RepairTally tally, bool isChinese)
     {

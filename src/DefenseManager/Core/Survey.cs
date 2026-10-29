@@ -17,7 +17,8 @@ public sealed record RepairStamina(float Have, int NeededToStart);
 /// repairs use, what starting a batch does to the character's queue, whether a zombie wave has defenses locked,
 /// whether the character is at home where the defenses are, their stamina (null when it could not be read), and
 /// whether the game is showing Chinese, which the words the press ends with follow, and the yard's grid of defense
-/// squares (null when it could not be read).
+/// squares (null when it could not be read), the defense packages waiting to be installed, and whether an install is
+/// already under way (the game runs one at a time).
 /// </summary>
 public sealed record Survey(
     IReadOnlyList<Defense> Defenses,
@@ -28,13 +29,24 @@ public sealed record Survey(
     bool IsHome,
     RepairStamina? Stamina = null,
     bool IsChinese = false,
-    Yard? Yard = null)
+    Yard? Yard = null,
+    IReadOnlyList<DefensePackage>? Packages = null,
+    bool IsInstalling = false)
 {
     /// <summary>A material the game did not describe is still named, so a message never shows a bare id alone.</summary>
     public string MaterialName(int itemId) => Materials.TryGetValue(itemId, out var material) ? material.Name : Texts.UnnamedItem.Say(IsChinese, itemId);
 
     /// <summary>A material the game did not describe counts as none in stock, so no repair is promised on it.</summary>
     public int Stock(int itemId) => Materials.TryGetValue(itemId, out var material) ? material.Stock : 0;
+}
+
+/// <summary>
+/// One kind of defense the player has packed and could install: its furniture id, name and picture, the ids of its
+/// packages lying in the yard's package spots, and how many more wait in Package Bank (0 without that mod).
+/// </summary>
+public sealed record DefensePackage(int ConfigId, string Name, string? Icon, IReadOnlyList<long> YardBags, int Banked)
+{
+    public int Count => YardBags.Count + Banked;
 }
 
 /// <summary>The game's defenses for one press, or why they could not be read.</summary>

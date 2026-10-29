@@ -44,6 +44,27 @@ public abstract record DefenseOutcome
 
     public sealed record Repaired(RepairTally Tally) : DefenseOutcome;
 
+    /// <summary>The square an Install button named is not an owned, empty yard square any more.</summary>
+    public sealed record SquareTaken : DefenseOutcome;
+
+    /// <summary>The player has no package of that defense, in the yard or in Package Bank.</summary>
+    public sealed record NoPackage : DefenseOutcome;
+
+    /// <summary>The character is already installing something; the game runs one install at a time.</summary>
+    public sealed record InstallBusy : DefenseOutcome;
+
+    /// <summary>The package is in Package Bank but every yard package spot is taken, so it could not come out.</summary>
+    public sealed record NoFreeSpot(string Name) : DefenseOutcome;
+
+    /// <summary>Package Bank would not give the package back.</summary>
+    public sealed record BankFailed(string Name) : DefenseOutcome;
+
+    /// <summary>The game refused the install and showed its own reason. FromBank says the package came out of the bank first.</summary>
+    public sealed record NotInstalled(string Name, bool FromBank) : DefenseOutcome;
+
+    /// <summary>The character is on the way to install the defense. FromBank says the package came out of the bank first.</summary>
+    public sealed record Installing(string Name, bool FromBank) : DefenseOutcome;
+
     public sealed record Cleared(ClearTally Tally) : DefenseOutcome;
 }
 

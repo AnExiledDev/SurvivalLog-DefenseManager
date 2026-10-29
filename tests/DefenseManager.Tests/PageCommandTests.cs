@@ -46,6 +46,12 @@ public class PageCommandTests
     }
 
     [Fact]
+    public void An_install_carries_the_square_and_the_defense_furniture_id()
+    {
+        Assert.Equal(new PageCommand.Install("TowerSlot_2_3", 36001), PageCommand.Parse("slmod|defensemanager|install|TowerSlot_2_3|36001"));
+    }
+
+    [Fact]
     public void A_settings_change_carries_the_setting_and_its_value()
     {
         Assert.Equal(new PageCommand.Setting(new SettingChange.LayoutControls(false)), PageCommand.Parse("slmod|defensemanager|set|layoutcontrols|0"));
@@ -74,6 +80,13 @@ public class PageCommandTests
     [InlineData("slmod|defensemanager|set|layoutcontrols")]
     [InlineData("slmod|defensemanager|set|layoutcontrols|yes")]
     [InlineData("slmod|defensemanager|set|panelkey|F8")]
+    [InlineData("slmod|defensemanager|install")]
+    [InlineData("slmod|defensemanager|install|s1")]
+    [InlineData("slmod|defensemanager|install||36001")]
+    [InlineData("slmod|defensemanager|install|s1|0")]
+    [InlineData("slmod|defensemanager|install|s1|-5")]
+    [InlineData("slmod|defensemanager|install|s1|tesla")]
+    [InlineData("slmod|defensemanager|install|s1|36001|2")]
     [InlineData("slmod|defensemanager|diag|hud button placed")]
     [InlineData("slmod|unpackall|toggle")]
     public void Anything_else_is_unknown_and_kept_whole_for_the_log(string message)

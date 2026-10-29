@@ -14,13 +14,15 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 - **Yard tab**: your yard as its real grid of squares, row 1 against the house and the highest row at the road side, with the house's doors and windows along the wall. Each defense sits on the square it stands on, colored by its state (Broken, Damaged or Intact). Squares you have not unlocked yet are marked with their Survival Points price. A defense on no square shows in a **Not on the grid** strip under the yard.
 - **Repairs list**: beside the yard, every defense that needs repair is listed worst first under the **Repair all** button, each with its condition and repair cost. A defense already queued shows "Repair queued" or "Removal queued".
 - **Click a defense** on the grid or in the list to see its name, where it stands, its condition, its repair cost, and a **Repair** and a **Remove** button. An electrical defense also shows whether its power is on and its power mode. **< Back to repairs** returns to the list.
-- **Click a row number** to see that row: how many defenses and squares of yours it has, what the rest cost, and **Repair row n (count)**, which repairs every damaged defense in that row the way Repair all does. Click an empty square to see whether it is yours.
+- **Install from the panel**: click an empty square of yours and the panel lists the defense packages lying in your yard's package spots and, with [Package Bank](https://www.nexusmods.com/survivallog/mods/79) 0.5.0 or newer, the ones in the bank, with how many of each. **Install** sends the character to install that defense on the square, the same install the game lines up from a package. A package in the yard is used first; otherwise one is taken out of the bank onto a free yard package spot and installed. With nothing to install, the square points you to the Layout screen.
+- **Work during waves**: `AllowDuringWaves` in the config, or **Work during waves** on the Settings tab, lets you repair, remove, install and move defenses while a zombie wave is on, from the panel and from the game's own menus and Layout screen. It is off by default, as in the base game. Robot repairs and expeditions still wait for the wave to end.
+- **Click a row number** to see that row: how many defenses and squares of yours it has, what the rest cost, and **Repair row n (count)**, which repairs every damaged defense in that row the way Repair all does. Click a square that is not yours to see its price.
 - **Buttons say why not**: a button that would be refused is greyed out and the reason shows under it: "Needs 3 more Wood", the game's own reason, or "Repair queued: let it finish or cancel it first".
 - **Remove without the are-you-sure box**: Remove queues the same removal action as the defense's own menu, without the confirmation box.
 - **Short of materials**: when your materials do not cover every repair, a line under Repair all names each material you are short of as free / needed: what is left after the repairs already queued, against what the repairs not yet queued would take.
 - **Clear messages**: after each press a line says what was queued and what was left and why. Repair all names up to three defenses that are short of materials and exactly what each is missing. When the panel is closed, the message shows as a short pop-up instead.
 - **Power modes for electrical defenses**: the mod switches each electrical defense's power for you, in one of four modes (see [Power modes](#power-modes)). Click one to see whether its power is on and to pick its own mode. The **Power** tab sets the mode for every defense of a type.
-- **Settings tab**: the Layout screen buttons, the default power mode, the Proximity range, the crawler dodge chances and the device attack rate can be changed in the panel, and are saved to the config at once. The panel key shows there but is changed in the config.
+- **Settings tab**: the Layout screen buttons, the default power mode, the Proximity range, the crawler dodge chances, the device attack rate and Work during waves can be changed in the panel, and are saved to the config at once. The panel key shows there but is changed in the config.
 - **Game hotkeys paused**: the game's own hotkeys are off while the panel is open and come back when it closes, so keys you press in the panel do not reach the game.
 - **Device attack rate**: `DeviceAttackRate` in the config sets how often defense devices strike. 2 strikes twice as often. A powered device uses power on every strike, so a faster rate uses more power. It is 1, the game's own rate, by default.
 - **Crawlers can be hit by the chainsaw**: in the base game crawler zombies always dodge the Mechanical Chainsaw, so its blade never hits them. With the mod they dodge it only 25% of the time. `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` in the config set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
@@ -69,7 +71,8 @@ The mod checks the defenses about twice a second whenever a game is loaded, with
 
 ## Known issues and limits
 
-- Nothing can be repaired or removed during a zombie wave. The panel says so and its buttons wait.
+- By default nothing can be repaired, removed or installed during a zombie wave, as in the base game. The panel says so and its buttons wait. Turn on `AllowDuringWaves` to work during waves.
+- Install takes one defense at a time: while one is being installed, the next waits. It is the game's own install, so it joins your action queue the way an install from the package's own menu does.
 - On an expedition the panel, the HUD button and the Layout buttons are hidden and `F7` does nothing, since your defenses are back home. They come back when you return home.
 - The game is paused while the Layout screen is open, so repairs and removals you queue there wait. The character starts on them when you leave Layout (or, if you had paused the game before opening Layout, when you unpause). The message after each press says so.
 - The Layout buttons sit at the top middle of the screen. If they cover something you need on your screen size, turn them off with `LayoutControls` in the config; `F7` and the HUD button still work.
@@ -90,6 +93,7 @@ The mod checks the defenses about twice a second whenever a game is loaded, with
 
 - Survival Log 1.1.19611. Built and tested on this version; a game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
+- Optional: [Package Bank](https://www.nexusmods.com/survivallog/mods/79) 0.5.0 or newer. With it, the panel can install defenses straight from the bank.
 - [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.11.0 or newer. Defense Manager does not load without it. It shows results as toasts while the panel is closed, applies settings changed on the Mod Manager's Mods screen without a restart, lays out the HUD's tool buttons four high, in columns, when there are more than four, and its UI size setting sizes the panel.
 
 ## Install

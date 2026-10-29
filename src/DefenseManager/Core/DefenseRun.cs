@@ -25,6 +25,17 @@ public static class DefenseRun
 
     public static DefenseOutcome Remove(IDefenseGame game, long defenseId) => WithSurvey(game, survey => Remove(game, survey, defenseId));
 
+    /// <summary>
+    /// Installs a packed defense on an owned, empty yard square. A package lying in the yard is used first; only when
+    /// there is none is one taken out of Package Bank. The game's own install checks then run as if the player had
+    /// picked the square in Layout.
+    /// </summary>
+    public static DefenseOutcome Install(IDefenseGame game, string square, int configId) => WithSurvey(game, survey => Install(game, survey, square, configId));
+
+    /// <summary>Whether a square can take a new defense from the panel: the player owns it and no defense stands on it.</summary>
+    public static bool IsOpenSquare(Survey survey, YardSquare square) =>
+        square.IsOwned && survey.Yard is { } yard && !survey.Defenses.Any(defense => ReferenceEquals(yard.SquareAt(defense.Position), square));
+
     private static DefenseOutcome WithSurvey(IDefenseGame game, Func<Survey, DefenseOutcome> press)
     {
         var read = game.Read();
@@ -118,6 +129,26 @@ public static class DefenseRun
         if (survey.QueueOnStart == QueueOnStart.ReplacesPlayerActions) return new DefenseOutcome.QueueBusy();
 
         return QueueOne(game, Job.Remove, defense);
+    }
+
+    private static DefenseOutcome Install(IDefenseGame game, Survey survey, string squareName, int configId)
+    {
+        var square = survey.Yard?.Squares.FirstOrDefault(candidate => candidate.Name == squareName);
+
+        if (square is null || !IsOpenSquare(survey, square)) return new DefenseOutcome.SquareTaken();
+
+        var package = survey.Packages?.FirstOrDefault(candidate => candidate.ConfigId == configId);
+
+        if (package is null || package.Count == 0) return new DefenseOutcome.NoPackage();
+        if (survey.IsInstalling) return new DefenseOutcome.InstallBusy();
+        if (package.YardBags.Count > 0) return game.TryInstall(package.YardBags[0], squareName) ? new DefenseOutcome.Installing(package.Name, FromBank: false) : new DefenseOutcome.NotInstalled(package.Name, FromBank: false);
+
+        var bagId = game.TakeOutOfBank(configId);
+
+        if (bagId == BankTakeOut.NoFreeSpot) return new DefenseOutcome.NoFreeSpot(package.Name);
+        if (bagId == BankTakeOut.Failed) return new DefenseOutcome.BankFailed(package.Name);
+
+        return game.TryInstall(bagId, squareName) ? new DefenseOutcome.Installing(package.Name, FromBank: true) : new DefenseOutcome.NotInstalled(package.Name, FromBank: true);
     }
 
     private static DefenseOutcome QueueOne(IDefenseGame game, Job job, Defense defense)

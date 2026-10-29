@@ -18,6 +18,7 @@ internal sealed class PanelConfig
     private readonly ConfigEntry<float> _crawlerDodge;
     private readonly ConfigEntry<float> _armoredCrawlerDodge;
     private readonly ConfigEntry<float> _attackRate;
+    private readonly ConfigEntry<bool> _allowDuringWaves;
 
     public PanelConfig(
         ConfigEntry<KeyCode> panelKey,
@@ -26,7 +27,8 @@ internal sealed class PanelConfig
         ConfigEntry<float> proximityRange,
         ConfigEntry<float> crawlerDodge,
         ConfigEntry<float> armoredCrawlerDodge,
-        ConfigEntry<float> attackRate)
+        ConfigEntry<float> attackRate,
+        ConfigEntry<bool> allowDuringWaves)
     {
         _panelKey = panelKey;
         _layoutControls = layoutControls;
@@ -35,14 +37,17 @@ internal sealed class PanelConfig
         _crawlerDodge = crawlerDodge;
         _armoredCrawlerDodge = armoredCrawlerDodge;
         _attackRate = attackRate;
+        _allowDuringWaves = allowDuringWaves;
     }
 
-    /// <summary>Set by the plugin: puts the controls, power and dodge values in use, as at start-up.</summary>
+    /// <summary>Set by the plugin: puts the controls, power, dodge and wave values in use, as at start-up.</summary>
     public Action ApplyControls { get; set; } = () => { };
 
     public Action ApplyPower { get; set; } = () => { };
 
     public Action ApplyDodge { get; set; } = () => { };
+
+    public Action ApplyWaveWork { get; set; } = () => { };
 
     public KeyCode PanelKey => _panelKey.Value;
 
@@ -51,6 +56,8 @@ internal sealed class PanelConfig
     public PowerMode DefaultMode => PowerModes.Parse(_defaultMode.Value) ?? PowerMode.WaveOnly;
 
     public float ProximityRange => _proximityRange.Value;
+
+    public bool AllowDuringWaves => _allowDuringWaves.Value;
 
     public CrawlerDodge Dodge => new(_crawlerDodge.Value, _armoredCrawlerDodge.Value);
 
@@ -61,7 +68,8 @@ internal sealed class PanelConfig
         _proximityRange.Value,
         _crawlerDodge.Value,
         _armoredCrawlerDodge.Value,
-        _attackRate.Value);
+        _attackRate.Value,
+        _allowDuringWaves.Value);
 
     /// <summary>Saves the change, puts it in use and returns the status line for it.</summary>
     public string Apply(SettingChange change, bool isChinese)
@@ -87,6 +95,10 @@ internal sealed class PanelConfig
             case SettingChange.ArmoredCrawlerDodge dodge:
                 _armoredCrawlerDodge.Value = dodge.Chance;
                 ApplyDodge();
+                break;
+            case SettingChange.AllowDuringWaves waves:
+                _allowDuringWaves.Value = waves.IsAllowed;
+                ApplyWaveWork();
                 break;
             case SettingChange.AttackRate rate:
                 _attackRate.Value = rate.Rate;

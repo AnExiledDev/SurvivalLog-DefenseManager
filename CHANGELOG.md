@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0
+
+- New: install a packed defense from the panel. Click an empty square of yours on the Yard tab and it lists the defense packages lying in your yard and, with Package Bank 0.5.0 or newer, the ones in the bank. Install sends the character to install it there, the same as the game's own install. A banked one is taken out onto a free yard package spot first.
+- New: `AllowDuringWaves` under Combat, off by default. When on, defenses can be repaired, removed, installed and moved during a zombie wave, from the panel and from the game's own menus and Layout screen. Robot repairs and expeditions still wait for the wave to end. It can also be turned on in the panel's Settings tab.
+- Made for Survival Log 1.1.19611.
+
 ## 0.8.1
 
 - Results shown while the panel is closed, such as a press on the Layout screen bar, are now Exiled's Toolkit toasts, so they appear beside the game's HUD and in the Notifications history.
