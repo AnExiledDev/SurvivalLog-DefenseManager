@@ -14,12 +14,14 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.7.4";
+    private const string Version = "0.8.0";
     private const string PowerFileName = Guid + ".power.txt";
 
     public override void Load()
     {
         if (!OptionalLive.IsToolkitInstalled) Log.LogInfo(OptionalLive.MissingNote);
+
+        OptionalUiSize.Bind(Config);
 
         var panelKey = Config.Bind("Controls", "PanelKey", KeyCode.F7,
             "Key that opens and closes the Defense Manager panel, F7 by default. None turns the key off; the shield button in the bottom-left corner of the screen still opens the panel.\n" +

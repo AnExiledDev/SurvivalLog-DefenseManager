@@ -23,7 +23,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Per defense, per type, or for all[/b]: pick a mode for one defense when you click it, or for every defense of a type on the [b]Power[/b] tab. Anything without a setting follows its type, and a type without one follows the global mode (Wave only unless you change it).[/*]
 [*][b]Settings tab[/b]: change the Layout screen buttons, the global power mode, the Proximity range, the crawler dodge chances and the device attack rate right in the panel.[/*]
 [*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. With the mod they dodge it 25% of the time, and the chance for each kind of crawler can be set in the config.[/*]
-[*][b]UI size[/b]: with Exiled's Toolkit 0.10.0 or newer, its UI size setting draws the panel bigger or smaller, as far as it still fits on the screen.[/*]
+[*][b]UI size[/b]: with Exiled's Toolkit 0.10.0 or newer, its UI size setting draws the panel bigger or smaller, as far as it still fits on the screen. With 0.11.0 or newer, Defense Manager's own UiScale setting can set a size for this mod alone.[/*]
 [/list]
 
 [size=5]Hotkeys[/size]
@@ -107,7 +107,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*][b]单个、同类或全部[/b]：点击防御设施可以单独设置它的模式，在「供电」标签页可以设置同类的全部。没有单独设置的跟随它的类型，类型也没有设置的跟随全局模式（默认是仅尸潮）。[/*]
 [*][b]「设置」标签页[/b]：直接在面板里修改「规划模式」界面按钮、全局供电模式、靠近触发的范围、爬行者闪避概率和防御设施攻击频率。[/*]
 [*][b]电锯能打到爬行者[/b]：原版游戏中爬行者总能闪避「机械电锯」。本模组把闪避概率降到 25%，每种爬行者的概率都可以在配置里设置。[/*]
-[*][b]界面大小[/b]：安装 Exiled's Toolkit 0.10.0 或更新版本后，可以用它的界面大小设置放大或缩小面板，最大放到面板仍能完整显示在屏幕上为止。[/*]
+[*][b]界面大小[/b]：安装 Exiled's Toolkit 0.10.0 或更新版本后，可以用它的界面大小设置放大或缩小面板，最大放到面板仍能完整显示在屏幕上为止。0.11.0 或更新版本还可以用 Defense Manager 自己的 UiScale 设置单独调整本模组的大小。[/*]
 [/list]
 
 [size=5]快捷键[/size]

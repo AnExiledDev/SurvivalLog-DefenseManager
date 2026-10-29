@@ -35,3 +35,9 @@ The defense and type settings belong to a save file. A game that carries on unde
 | `CrawlerDodgeChance` | `0.25` | Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. |
 | `ArmoredCrawlerDodgeChance` | `0.25` | The same for the Armored Crawler Zombie. |
 | `DeviceAttackRate` | `1` | How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. From 0.25 to 10. A powered device uses power on every strike, so a higher rate uses more power. Takes effect at the next game start. |
+
+## Interface
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `UiScale` | `0` | How big Defense Manager's own windows, panels and messages are drawn, in percent, from 75 to 200. At `0` they follow the UI size set in Exiled's Toolkit (its `UiScale`). Needs Exiled's Toolkit 0.11.0 or newer. |
