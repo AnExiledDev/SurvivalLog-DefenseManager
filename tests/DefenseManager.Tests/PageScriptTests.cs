@@ -76,6 +76,34 @@ public class PageScriptTests
     }
 
     [Fact]
+    public void An_unbound_panel_key_is_left_out_of_the_hud_tip_and_the_layout_button()
+    {
+        var page = new PageScript();
+
+        page.OpenLayout();
+        page.Run("openHud()");
+        page.Live(true, "");
+        page.Layout(BarView(Home()));
+        page.Poll();
+
+        Assert.True(page.Is("hudButton()"));
+        Assert.False(page.Is("hudButton().querySelector('.entry-tip-key')"));
+        Assert.Equal("Defense list", Label(page, "toggle"));
+    }
+
+    [Fact]
+    public void A_bound_panel_key_shows_in_the_hud_tip()
+    {
+        var page = new PageScript();
+
+        page.Run("openHud()");
+        page.Live(true, "F7");
+        page.Poll();
+
+        Assert.Equal("F7", page.Text("hudButton().querySelector('.entry-tip-key').textContent"));
+    }
+
+    [Fact]
     public void A_Layout_page_the_game_draws_after_the_view_arrived_gets_the_bar_on_the_next_check()
     {
         var page = new PageScript();

@@ -1,5 +1,5 @@
 Name: Defense Manager
-Summary: Repair every damaged trap and barricade in one press, clear all the broken ones in another, or handle them one by one on a grid of your yard, in a panel on F7 or a HUD button. Electrical defenses switch on only when zombies show up, and crawlers dodge the chainsaw 25% of the time instead of always. Repair all is on the Layout screen too.
+Summary: Repair every damaged trap and barricade in one press, clear all the broken ones in another, or handle them one by one on a grid of your yard, in a panel opened from a HUD button. Electrical defenses switch on only when zombies show up, and crawlers dodge the chainsaw 25% of the time instead of always. Repair all is on the Layout screen too.
 
 Description (BBCode):
 [center][img]https://sldb.core-directive.com/media/save/1-save-safe.png[/img][/center]
@@ -30,10 +30,9 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 
 [size=5]Hotkeys[/size]
 [list]
-[*][b]F7[/b]: open or close the panel (at home in a loaded game, past the prologue).[/*]
 [*][b]Esc[/b]: close the panel.[/*]
 [/list]
-F7 can be changed or turned off in the config. The game's own hotkeys are off while the panel is open.
+The panel key is unbound by default: the HUD button opens the panel. Set PanelKey in the config to open it from the keyboard too; it does nothing while you type in a text box. The game's own hotkeys are off while the panel is open.
 
 The mod writes nothing into your save file; its power settings are its own data, kept for each save in [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]. The repairs and removals it queues are real: they use your materials and take defenses down. You can remove it at any time; your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
 
@@ -61,10 +60,10 @@ Works in English and Chinese.
 
 [size=5]Requirements[/size]
 [list]
-[*]Survival Log 1.1.19611. A game update can break it until the mod is updated.[/*]
+[*]Survival Log 1.1.20151. A game update can break it until the mod is updated.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
 [*]Optional: [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 or newer, to install defenses straight from the bank.[/*]
-[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.11.0 or newer. Defense Manager does not load without it. It shows results as toasts while the panel is closed, applies settings changed on the Mod Manager's Mods screen without a restart, and its UI size setting sizes the panel.[/*]
+[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.12.0 or newer. Defense Manager does not load without it. It keeps the panel key quiet while you type, shows results as toasts while the panel is closed, applies settings changed on the Mod Manager's Mods screen without a restart, and its UI size setting sizes the panel.[/*]
 [/list]
 
 [size=5]Installation[/size]
@@ -118,10 +117,9 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 
 [size=5]快捷键[/size]
 [list]
-[*][b]F7[/b]：打开或关闭面板（在家中、已载入游戏且过了序章时）。[/*]
 [*][b]Esc[/b]：关闭面板。[/*]
 [/list]
-F7 可以在配置中修改或停用。面板打开时游戏自己的快捷键不起作用。
+面板按键默认不绑定，用 HUD 按钮打开面板。在配置中设置 PanelKey 后也可以用键盘打开；在输入框里打字时按键不起作用。面板打开时游戏自己的快捷键不起作用。
 
 模组不会往存档里写入任何数据；它的供电设置是它自己的数据，按存档分别保存在 [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]。它排队的修理和拆除都是真实的：会消耗你的材料，也会拆掉防御设施。你可以随时移除它；防御设施保持原样，每个电力防御设施会保持模组最后一次切换的供电状态，因为游戏会保存这个开关。
 
@@ -148,10 +146,10 @@ F7 可以在配置中修改或停用。面板打开时游戏自己的快捷键�
 
 [size=5]前置要求[/size]
 [list]
-[*]Survival Log 1.1.19611。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
+[*]Survival Log 1.1.20151。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]，请先安装。[/*]
 [*]可选：[url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 或更新版本，用来直接从仓库安装防御设施。[/*]
-[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.11.0 或更新版本。没有它本模组不会加载。面板关闭时，它把结果显示为弹出通知；它让在 Mod Manager 的「模组」界面改动的设置无需重启即可生效，它的界面大小设置还能调整面板的大小。[/*]
+[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.12.0 或更新版本。没有它本模组不会加载。打字时它让面板按键不起作用；面板关闭时，它把结果显示为弹出通知；它让在 Mod Manager 的「模组」界面改动的设置无需重启即可生效，它的界面大小设置还能调整面板的大小。[/*]
 [/list]
 
 [size=5]安装[/size]

@@ -27,6 +27,8 @@ internal sealed class DefenseSession
     // Made once: a method handed over as a delegate is a new delegate each time, and these are handed over every frame.
     private readonly Func<bool> _isInLayout;
     private readonly Func<DefenseRead> _read;
+    private readonly Func<bool> _isPanelKeyDown;
+    private static readonly Func<bool> IsTyping = () => ExiledToolkit.Typing.IsActive;
 
     // The rows page.js already holds, so a refresh sends only the rows that changed.
     private readonly ViewDelta _delta = new();
@@ -52,6 +54,7 @@ internal sealed class DefenseSession
         _log = log;
         _isInLayout = game.IsInLayout;
         _read = game.Read;
+        _isPanelKeyDown = () => Input.GetKeyDown(_panelKey);
     }
 
     /// <summary>
@@ -87,7 +90,8 @@ internal sealed class DefenseSession
         // One ask of Unity in a frame with no key going down, rather than one per key the panel listens for.
         var isAnyKeyDown = (_panelKey != KeyCode.None || _isOpen) && Input.anyKeyDown;
 
-        if (isAnyKeyDown && _panelKey != KeyCode.None && Input.GetKeyDown(_panelKey))
+        // A key typed into a text box (a search, another mod's field) is the player's text, not the panel key.
+        if (isAnyKeyDown && Hotkey.Fires(_panelKey != KeyCode.None, _isPanelKeyDown, IsTyping))
         {
             Toggle();
 

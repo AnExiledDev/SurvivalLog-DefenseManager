@@ -6,9 +6,9 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 
 ## Features
 
-- **Panel key**: press `F7` to open and close the panel at home in a loaded game, past the prologue. `Esc` or the close button in the top-right corner also closes it.
-- **HUD button**: a shield at the top of the tool column in the bottom-left corner of the screen, above the game's own buttons there. It opens and closes the panel like `F7`, and hovering it shows "Defense Manager" with the key and "Repair or remove your outdoor defenses". It only shows at home in a loaded game past the prologue, so it is hidden on expeditions, and it hides with the rest of the column on the Layout screen.
-- **Layout screen buttons**: while the game's Layout screen is open, three buttons sit at the top middle of the screen, styled like Layout's own buttons: **Repair all (n)**, **Clear all broken (n)** and **Defense list (F7)**. The first two do exactly what the panel's buttons of the same name do. Defense list opens the panel. When the buttons are greyed out, the reason shows under them. They can be turned off in the config.
+- **Panel key**: unbound by default. Set `PanelKey` in the config to open and close the panel from the keyboard at home in a loaded game, past the prologue. `Esc` or the close button in the top-right corner closes it. The key does nothing while you type in a text box.
+- **HUD button**: a shield at the top of the tool column in the bottom-left corner of the screen, above the game's own buttons there. It opens and closes the panel, and hovering it shows "Defense Manager" (with the panel key, if you set one) and "Repair or remove your outdoor defenses". It only shows at home in a loaded game past the prologue, so it is hidden on expeditions, and it hides with the rest of the column on the Layout screen.
+- **Layout screen buttons**: while the game's Layout screen is open, three buttons sit at the top middle of the screen, styled like Layout's own buttons: **Repair all (n)**, **Clear all broken (n)** and **Defense list** (with the panel key in brackets, if you set one). The first two do exactly what the panel's buttons of the same name do. Defense list opens the panel. When the buttons are greyed out, the reason shows under them. They can be turned off in the config.
 - **Repair all (n)**: queues a repair for every damaged defense your materials cover (n is how many it would repair now). The character goes nearest-next from where they stand, so the round does not zigzag across the yard. A defense the remaining materials cannot cover is skipped and the round goes on to the next one they can.
 - **Clear all broken (n)**: queues the removal of every broken defense, nearest-next. A broken defense you already queued for repair is kept: you chose to fix it.
 - **Yard tab**: your yard as its real grid of squares, row 1 against the house and the highest row at the road side, with the house's doors and windows along the wall. Each defense sits on the square it stands on, colored by its state (Broken, Damaged or Intact). Squares you have not unlocked yet are marked with their Survival Points price. A defense on no square shows in a **Not on the grid** strip under the yard.
@@ -37,10 +37,9 @@ Defense Manager writes nothing into your save file. Its power settings are its o
 
 | Key | What it does |
 | --- | --- |
-| `F7` | Opens and closes the panel (at home in a loaded game, past the prologue). |
 | `Esc` | Closes the panel. |
 
-`F7` can be changed or turned off in the config. The HUD button works either way.
+The panel key (`PanelKey`) is unbound by default: the HUD button opens the panel. Set a key in the config to open it from the keyboard too. It does nothing while you type in a text box.
 
 The mod's panel, buttons and messages follow the game's language: English or Simplified Chinese. Defense and material names, and the game's own refusal reasons, come from the game as it words them.
 
@@ -73,9 +72,9 @@ The mod checks the defenses about twice a second whenever a game is loaded, with
 
 - By default nothing can be repaired, removed or installed during a zombie wave, as in the base game. The panel says so and its buttons wait. Turn on `AllowDuringWaves` to work during waves.
 - Install takes one defense at a time: while one is being installed, the next waits. It is the game's own install, so it joins your action queue the way an install from the package's own menu does.
-- On an expedition the panel, the HUD button and the Layout buttons are hidden and `F7` does nothing, since your defenses are back home. They come back when you return home.
+- On an expedition the panel, the HUD button and the Layout buttons are hidden and the panel key does nothing, since your defenses are back home. They come back when you return home.
 - The game is paused while the Layout screen is open, so repairs and removals you queue there wait. The character starts on them when you leave Layout (or, if you had paused the game before opening Layout, when you unpause). The message after each press says so.
-- The Layout buttons sit at the top middle of the screen. If they cover something you need on your screen size, turn them off with `LayoutControls` in the config; `F7` and the HUD button still work.
+- The Layout buttons sit at the top middle of the screen. If they cover something you need on your screen size, turn them off with `LayoutControls` in the config; the HUD button and the panel key, if you set one, still work.
 - If something else uses the materials before the character reaches a defense, the game decides what happens to that repair, not the mod.
 - Nearest-next is measured in a straight line from where the character stands, not along the path they walk.
 - The walking order only applies to Repair all, Repair row and Clear all broken.
@@ -91,10 +90,10 @@ The mod checks the defenses about twice a second whenever a game is loaded, with
 
 ## Requirements
 
-- Survival Log 1.1.19611. Built and tested on this version; a game update can break it until the mod is updated.
+- Survival Log 1.1.20151. Built for this version; a game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
 - Optional: [Package Bank](https://www.nexusmods.com/survivallog/mods/79) 0.5.0 or newer. With it, the panel can install defenses straight from the bank.
-- [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.11.0 or newer. Defense Manager does not load without it. It shows results as toasts while the panel is closed, applies settings changed on the Mod Manager's Mods screen without a restart, lays out the HUD's tool buttons four high, in columns, when there are more than four, and its UI size setting sizes the panel.
+- [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.12.0 or newer. Defense Manager does not load without it. It keeps the panel key quiet while you type, shows results as toasts while the panel is closed, applies settings changed on the Mod Manager's Mods screen without a restart, lays out the HUD's tool buttons four high, in columns, when there are more than four, and its UI size setting sizes the panel.
 
 ## Install
 
@@ -118,11 +117,11 @@ Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, create
 
 Tested on Survival Log 1.1.19611 with BepInEx `6.0.0-be.788`.
 
-Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.7.4 started, device attack rate 1`, followed by `key F7, Layout controls on` and `power default WaveOnly, proximity range 15 m` (the words change with your settings, and a setting changed on the Mods screen writes its line again). The same lines, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
+Check `BepInEx\LogOutput.log` for `===== Defense Manager 0.7.4 started, device attack rate 1`, followed by `key None, Layout controls on` and `power default WaveOnly, proximity range 15 m` (the words change with your settings, and a setting changed on the Mods screen writes its line again). The same lines, plus one line for every press saying what was queued and why anything was left, and one for every power switch with its reason, is in `BepInEx\defense-manager.log`, which survives restarts.
 
 If an electrical defense is not switched, click it in the panel: a broken or not working defense is left alone, and a defense in Default mode is left to the game. If no defense shows power modes, look in `BepInEx\defense-manager.log` for a line about the power settings.
 
-If `F7` does nothing, check that you are at home in a loaded game past the prologue, and that no other mod uses the same key. You can pick another key in the config, or use the HUD button.
+If the panel key does nothing, check that you set one in the config (it is unbound by default), that you are at home in a loaded game past the prologue, that you are not typing in a text box, and that no other mod uses the same key. The HUD button works either way.
 
 If the Layout buttons do not show, check that `LayoutControls` is `true` in the config and that you are at home in a loaded game past the prologue. They can take a second to appear after Layout opens.
 

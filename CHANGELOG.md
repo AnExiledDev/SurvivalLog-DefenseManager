@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1
+
+- The panel key is now unbound by default; use the HUD button, or set a key in the settings.
+- The panel key no longer opens or closes the panel while you type in a text box.
+- Exiled's Toolkit 0.12.0 or newer is now required.
+- Made for Survival Log 1.1.20151.
+
 ## 0.9.0
 
 - New: install a packed defense from the panel. Click an empty square of yours on the Yard tab and it lists the defense packages lying in your yard and, with Package Bank 0.5.0 or newer, the ones in the bank. Install sends the character to install it there, the same as the game's own install. A banked one is taken out onto a free yard package spot first.
