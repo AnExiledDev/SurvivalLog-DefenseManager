@@ -16,6 +16,10 @@ public class SettingChangeTests
         Assert.Equal(new SettingChange.AttackRate(2.5f), SettingChange.Parse("attackrate", "2.5"));
         Assert.Equal(new SettingChange.AllowDuringWaves(true), SettingChange.Parse("wavework", "1"));
         Assert.Equal(new SettingChange.AllowDuringWaves(false), SettingChange.Parse("wavework", "0"));
+        Assert.Equal(new SettingChange.Unlock(UnlockGroup.Doors, true), SettingChange.Parse("doorunlock", "1"));
+        Assert.Equal(new SettingChange.Unlock(UnlockGroup.Windows, false), SettingChange.Parse("windowunlock", "0"));
+        Assert.Equal(new SettingChange.Unlock(UnlockGroup.Fortifications, true), SettingChange.Parse("fortunlock", "1"));
+        Assert.Null(SettingChange.Parse("fortunlock", "yes"));
     }
 
     /// <summary>A stepper pressed past the end of a range stays at the end instead of saving a value the config refuses.</summary>

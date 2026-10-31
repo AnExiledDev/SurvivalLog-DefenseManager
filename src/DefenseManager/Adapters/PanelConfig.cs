@@ -19,6 +19,9 @@ internal sealed class PanelConfig
     private readonly ConfigEntry<float> _armoredCrawlerDodge;
     private readonly ConfigEntry<float> _attackRate;
     private readonly ConfigEntry<bool> _allowDuringWaves;
+    private readonly ConfigEntry<bool> _doorUnlocks;
+    private readonly ConfigEntry<bool> _windowUnlocks;
+    private readonly ConfigEntry<bool> _fortificationUnlocks;
 
     public PanelConfig(
         ConfigEntry<KeyCode> panelKey,
@@ -28,7 +31,10 @@ internal sealed class PanelConfig
         ConfigEntry<float> crawlerDodge,
         ConfigEntry<float> armoredCrawlerDodge,
         ConfigEntry<float> attackRate,
-        ConfigEntry<bool> allowDuringWaves)
+        ConfigEntry<bool> allowDuringWaves,
+        ConfigEntry<bool> doorUnlocks,
+        ConfigEntry<bool> windowUnlocks,
+        ConfigEntry<bool> fortificationUnlocks)
     {
         _panelKey = panelKey;
         _layoutControls = layoutControls;
@@ -38,9 +44,12 @@ internal sealed class PanelConfig
         _armoredCrawlerDodge = armoredCrawlerDodge;
         _attackRate = attackRate;
         _allowDuringWaves = allowDuringWaves;
+        _doorUnlocks = doorUnlocks;
+        _windowUnlocks = windowUnlocks;
+        _fortificationUnlocks = fortificationUnlocks;
     }
 
-    /// <summary>Set by the plugin: puts the controls, power, dodge and wave values in use, as at start-up.</summary>
+    /// <summary>Set by the plugin: puts the controls, power, dodge, wave and unlock values in use, as at start-up.</summary>
     public Action ApplyControls { get; set; } = () => { };
 
     public Action ApplyPower { get; set; } = () => { };
@@ -48,6 +57,8 @@ internal sealed class PanelConfig
     public Action ApplyDodge { get; set; } = () => { };
 
     public Action ApplyWaveWork { get; set; } = () => { };
+
+    public Action ApplyUnlocks { get; set; } = () => { };
 
     public KeyCode PanelKey => _panelKey.Value;
 
@@ -59,6 +70,8 @@ internal sealed class PanelConfig
 
     public bool AllowDuringWaves => _allowDuringWaves.Value;
 
+    public UnlockSettings Unlocks => new(_doorUnlocks.Value, _windowUnlocks.Value, _fortificationUnlocks.Value);
+
     public CrawlerDodge Dodge => new(_crawlerDodge.Value, _armoredCrawlerDodge.Value);
 
     public PanelSettings Read(string keyName) => new(
@@ -69,7 +82,10 @@ internal sealed class PanelConfig
         _crawlerDodge.Value,
         _armoredCrawlerDodge.Value,
         _attackRate.Value,
-        _allowDuringWaves.Value);
+        _allowDuringWaves.Value,
+        _doorUnlocks.Value,
+        _windowUnlocks.Value,
+        _fortificationUnlocks.Value);
 
     /// <summary>Saves the change, puts it in use and returns the status line for it.</summary>
     public string Apply(SettingChange change, bool isChinese)
@@ -100,6 +116,10 @@ internal sealed class PanelConfig
                 _allowDuringWaves.Value = waves.IsAllowed;
                 ApplyWaveWork();
                 break;
+            case SettingChange.Unlock unlock:
+                Entry(unlock.Group).Value = unlock.IsOn;
+                ApplyUnlocks();
+                break;
             case SettingChange.AttackRate rate:
                 _attackRate.Value = rate.Rate;
 
@@ -110,4 +130,12 @@ internal sealed class PanelConfig
 
         return Texts.Saved.Pick(isChinese);
     }
+
+    private ConfigEntry<bool> Entry(UnlockGroup group) => group switch
+    {
+        UnlockGroup.Doors => _doorUnlocks,
+        UnlockGroup.Windows => _windowUnlocks,
+        UnlockGroup.Fortifications => _fortificationUnlocks,
+        _ => throw new InvalidOperationException("unknown unlock group " + group),
+    };
 }

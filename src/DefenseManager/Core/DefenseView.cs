@@ -204,7 +204,8 @@ public static class DefenseView
     private static string SettingsJson(PanelSettings? settings) => settings is null
         ? "null"
         : $"{{\"key\":{Str(settings.Key)},\"layout\":{Bool(settings.LayoutControls)},\"mode\":{Str(PowerModes.ConfigName(settings.DefaultMode))}"
-            + $",\"range\":{Dec(settings.ProximityRange)},\"crawler\":{Dec(settings.CrawlerDodge)},\"armored\":{Dec(settings.ArmoredCrawlerDodge)},\"rate\":{Dec(settings.AttackRate)},\"waves\":{Bool(settings.AllowDuringWaves)}}}";
+            + $",\"range\":{Dec(settings.ProximityRange)},\"crawler\":{Dec(settings.CrawlerDodge)},\"armored\":{Dec(settings.ArmoredCrawlerDodge)},\"rate\":{Dec(settings.AttackRate)},\"waves\":{Bool(settings.AllowDuringWaves)}"
+            + $",\"doors\":{Bool(settings.DoorUnlocks)},\"windows\":{Bool(settings.WindowUnlocks)},\"forts\":{Bool(settings.FortificationUnlocks)}}}";
 
     private static string Dec(double value) => Math.Round(value, 2).ToString("0.##", CultureInfo.InvariantCulture);
 

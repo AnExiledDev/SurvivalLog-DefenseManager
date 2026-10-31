@@ -16,7 +16,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.9.1";
+    private const string Version = "0.10.0";
     private const string PowerFileName = Guid + ".power.txt";
 
     public override void Load()
@@ -52,12 +52,22 @@ public sealed class Plugin : BasePlugin
         var allowDuringWaves = Config.Bind("Combat", "AllowDuringWaves", false,
             "Let defenses be repaired, removed, installed and moved while a zombie wave is on. The base game locks all of these until the wave ends. Off by default. Robot repairs and expeditions still wait for the wave to end.\n" +
             "允许在尸潮进行时修理、拆除、安装和移动防御设施。原版游戏在尸潮结束前禁止这些操作。默认关闭。机器人修理和外出探索仍需等尸潮结束。");
+        var doorUnlocks = Config.Bind("Unlocks", "DoorUpgradesFromDayOne", false,
+            "Give the door's Advanced Repair and Advanced Reinforce options, with the Door Repair Kit and All-Purpose Strengthener recipes, from the first day of a story run. The base game gives them on days 2 and 5. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
+            "在剧情模式开局第一天就提供门的「高级修理」「高级加固」选项，以及「门板修补材料」「万能加固件」配方。原版游戏在第 2 天和第 5 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。");
+        var windowUnlocks = Config.Bind("Unlocks", "WindowUpgradesFromDayOne", false,
+            "Give the window's Advanced Repair, Advanced Reinforce and Reinforce Window options, with the Window Repair Kit and All-Purpose Strengthener recipes, from the first day of a story run. The base game gives them on days 13 and 14. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
+            "在剧情模式开局第一天就提供窗户的「高级修理」「高级加固」「加固窗户」选项，以及「窗户修补材料」「万能加固件」配方。原版游戏在第 13 天和第 14 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。");
+        var fortificationUnlocks = Config.Bind("Unlocks", "FortificationsFromDayOne", false,
+            "Give the Reinforce Fortifications option on doors and windows, with the Fortification Reinforcement Components recipe, from the first day of a story run. The base game gives it on day 54. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
+            "在剧情模式开局第一天就提供门窗的「强化加固」选项，以及「强化加固件」配方。原版游戏在第 54 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。");
         var attackRate = DeviceAttackRate.From(attackRateEntry.Value);
         var log = new DefenseLog(Log, Path.Combine(Paths.BepInExRootPath, "defense-manager.log"));
         var harmony = new Harmony(Guid);
         var powerSlot = new PowerSlot(new PowerFileOnDisk(Path.Combine(Paths.ConfigPath, PowerFileName), log.Write));
         var power = new PowerSession(new GamePower(log.Write), powerSlot, log.Write);
-        var config = new PanelConfig(panelKey, layoutControls, defaultModeName, proximityRange, crawlerDodge, armoredCrawlerDodge, attackRateEntry, allowDuringWaves);
+        var config = new PanelConfig(panelKey, layoutControls, defaultModeName, proximityRange, crawlerDodge, armoredCrawlerDodge, attackRateEntry, allowDuringWaves, doorUnlocks, windowUnlocks, fortificationUnlocks);
+        var unlocks = new UnlockSession(log.Write);
         var session = new DefenseSession(new GameDefenses(log.Write), power, new WebPage(log.Write), config, log.Write);
 
         log.Write($"===== Defense Manager {Version} started, device attack rate {attackRate.Value}");
@@ -79,13 +89,22 @@ public sealed class Plugin : BasePlugin
         };
         config.ApplyDodge = () => DodgeRulesPatch.Use(config.Dodge);
         config.ApplyWaveWork = () => WaveLockPatch.Use(config.AllowDuringWaves);
+        config.ApplyUnlocks = () =>
+        {
+            var wanted = config.Unlocks;
+
+            unlocks.Use(wanted);
+            log.Write($"unlocks from day one: doors {(wanted.Doors ? "on" : "off")}, windows {(wanted.Windows ? "on" : "off")}, fortifications {(wanted.Fortifications ? "on" : "off")}");
+        };
 
         OptionalLive.Watch(config.ApplyControls, panelKey, layoutControls);
         OptionalLive.Watch(config.ApplyPower, defaultModeName, proximityRange);
         OptionalLive.Watch(config.ApplyDodge, crawlerDodge, armoredCrawlerDodge);
         OptionalLive.Watch(config.ApplyWaveWork, allowDuringWaves);
+        OptionalLive.Watch(config.ApplyUnlocks, doorUnlocks, windowUnlocks, fortificationUnlocks);
 
         DefenseTicker.Session = session;
+        DefenseTicker.Unlocks = unlocks;
         DefenseTicker.Log = log.Write;
         AddComponent<DefenseTicker>();
     }

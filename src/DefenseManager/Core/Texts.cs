@@ -228,6 +228,13 @@ public static class Texts
         ("setRateDesc", new("How often defense devices strike, 0.25 to 10. Takes effect at the next game start.", "防御设施攻击的频率，0.25 到 10。下次启动游戏时生效。")),
         ("setWaves", new("Work during waves", "尸潮期间操作")),
         ("setWavesDesc", new("Repair, remove, install and move defenses while a zombie wave is on. The base game locks them until it ends.", "尸潮进行时也可修理、拆除、安装和移动防御设施。原版游戏在尸潮结束前禁止这些操作。")),
+        ("setUnlocks", new("Unlocks", "提前解锁")),
+        ("setDoors", new("Door upgrades from day one", "第一天起解锁门的升级")),
+        ("setDoorsDesc", new("Advanced Repair and Advanced Reinforce on doors, with their recipes, from the first day of a story run. The base game gives them on days 2 and 5.", "剧情模式第一天起即可对门使用「高级修理」「高级加固」，并获得对应配方。原版游戏在第 2 天和第 5 天提供。")),
+        ("setWindows", new("Window upgrades from day one", "第一天起解锁窗户的升级")),
+        ("setWindowsDesc", new("Advanced Repair, Advanced Reinforce and Reinforce Window on windows, with their recipes, from the first day of a story run. The base game gives them on days 13 and 14.", "剧情模式第一天起即可对窗户使用「高级修理」「高级加固」「加固窗户」，并获得对应配方。原版游戏在第 13 天和第 14 天提供。")),
+        ("setForts", new("Reinforce Fortifications from day one", "第一天起解锁「强化加固」")),
+        ("setFortsDesc", new("Reinforce Fortifications on doors and windows, with its recipe, from the first day of a story run. The base game gives it on day 54.", "剧情模式第一天起即可对门窗使用「强化加固」，并获得对应配方。原版游戏在第 54 天提供。")),
         ("keyClose", new("{0} or Esc to close", "按 {0} 或 Esc 关闭")),
         ("noSettings", new("Settings are not available right now.", "现在无法读取设置。")),
     };

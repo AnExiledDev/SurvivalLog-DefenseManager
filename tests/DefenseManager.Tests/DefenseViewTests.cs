@@ -329,7 +329,7 @@ public class DefenseViewTests
     [Fact]
     public void The_settings_tab_gets_the_saved_values_even_when_the_game_could_not_be_read()
     {
-        var settings = new PanelSettings("F7", false, PowerMode.Proximity, 15, 0.25f, 0.3f, 1.5f, AllowDuringWaves: true);
+        var settings = new PanelSettings("F7", false, PowerMode.Proximity, 15, 0.25f, 0.3f, 1.5f, AllowDuringWaves: true, WindowUnlocks: true);
         var view = JsonDocument.Parse(DefenseView.Empty("Load a game first.", settings)).RootElement.GetProperty("settings");
 
         Assert.Equal("F7", view.GetProperty("key").GetString());
@@ -339,5 +339,8 @@ public class DefenseViewTests
         Assert.Equal(0.3, view.GetProperty("armored").GetDouble(), 3);
         Assert.Equal(1.5, view.GetProperty("rate").GetDouble());
         Assert.True(view.GetProperty("waves").GetBoolean());
+        Assert.False(view.GetProperty("doors").GetBoolean());
+        Assert.True(view.GetProperty("windows").GetBoolean());
+        Assert.False(view.GetProperty("forts").GetBoolean());
     }
 }

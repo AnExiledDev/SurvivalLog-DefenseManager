@@ -71,6 +71,12 @@
     setArmoredDesc: 'Chance an Armored Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.',
     setRate: 'Device attack rate', setRateDesc: 'How often defense devices strike, 0.25 to 10. Takes effect at the next game start.',
     setWaves: 'Work during waves', setWavesDesc: 'Repair, remove, install and move defenses while a zombie wave is on. The base game locks them until it ends.',
+    setUnlocks: 'Unlocks', setDoors: 'Door upgrades from day one',
+    setDoorsDesc: 'Advanced Repair and Advanced Reinforce on doors, with their recipes, from the first day of a story run. The base game gives them on days 2 and 5.',
+    setWindows: 'Window upgrades from day one',
+    setWindowsDesc: 'Advanced Repair, Advanced Reinforce and Reinforce Window on windows, with their recipes, from the first day of a story run. The base game gives them on days 13 and 14.',
+    setForts: 'Reinforce Fortifications from day one',
+    setFortsDesc: 'Reinforce Fortifications on doors and windows, with its recipe, from the first day of a story run. The base game gives it on day 54.',
     keyClose: '{0} or Esc to close', noSettings: 'Settings are not available right now.'
   };
 
@@ -1131,7 +1137,11 @@
       setRow('setCrawler', 'setCrawlerDesc', stepper('crawlerdodge', s.crawler, percent)),
       setRow('setArmored', 'setArmoredDesc', stepper('armoredcrawlerdodge', s.armored, percent)),
       setRow('setRate', 'setRateDesc', stepper('attackrate', s.rate, function (v) { return v + 'x'; })),
-      setRow('setWaves', 'setWavesDesc', onOff('wavework', s.waves)));
+      setRow('setWaves', 'setWavesDesc', onOff('wavework', s.waves)),
+      sect(say('setUnlocks')),
+      setRow('setDoors', 'setDoorsDesc', onOff('doorunlock', s.doors)),
+      setRow('setWindows', 'setWindowsDesc', onOff('windowunlock', s.windows)),
+      setRow('setForts', 'setFortsDesc', onOff('fortunlock', s.forts)));
 
     return add(box, add(grid, left, right));
   }

@@ -14,6 +14,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Click to act[/b]: click a defense for its condition, repair cost, Repair and Remove, and its power mode. Click a row number and [b]Repair row[/b] repairs everything in that row.[/*]
 [*][b]Install from the panel[/b]: click an empty square of yours to list the defense packages in your yard and, with [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 or newer, in the bank. [b]Install[/b] puts one on that square, the game's own install.[/*]
 [*][b]Work during waves[/b]: an option, off by default, that lets you repair, remove, install and move defenses during a zombie wave. Robot repairs and expeditions still wait.[/*]
+[*][b]Unlocks from day one[/b]: three options, off by default, give the door upgrades (Advanced Repair, Advanced Reinforce), the window upgrades (Advanced Repair, Advanced Reinforce, Reinforce Window) and Reinforce Fortifications from the first day of a story run, with the recipes they use, instead of on days 2, 5, 13, 14 and 54. Turning one off takes back what the mod gave, never what the game has given by then.[/*]
 [*][b]Repairs list[/b]: every defense that needs repair, worst first, under Repair all.[/*]
 [*][b]Buttons say why not[/b]: a greyed-out button shows the reason, like "Needs 3 more Wood".[/*]
 [*][b]Short of materials[/b]: a line under Repair all names each material you are short of, as free / needed.[/*]
@@ -23,7 +24,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Game's own actions[/b]: repairs and removals join the end of your action queue, so your own queued actions run first.[/*]
 [*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them on during waves and while zombies are at the base, and off otherwise, [b]Proximity[/b] turns them on while a zombie is in range (15 m by default) and off after 10 game minutes with none, [b]Always on[/b] keeps them on, and [b]Default[/b] leaves them to the game's own switch.[/*]
 [*][b]Per defense, per type, or for all[/b]: pick a mode for one defense when you click it, or for every defense of a type on the [b]Power[/b] tab. Anything without a setting follows its type, and a type without one follows the global mode (Wave only unless you change it).[/*]
-[*][b]Settings tab[/b]: change the Layout screen buttons, the global power mode, the Proximity range, the crawler dodge chances, the device attack rate and Work during waves right in the panel.[/*]
+[*][b]Settings tab[/b]: change the Layout screen buttons, the global power mode, the Proximity range, the crawler dodge chances, the device attack rate, Work during waves and the Unlocks right in the panel.[/*]
 [*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. With the mod they dodge it 25% of the time, and the chance for each kind of crawler can be set in the config.[/*]
 [*][b]UI size[/b]: with Exiled's Toolkit 0.10.0 or newer, its UI size setting draws the panel bigger or smaller, as far as it still fits on the screen. With 0.11.0 or newer, Defense Manager's own UiScale setting can set a size for this mod alone.[/*]
 [/list]
@@ -34,13 +35,14 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [/list]
 The panel key is unbound by default: the HUD button opens the panel. Set PanelKey in the config to open it from the keyboard too; it does nothing while you type in a text box. The game's own hotkeys are off while the panel is open.
 
-The mod writes nothing into your save file; its power settings are its own data, kept for each save in [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]. The repairs and removals it queues are real: they use your materials and take defenses down. You can remove it at any time; your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
+With the Unlocks off, the mod writes nothing into your save file; the Unlocks add the game's own unlocks to the run, which the game saves. Its power settings are its own data, kept for each save in [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]. The repairs and removals it queues are real: they use your materials and take defenses down. You can remove it at any time; your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
 
 Works in English and Chinese.
 
 [size=5]Known issues[/size]
 [list]
 [*]By default nothing can be repaired, removed or installed during a zombie wave, as in the base game. Turn on Work during waves to change that.[/*]
+[*]The Unlocks only give early what the game gives later; the story events still happen on their days. What they gave stays in the save if you remove the mod.[/*]
 [*]Install takes one defense at a time; the next waits until it is done.[/*]
 [*]On an expedition the panel, the HUD button and the Layout buttons are hidden, since your defenses are back home.[/*]
 [*]The game is paused while the Layout screen is open, so anything you queue there starts when you leave Layout (or when you unpause, if you had paused before).[/*]
@@ -101,6 +103,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*][b]点击即可操作[/b]：点击防御设施可查看耐久、修理费用、「修理」和「拆除」以及供电模式。点击行号后，「修理第 n 行」会修理这一行的全部防御设施。[/*]
 [*][b]在面板中安装[/b]：点击属于你的空格子，会列出院子里的防御设施包裹；安装了 [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 或更新版本时，还会列出仓库里的。「安装」会把它装到这个格子上，用的是游戏自己的安装。[/*]
 [*][b]尸潮期间操作[/b]：一个默认关闭的选项，开启后可在尸潮期间修理、拆除、安装和移动防御设施。机器人修理和外出探索仍需等尸潮结束。[/*]
+[*][b]第一天起解锁[/b]：三个默认关闭的选项，可在剧情模式第一天起就提供门的升级（「高级修理」「高级加固」）、窗户的升级（「高级修理」「高级加固」「加固窗户」）和「强化加固」，以及它们所需的配方，而不用等到第 2、5、13、14 和 54 天。关闭后会收回本模组提供的内容，游戏届时已经提供的不会收回。[/*]
 [*][b]待修理列表[/b]：「全部修理」下方按损坏程度从重到轻列出每个需要修理的防御设施。[/*]
 [*][b]按钮会说明原因[/b]：灰掉的按钮下方会显示原因，例如「还差 3 个木材」。[/*]
 [*][b]材料不足提示[/b]：「全部修理」下方会列出每种不够的材料，显示为 可用 / 所需。[/*]
@@ -110,7 +113,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*][b]使用游戏自己的行动[/b]：修理和拆除会排到你的行动队列末尾，你自己排好的行动先执行。[/*]
 [*][b]供电模式[/b]：模组会替你切换电力防御设施。[b]仅尸潮[/b]在尸潮期间和基地有僵尸时开启，其余时间关闭；[b]僵尸靠近[/b]在有僵尸进入范围（默认 15 米）时开启，连续 10 分钟游戏时间没有僵尸后关闭；[b]常开[/b]一直开启；[b]默认[/b]交给游戏自己的开关。[/*]
 [*][b]单个、同类或全部[/b]：点击防御设施可以单独设置它的模式，在「供电」标签页可以设置同类的全部。没有单独设置的跟随它的类型，类型也没有设置的跟随全局模式（默认是仅尸潮）。[/*]
-[*][b]「设置」标签页[/b]：直接在面板里修改「规划模式」界面按钮、全局供电模式、靠近触发的范围、爬行者闪避概率、防御设施攻击频率和「尸潮期间操作」。[/*]
+[*][b]「设置」标签页[/b]：直接在面板里修改「规划模式」界面按钮、全局供电模式、靠近触发的范围、爬行者闪避概率、防御设施攻击频率、「尸潮期间操作」和三个提前解锁选项。[/*]
 [*][b]电锯能打到爬行者[/b]：原版游戏中爬行者总能闪避「机械电锯」。本模组把闪避概率降到 25%，每种爬行者的概率都可以在配置里设置。[/*]
 [*][b]界面大小[/b]：安装 Exiled's Toolkit 0.10.0 或更新版本后，可以用它的界面大小设置放大或缩小面板，最大放到面板仍能完整显示在屏幕上为止。0.11.0 或更新版本还可以用 Defense Manager 自己的 UiScale 设置单独调整本模组的大小。[/*]
 [/list]
@@ -121,13 +124,14 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [/list]
 面板按键默认不绑定，用 HUD 按钮打开面板。在配置中设置 PanelKey 后也可以用键盘打开；在输入框里打字时按键不起作用。面板打开时游戏自己的快捷键不起作用。
 
-模组不会往存档里写入任何数据；它的供电设置是它自己的数据，按存档分别保存在 [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]。它排队的修理和拆除都是真实的：会消耗你的材料，也会拆掉防御设施。你可以随时移除它；防御设施保持原样，每个电力防御设施会保持模组最后一次切换的供电状态，因为游戏会保存这个开关。
+关闭提前解锁选项时，模组不会往存档里写入任何数据；提前解锁会把游戏自己的解锁内容加入本局，由游戏保存。它的供电设置是它自己的数据，按存档分别保存在 [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]。它排队的修理和拆除都是真实的：会消耗你的材料，也会拆掉防御设施。你可以随时移除它；防御设施保持原样，每个电力防御设施会保持模组最后一次切换的供电状态，因为游戏会保存这个开关。
 
 支持英文和中文。
 
 [size=5]已知问题[/size]
 [list]
 [*]默认情况下，尸潮期间无法修理、拆除或安装任何防御设施，和原版游戏一样。开启「尸潮期间操作」即可改变。[/*]
+[*]提前解锁只是把游戏之后才给的内容提前给你；剧情事件仍会在原来的日子发生。移除模组后，已提供的内容仍留在存档里。[/*]
 [*]一次只安装一个防御设施；下一个要等它装完。[/*]
 [*]外出探索时，面板、HUD 按钮和「规划模式」界面上的按钮都会隐藏，因为你的防御设施在家里。[/*]
 [*]「规划模式」界面打开时游戏是暂停的，所以在那里排队的行动会在离开「规划模式」后开始（如果之前已经暂停，则在取消暂停后开始）。[/*]

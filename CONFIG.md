@@ -37,6 +37,18 @@ The defense and type settings belong to a save file. A game that carries on unde
 | `AllowDuringWaves` | `false` | Lets defenses be repaired, removed, installed and moved while a zombie wave is on, from the panel and from the game's own menus and Layout screen. The base game locks all of these until the wave ends. Robot repairs and expeditions still wait for the wave to end. |
 | `DeviceAttackRate` | `1` | How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. From 0.25 to 10. A powered device uses power on every strike, so a higher rate uses more power. Takes effect at the next game start. |
 
+## Unlocks
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `DoorUpgradesFromDayOne` | `false` | Gives the door's Advanced Repair and Advanced Reinforce options, with the Door Repair Kit and All-Purpose Strengthener recipes, from the first day of a story run. The base game gives them on days 2 and 5. |
+| `WindowUpgradesFromDayOne` | `false` | Gives the window's Advanced Repair, Advanced Reinforce and Reinforce Window options, with the Window Repair Kit and All-Purpose Strengthener recipes, from the first day of a story run. The base game gives them on days 13 and 14. |
+| `FortificationsFromDayOne` | `false` | Gives the Reinforce Fortifications option on doors and windows, and lets the craft table make Fortification Reinforcement Components, from the first day of a story run. The base game gives it on day 54. |
+
+These only work in story runs, once the disaster has happened. Endless runs already start with all of it, and challenge and tutorial runs are left alone. The mod checks every few seconds, so a run gets them within a few seconds of loading.
+
+Turning a setting off takes back what the mod gave in the loaded run, but never what the game has given by then (from its own event, or from the work desk manual for the repair recipes). The All-Purpose Strengthener belongs to both doors and windows, so it stays while either is on. What the mod gave is kept in the save, with a marker for each so it knows what is its own; it stays there if you remove the mod.
+
 ## Interface
 
 | Setting | Default | What it does |

@@ -13,6 +13,7 @@ public sealed class DefenseTicker : MonoBehaviour
     private const int MaxReportedFailures = 20;
 
     internal static DefenseSession? Session;
+    internal static UnlockSession? Unlocks;
     internal static Action<string> Log = _ => { };
     private static readonly HashSet<string> ReportedFailures = new();
 
@@ -25,6 +26,7 @@ public sealed class DefenseTicker : MonoBehaviour
         try
         {
             Session?.Update();
+            Unlocks?.Update();
         }
         catch (Exception ex)
         {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.0
+
+- New: three settings under Unlocks, all off by default, give the house's upgrades from the first day of a story run. `DoorUpgradesFromDayOne` gives the door's Advanced Repair and Advanced Reinforce with the Door Repair Kit and All-Purpose Strengthener recipes (day 2 and 5 in the base game). `WindowUpgradesFromDayOne` gives the window's Advanced Repair, Advanced Reinforce and Reinforce Window with the Window Repair Kit and All-Purpose Strengthener recipes (days 13 and 14). `FortificationsFromDayOne` gives Reinforce Fortifications and lets the craft table make Fortification Reinforcement Components (day 54). They can also be turned on in the panel's Settings tab.
+- Turning one off takes back what the mod gave, but never what the game has given by then.
+- Made for Survival Log 1.1.20151.
+
 ## 0.9.1
 
 - The panel key is now unbound by default; use the HUD button, or set a key in the settings.

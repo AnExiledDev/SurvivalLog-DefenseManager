@@ -444,6 +444,8 @@ public class PageScriptTests
         page.Click("panelButtonWith('set', 'defaultmode|Proximity')");
         page.Status("Setting saved.");
         page.Click("panelButtonWith('set', 'wavework|1')");
+        page.Status("Setting saved.");
+        page.Click("panelButtonWith('set', 'fortunlock|1')");
 
         Assert.Equal(
             new PageCommand[]
@@ -453,6 +455,7 @@ public class PageScriptTests
                 new PageCommand.Setting(new SettingChange.LayoutControls(false)),
                 new PageCommand.Setting(new SettingChange.DefaultMode(PowerMode.Proximity)),
                 new PageCommand.Setting(new SettingChange.AllowDuringWaves(true)),
+                new PageCommand.Setting(new SettingChange.Unlock(UnlockGroup.Fortifications, true)),
             },
             page.Sent);
     }
