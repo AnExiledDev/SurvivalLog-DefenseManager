@@ -113,7 +113,7 @@ Each electrical defense stays in the power state the mod last switched it to, be
 
 ## Configuration
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once except `DeviceAttackRate`, which takes effect at the next game start. All but `PanelKey` can also be changed on the panel's Settings tab, which saves to the same file. Each setting in the cfg file is explained in English and Simplified Chinese. See [CONFIG.md](CONFIG.md) for every setting.
+Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once. All but `PanelKey` can also be changed on the panel's Settings tab, which saves to the same file and takes effect at once. With Exiled's Toolkit 0.17.0 or newer, each world can keep its own combat and unlock settings: every setting in Combat and Unlocks. Pick them for a new world in Customizable Difficulty, or, while you play, change them for that world alone on the Mods screen. The panel's Settings tab changes a setting the world has its own value for in that world alone, and any other for every world. Each setting in the cfg file is explained in English and Simplified Chinese. See [CONFIG.md](CONFIG.md) for every setting.
 
 ## Troubleshooting
 
@@ -129,6 +129,7 @@ If the Layout buttons do not show, check that `LayoutControls` is `true` in the 
 
 ## Changelog
 
+- 0.11.0: each world can keep its own combat and unlock settings, and `DeviceAttackRate` takes effect at once, on the devices already built too.
 - 0.10.0: three Unlocks settings give the door, window and Reinforce Fortifications upgrades from day one.
 - 0.7.0: a new panel: the yard as its real grid of squares, Repair row, a Power tab for each type's power mode, a Settings tab, and a warm gold look.
 - 0.6.0: settings can be changed on the Mod Manager's Mods screen without a restart (all but `DeviceAttackRate`). Works with Exiled's Toolkit 0.4.0 or newer, which is optional.

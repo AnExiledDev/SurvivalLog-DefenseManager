@@ -4,8 +4,8 @@ using System.Globalization;
 namespace DefenseManager.Core;
 
 /// <summary>
-/// The config values the panel's Settings tab shows. Key is the panel key's name, "" for none. AttackRate is the saved
-/// value, which the game picks up at its next start. AllowDuringWaves lets defenses be repaired, removed, installed and
+/// The config values the panel's Settings tab shows. Key is the panel key's name, "" for none. AttackRate is how often
+/// defense devices strike. AllowDuringWaves lets defenses be repaired, removed, installed and
 /// moved while a zombie wave is on. The three Unlocks give the door, window and fortification upgrades from day one.
 /// </summary>
 public sealed record PanelSettings(

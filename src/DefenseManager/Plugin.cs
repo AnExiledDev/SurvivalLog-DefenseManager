@@ -16,7 +16,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.10.0";
+    private const string Version = "0.11.0";
     private const string PowerFileName = Guid + ".power.txt";
 
     public override void Load()
@@ -40,28 +40,31 @@ public sealed class Plugin : BasePlugin
         var crawlerDodge = Config.Bind("Combat", "CrawlerDodgeChance", 0.25f, new ConfigDescription(
             "Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. 0.25 by default.\n" +
             "「爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1，电锯刀片完全打不到爬行者。默认 0.25。",
-            new AcceptableValueRange<float>(0f, 1f)));
+            new AcceptableValueRange<float>(0f, 1f), WorldRule.Tag));
         var armoredCrawlerDodge = Config.Bind("Combat", "ArmoredCrawlerDodgeChance", 0.25f, new ConfigDescription(
             "Chance that an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. 0.25 by default.\n" +
             "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1。默认 0.25。",
-            new AcceptableValueRange<float>(0f, 1f)));
+            new AcceptableValueRange<float>(0f, 1f), WorldRule.Tag));
         var attackRateEntry = Config.Bind("Combat", "DeviceAttackRate", 1f, new ConfigDescription(
-            "How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. Each strike of a powered device uses power, so a higher rate also uses more power. 1 by default, from 0.25 to 10. Takes effect at the next game start.\n" +
-            "防御设施攻击的频率：2 为两倍频率，0.5 为一半，1 为游戏原速。用电的防御设施每次攻击都耗电，所以频率越高耗电越多。默认 1，可设为 0.25 到 10。下次启动游戏时生效。",
-            new AcceptableValueRange<float>(DeviceAttackRate.Slowest, DeviceAttackRate.Fastest), "ModManager.Restart"));
-        var allowDuringWaves = Config.Bind("Combat", "AllowDuringWaves", false,
+            "How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. Each strike of a powered device uses power, so a higher rate also uses more power. 1 by default, from 0.25 to 10.\n" +
+            "防御设施攻击的频率：2 为两倍频率，0.5 为一半，1 为游戏原速。用电的防御设施每次攻击都耗电，所以频率越高耗电越多。默认 1，可设为 0.25 到 10。",
+            new AcceptableValueRange<float>(DeviceAttackRate.Slowest, DeviceAttackRate.Fastest), WorldRule.Tag));
+        var allowDuringWaves = Config.Bind("Combat", "AllowDuringWaves", false, new ConfigDescription(
             "Let defenses be repaired, removed, installed and moved while a zombie wave is on. The base game locks all of these until the wave ends. Off by default. Robot repairs and expeditions still wait for the wave to end.\n" +
-            "允许在尸潮进行时修理、拆除、安装和移动防御设施。原版游戏在尸潮结束前禁止这些操作。默认关闭。机器人修理和外出探索仍需等尸潮结束。");
-        var doorUnlocks = Config.Bind("Unlocks", "DoorUpgradesFromDayOne", false,
+            "允许在尸潮进行时修理、拆除、安装和移动防御设施。原版游戏在尸潮结束前禁止这些操作。默认关闭。机器人修理和外出探索仍需等尸潮结束。",
+            null, WorldRule.Tag));
+        var doorUnlocks = Config.Bind("Unlocks", "DoorUpgradesFromDayOne", false, new ConfigDescription(
             "Give the door's Advanced Repair and Advanced Reinforce options, with the Door Repair Kit and All-Purpose Strengthener recipes, from the first day of a story run. The base game gives them on days 2 and 5. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
-            "在剧情模式开局第一天就提供门的「高级修理」「高级加固」选项，以及「门板修补材料」「万能加固件」配方。原版游戏在第 2 天和第 5 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。");
-        var windowUnlocks = Config.Bind("Unlocks", "WindowUpgradesFromDayOne", false,
+            "在剧情模式开局第一天就提供门的「高级修理」「高级加固」选项，以及「门板修补材料」「万能加固件」配方。原版游戏在第 2 天和第 5 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
+            null, WorldRule.Tag));
+        var windowUnlocks = Config.Bind("Unlocks", "WindowUpgradesFromDayOne", false, new ConfigDescription(
             "Give the window's Advanced Repair, Advanced Reinforce and Reinforce Window options, with the Window Repair Kit and All-Purpose Strengthener recipes, from the first day of a story run. The base game gives them on days 13 and 14. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
-            "在剧情模式开局第一天就提供窗户的「高级修理」「高级加固」「加固窗户」选项，以及「窗户修补材料」「万能加固件」配方。原版游戏在第 13 天和第 14 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。");
-        var fortificationUnlocks = Config.Bind("Unlocks", "FortificationsFromDayOne", false,
+            "在剧情模式开局第一天就提供窗户的「高级修理」「高级加固」「加固窗户」选项，以及「窗户修补材料」「万能加固件」配方。原版游戏在第 13 天和第 14 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
+            null, WorldRule.Tag));
+        var fortificationUnlocks = Config.Bind("Unlocks", "FortificationsFromDayOne", false, new ConfigDescription(
             "Give the Reinforce Fortifications option on doors and windows, with the Fortification Reinforcement Components recipe, from the first day of a story run. The base game gives it on day 54. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
-            "在剧情模式开局第一天就提供门窗的「强化加固」选项，以及「强化加固件」配方。原版游戏在第 54 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。");
-        var attackRate = DeviceAttackRate.From(attackRateEntry.Value);
+            "在剧情模式开局第一天就提供门窗的「强化加固」选项，以及「强化加固件」配方。原版游戏在第 54 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
+            null, WorldRule.Tag));
         var log = new DefenseLog(Log, Path.Combine(Paths.BepInExRootPath, "defense-manager.log"));
         var harmony = new Harmony(Guid);
         var powerSlot = new PowerSlot(new PowerFileOnDisk(Path.Combine(Paths.ConfigPath, PowerFileName), log.Write));
@@ -70,11 +73,11 @@ public sealed class Plugin : BasePlugin
         var unlocks = new UnlockSession(log.Write);
         var session = new DefenseSession(new GameDefenses(log.Write), power, new WebPage(log.Write), config, log.Write);
 
-        log.Write($"===== Defense Manager {Version} started, device attack rate {attackRate.Value}");
+        log.Write($"===== Defense Manager {Version} started, device attack rate {DeviceAttackRate.From(attackRateEntry.Value).Value}");
         InputGate.Apply(harmony, log.Write);
         PageMessages.Apply(harmony, log.Write);
         DodgeRulesPatch.Apply(harmony, log.Write);
-        AttackRatePatch.Apply(harmony, attackRate, log.Write);
+        AttackRatePatch.Apply(harmony, log.Write);
         WaveLockPatch.Apply(harmony, log.Write);
 
         config.ApplyControls = () =>
@@ -88,6 +91,7 @@ public sealed class Plugin : BasePlugin
             log.Write($"power default {PowerModes.ConfigName(config.DefaultMode)}, proximity range {config.ProximityRange} m");
         };
         config.ApplyDodge = () => DodgeRulesPatch.Use(config.Dodge);
+        config.ApplyRate = () => AttackRatePatch.Use(config.AttackRate);
         config.ApplyWaveWork = () => WaveLockPatch.Use(config.AllowDuringWaves);
         config.ApplyUnlocks = () =>
         {
@@ -100,6 +104,7 @@ public sealed class Plugin : BasePlugin
         OptionalLive.Watch(config.ApplyControls, panelKey, layoutControls);
         OptionalLive.Watch(config.ApplyPower, defaultModeName, proximityRange);
         OptionalLive.Watch(config.ApplyDodge, crawlerDodge, armoredCrawlerDodge);
+        OptionalLive.Watch(config.ApplyRate, attackRateEntry);
         OptionalLive.Watch(config.ApplyWaveWork, allowDuringWaves);
         OptionalLive.Watch(config.ApplyUnlocks, doorUnlocks, windowUnlocks, fortificationUnlocks);
 

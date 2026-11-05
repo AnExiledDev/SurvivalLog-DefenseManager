@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.0
+
+- Each world can keep its own combat and unlock settings: `CrawlerDodgeChance`, `ArmoredCrawlerDodgeChance`, `DeviceAttackRate`, `AllowDuringWaves`, `DoorUpgradesFromDayOne`, `WindowUpgradesFromDayOne` and `FortificationsFromDayOne`. With Exiled's Toolkit 0.17.0 or newer, pick them for a new world in Customizable Difficulty, or change them for the world you are playing on the Mod Manager's Mods screen. The panel's Settings tab changes a setting the world has its own value for in that world alone, and any other for every world. The Controls, Power and Interface settings stay the same for every world.
+- `DeviceAttackRate` now takes effect at once, from the Mods screen and from the panel's Settings tab, and reaches the defense devices already built.
+- Made for Survival Log 1.1.20151.
+
 ## 0.10.0
 
 - **Warning:** needs Exiled's Toolkit 0.12.0 or newer. Update the Toolkit first.

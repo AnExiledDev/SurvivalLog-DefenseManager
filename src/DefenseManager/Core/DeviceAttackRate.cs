@@ -24,4 +24,11 @@ public sealed class DeviceAttackRate
     /// <summary>The time between strikes; a device the game gives no interval (0 or less) is left alone.</summary>
     public float Interval(float gameSeconds) =>
         IsGameRate || !float.IsFinite(gameSeconds) || gameSeconds <= 0f ? gameSeconds : gameSeconds / Value;
+
+    /// <summary>
+    /// A time a device was set up with at the rate <paramref name="from"/>, as it would be had it been set up at this
+    /// rate. Like <see cref="Interval"/>, a time of 0 or less is left alone.
+    /// </summary>
+    public float Rescale(float seconds, DeviceAttackRate from) =>
+        !float.IsFinite(seconds) || seconds <= 0f ? seconds : seconds * from.Value / Value;
 }

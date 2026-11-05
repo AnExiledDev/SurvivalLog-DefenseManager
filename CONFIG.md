@@ -1,6 +1,6 @@
 # Defense Manager settings
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once except `DeviceAttackRate`, which takes effect at the next game start. Every setting but `PanelKey` can also be changed on the panel's Settings tab, which saves to this file at once (`DeviceAttackRate` still takes effect at the next game start). Delete the file to get the defaults back.
+Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once. Every setting but `PanelKey` can also be changed on the panel's Settings tab, which saves to this file and takes effect at once. With Exiled's Toolkit 0.17.0 or newer, each world can keep its own combat and unlock settings: every setting in Combat and Unlocks. Pick them for a new world in Customizable Difficulty, or, while you play, change them for that world alone on the Mods screen. The panel's Settings tab changes a setting the world has its own value for in that world alone, and any other for every world. Delete the file to get the defaults back.
 
 ## Controls
 
@@ -35,7 +35,7 @@ The defense and type settings belong to a save file. A game that carries on unde
 | `CrawlerDodgeChance` | `0.25` | Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. |
 | `ArmoredCrawlerDodgeChance` | `0.25` | The same for the Armored Crawler Zombie. |
 | `AllowDuringWaves` | `false` | Lets defenses be repaired, removed, installed and moved while a zombie wave is on, from the panel and from the game's own menus and Layout screen. The base game locks all of these until the wave ends. Robot repairs and expeditions still wait for the wave to end. |
-| `DeviceAttackRate` | `1` | How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. From 0.25 to 10. A powered device uses power on every strike, so a higher rate uses more power. Takes effect at the next game start. |
+| `DeviceAttackRate` | `1` | How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. From 0.25 to 10. A powered device uses power on every strike, so a higher rate uses more power. Devices already built change to a new rate at once. |
 
 ## Unlocks
 

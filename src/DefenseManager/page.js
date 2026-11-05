@@ -69,7 +69,7 @@
     setCrawlerDesc: 'Chance a Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.',
     setArmored: 'Armored crawler dodge chance',
     setArmoredDesc: 'Chance an Armored Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.',
-    setRate: 'Device attack rate', setRateDesc: 'How often defense devices strike, 0.25 to 10. Takes effect at the next game start.',
+    setRate: 'Device attack rate', setRateDesc: 'How often defense devices strike, 0.25 to 10.',
     setWaves: 'Work during waves', setWavesDesc: 'Repair, remove, install and move defenses while a zombie wave is on. The base game locks them until it ends.',
     setUnlocks: 'Unlocks', setDoors: 'Door upgrades from day one',
     setDoorsDesc: 'Advanced Repair and Advanced Reinforce on doors, with their recipes, from the first day of a story run. The base game gives them on days 2 and 5.',

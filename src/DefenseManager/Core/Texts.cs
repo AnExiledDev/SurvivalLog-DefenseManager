@@ -134,7 +134,6 @@ public static class Texts
 
     // The Settings tab.
     public static readonly Phrase Saved = new("Setting saved.", "设置已保存。");
-    public static readonly Phrase SavedAtRestart = new("Setting saved. It takes effect at the next game start.", "设置已保存，下次启动游戏时生效。");
 
     /// <summary>The words page.js draws the panel, the HUD button's tip and the Layout bar with, by the key it looks them up by.</summary>
     public static readonly IReadOnlyList<(string Key, Phrase Phrase)> Page = new (string, Phrase)[]
@@ -225,7 +224,7 @@ public static class Texts
         ("setArmored", new("Armored crawler dodge chance", "「重甲爬行者丧尸」闪避概率")),
         ("setArmoredDesc", new("Chance an Armored Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.", "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率。原版游戏为 100%。")),
         ("setRate", new("Device attack rate", "防御设施攻击频率")),
-        ("setRateDesc", new("How often defense devices strike, 0.25 to 10. Takes effect at the next game start.", "防御设施攻击的频率，0.25 到 10。下次启动游戏时生效。")),
+        ("setRateDesc", new("How often defense devices strike, 0.25 to 10.", "防御设施攻击的频率，0.25 到 10。")),
         ("setWaves", new("Work during waves", "尸潮期间操作")),
         ("setWavesDesc", new("Repair, remove, install and move defenses while a zombie wave is on. The base game locks them until it ends.", "尸潮进行时也可修理、拆除、安装和移动防御设施。原版游戏在尸潮结束前禁止这些操作。")),
         ("setUnlocks", new("Unlocks", "提前解锁")),
@@ -258,7 +257,7 @@ public static class Texts
             QueuedForRepair, NotAllowed, Needs, RepairQueuedFirst, NeedItem, OutOfStamina, UnnamedItem,
             NoWorld, ReadFailed, NoRepair, CostUnreadable, CheckFailed, Failed,
             NoSave, Unreadable, NoGame, NoSwitch, NotSaved, DefenseSet, DefenseFollowsType, TypeSet, TypeFollowsGlobal,
-            AlwaysOn, WaveOnly, Proximity, GameDefault, Saved, SavedAtRestart,
+            AlwaysOn, WaveOnly, Proximity, GameDefault, Saved,
         };
 
         foreach (var counted in Counts)

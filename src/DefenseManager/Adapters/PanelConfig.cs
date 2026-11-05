@@ -49,12 +49,14 @@ internal sealed class PanelConfig
         _fortificationUnlocks = fortificationUnlocks;
     }
 
-    /// <summary>Set by the plugin: puts the controls, power, dodge, wave and unlock values in use, as at start-up.</summary>
+    /// <summary>Set by the plugin: puts the controls, power, dodge, attack rate, wave and unlock values in use, as at start-up.</summary>
     public Action ApplyControls { get; set; } = () => { };
 
     public Action ApplyPower { get; set; } = () => { };
 
     public Action ApplyDodge { get; set; } = () => { };
+
+    public Action ApplyRate { get; set; } = () => { };
 
     public Action ApplyWaveWork { get; set; } = () => { };
 
@@ -73,6 +75,8 @@ internal sealed class PanelConfig
     public UnlockSettings Unlocks => new(_doorUnlocks.Value, _windowUnlocks.Value, _fortificationUnlocks.Value);
 
     public CrawlerDodge Dodge => new(_crawlerDodge.Value, _armoredCrawlerDodge.Value);
+
+    public DeviceAttackRate AttackRate => DeviceAttackRate.From(_attackRate.Value);
 
     public PanelSettings Read(string keyName) => new(
         keyName,
@@ -122,8 +126,8 @@ internal sealed class PanelConfig
                 break;
             case SettingChange.AttackRate rate:
                 _attackRate.Value = rate.Rate;
-
-                return Texts.SavedAtRestart.Pick(isChinese);
+                ApplyRate();
+                break;
             default:
                 throw new InvalidOperationException("unknown setting change " + change);
         }
