@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DefenseManager.Core;
+using ExiledToolkit.Game;
+using ExiledToolkit.Web;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using UnityEngine;
@@ -459,7 +461,7 @@ internal sealed class GameDefenses : IDefenseGame
 
     /// <summary>The defense's name in the player's language, falling back to the table's own text, then to its furniture id.</summary>
     internal static string NameOf(ConfigManager config, Config_Furniture row, int configId) =>
-        Translate(config, row.Name) ?? NonEmpty(row.Name_Local) ?? NonEmpty(row.Name) ?? $"Defense {configId}";
+        GameNames.Translate(config, row.Name) ?? GameNames.NonEmpty(row.Name_Local) ?? GameNames.NonEmpty(row.Name) ?? $"Defense {configId}";
 
     /// <summary>
     /// The switch as the game has it and whether the game counts the defense as working. A read that throws shows the
@@ -551,7 +553,7 @@ internal sealed class GameDefenses : IDefenseGame
 
             var reason = conditions.CheckFurnitureFuncCondition(conditionSetId, defenseId).Item2;
 
-            return Translate(config, reason) ?? NonEmpty(reason) ?? "";
+            return GameNames.Translate(config, reason) ?? GameNames.NonEmpty(reason) ?? "";
         }
         catch (Exception ex)
         {
@@ -637,8 +639,8 @@ internal sealed class GameDefenses : IDefenseGame
 
         var items = config._Config_Item_Dict;
         var item = items != null && items.TryGetValue(itemId, out var found) ? found : null;
-        var name = item == null ? null : Translate(config, item.ItemName) ?? NonEmpty(item.ItemName_Local) ?? NonEmpty(item.ItemName);
-        var facts = new ItemFacts(name ?? $"Item {itemId}", icons.Resolve(NonEmpty(item?.WebIcon) ?? NonEmpty(item?.Icon)));
+        var name = GameNames.ItemName(config, item);
+        var facts = new ItemFacts(name ?? $"Item {itemId}", icons.Resolve(GameNames.NonEmpty(item?.WebIcon) ?? GameNames.NonEmpty(item?.Icon)));
 
         _items.Add(itemId, facts);
 
@@ -721,17 +723,6 @@ internal sealed class GameDefenses : IDefenseGame
 
         return false;
     }
-
-    private static string? Translate(ConfigManager config, string? key)
-    {
-        if (string.IsNullOrEmpty(key)) return null;
-
-        var text = config.GetLocalTxt(key);
-
-        return string.IsNullOrEmpty(text) || text == key ? null : text;
-    }
-
-    private static string? NonEmpty(string? text) => string.IsNullOrWhiteSpace(text) ? null : text;
 
     private void ReportOnce(string operation, Exception ex)
     {

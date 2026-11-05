@@ -1,24 +1,29 @@
 using System;
 using DefenseManager.Core;
 using ExiledToolkit;
+using ExiledToolkit.Game;
+using ExiledToolkit.Kit;
+using ExiledToolkit.Web;
 using UnityEngine;
 
 namespace DefenseManager.Adapters;
 
 /// <summary>
 /// The panel's game side, run once a frame: its open state, the view it sends to page.js, the bar on the game's Layout
-/// screen, the presses the page asks for, and the power pass. Page messages arrive on the web view's thread, so they
-/// are queued and handled here, in this frame.
+/// screen, the presses the page asks for, and the power pass. Page messages arrive on the web view's thread, so
+/// Exiled's Toolkit queues them and they are handled here, in this frame.
 /// </summary>
 internal sealed class DefenseSession
 {
     private const float RefreshSeconds = 1f;
     private const float LiveCheckOffset = 0.25f;
+    private const string WindowName = "DefenseManager.panel";
     private static string FailedStatus => Texts.Failed.Pick(GameLanguage.IsChinese());
 
     private readonly GameDefenses _game;
     private readonly PowerSession _power;
-    private readonly WebPage _page;
+    private readonly DefensePage _page;
+    private readonly PageMailbox _messages = PageInbox.Listen(PageCommand.Prefix);
     private readonly PanelConfig _config;
     private KeyCode _panelKey;
     private bool _isLayoutBarEnabled;
@@ -45,7 +50,7 @@ internal sealed class DefenseSession
     private bool _hasReportedLayoutFailure;
     private bool _hasReportedPowerFailure;
 
-    public DefenseSession(GameDefenses game, PowerSession power, WebPage page, PanelConfig config, Action<string> log)
+    public DefenseSession(GameDefenses game, PowerSession power, DefensePage page, PanelConfig config, Action<string> log)
     {
         _game = game;
         _power = power;
@@ -70,10 +75,10 @@ internal sealed class DefenseSession
 
     public void Update()
     {
-        var now = Clock.Now();
+        var now = DefenseTicker.Now();
         _page.KeepInstalled(now);
 
-        while (PageMessages.TryTake(out var command)) HandleSafely(command);
+        while (_messages.TryTake(out var message)) HandleSafely(PageCommand.Parse(message));
 
         UpdatePower(now);
 
@@ -212,7 +217,7 @@ internal sealed class DefenseSession
     private void SendLive(float now)
     {
         // On its own beat, a quarter second off the power pass and the page check, so their work never shares a frame
-        // (see PowerSession and WebPage); a long stall starts the beat again.
+        // (see PowerSession and DefensePage); a long stall starts the beat again.
         _nextLiveCheckAt += RefreshSeconds;
 
         if (_nextLiveCheckAt <= now) _nextLiveCheckAt = now + RefreshSeconds;
@@ -304,7 +309,7 @@ internal sealed class DefenseSession
         if (view == null) return;
 
         _isOpen = true;
-        InputGate.PanelOpened();
+        InputGate.Opened(WindowName);
         SendOpen(view);
         _log("panel opened");
     }
@@ -325,7 +330,7 @@ internal sealed class DefenseSession
         if (!_isOpen) return;
 
         _isOpen = false;
-        InputGate.PanelClosed();
+        InputGate.Closed(WindowName);
         _page.Close();
     }
 
@@ -410,7 +415,7 @@ internal sealed class DefenseSession
 
     private string? ReadView()
     {
-        _nextRefreshAt = Clock.Now() + RefreshSeconds;
+        _nextRefreshAt = DefenseTicker.Now() + RefreshSeconds;
 
         return Presence.PanelView(_game.Locate(), _read, _power.Policy(), GameLanguage.IsChinese(), _config.Read(KeyName()));
     }

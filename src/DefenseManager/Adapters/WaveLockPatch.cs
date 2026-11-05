@@ -1,7 +1,7 @@
 using System;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
-using HarmonyLib;
 
 namespace DefenseManager.Adapters;
 
@@ -19,16 +19,18 @@ internal static class WaveLockPatch
     private const int RepairFunc = 9121;
 
     private static Action<string> _log = _ => { };
+    private static PatchKit? _hooks;
 
     /// <summary>True while the player's option lets defense work go on during waves.</summary>
     public static bool AllowsWaves { get; private set; }
 
-    public static void Apply(Harmony harmony, Action<string> log)
+    public static void Apply(PatchKit hooks, Action<string> log)
     {
         _log = log;
-        Hook(harmony, typeof(InstallPlanManager), nameof(InstallPlanManager.IsTowerSlotLockedByWave), prefix: nameof(OpenSlot), what: "installing and moving");
-        Hook(harmony, typeof(TowerDefensePlanBridge), nameof(TowerDefensePlanBridge.OnQueryWaveOperationLocked), prefix: nameof(OpenRemoval), what: "removing");
-        Hook(harmony, typeof(Furniture), nameof(Furniture.BuildSingleBtnData), postfix: nameof(OpenRepairButton), what: "the Repair button");
+        _hooks = hooks;
+        Hook(hooks, typeof(InstallPlanManager), nameof(InstallPlanManager.IsTowerSlotLockedByWave), prefix: nameof(OpenSlot), what: "installing and moving");
+        Hook(hooks, typeof(TowerDefensePlanBridge), nameof(TowerDefensePlanBridge.OnQueryWaveOperationLocked), prefix: nameof(OpenRemoval), what: "removing");
+        Hook(hooks, typeof(Furniture), nameof(Furniture.BuildSingleBtnData), postfix: nameof(OpenRepairButton), what: "the Repair button");
     }
 
     public static void Use(bool allowsWaves)
@@ -37,21 +39,8 @@ internal static class WaveLockPatch
         _log($"defense work during waves {(allowsWaves ? "allowed" : "locked as in the game")}");
     }
 
-    private static void Hook(Harmony harmony, Type type, string method, string what, string? prefix = null, string? postfix = null)
-    {
-        try
-        {
-            harmony.Patch(
-                AccessTools.Method(type, method),
-                prefix: prefix == null ? null : new HarmonyMethod(typeof(WaveLockPatch), prefix),
-                postfix: postfix == null ? null : new HarmonyMethod(typeof(WaveLockPatch), postfix));
-            _log($"hooked the wave lock on {what}");
-        }
-        catch (Exception ex)
-        {
-            _log($"could not hook {type.Name}.{method}, {what} stays locked during waves: {ex.Message}");
-        }
-    }
+    private static void Hook(PatchKit hooks, Type type, string method, string what, string? prefix = null, string? postfix = null) =>
+        hooks.Patch(typeof(WaveLockPatch), type, method, prefix: prefix, postfix: postfix, done: $"hooked the wave lock on {what}", consequence: $"{what} stays locked during waves");
 
     private static bool OpenSlot(ref bool __result)
     {
@@ -72,7 +61,7 @@ internal static class WaveLockPatch
         }
         catch (Exception ex)
         {
-            _log($"answering the removal wave check failed: {ex.Message}");
+            _hooks?.Fail("answering the removal wave check", ex);
         }
 
         return false;
@@ -95,7 +84,7 @@ internal static class WaveLockPatch
         }
         catch (Exception ex)
         {
-            _log($"opening the Repair button during a wave failed: {ex.Message}");
+            _hooks?.Fail("opening the Repair button during a wave", ex);
         }
     }
 }

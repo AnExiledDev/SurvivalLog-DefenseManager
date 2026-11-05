@@ -5,7 +5,7 @@ using static DefenseManager.Tests.FakeGame;
 
 namespace DefenseManager.Tests;
 
-/// <summary>What goes to the page with each call: the words only when it lacks them, and only the rows that changed.</summary>
+/// <summary>What goes to the page with each call: only the rows that changed.</summary>
 public class PageSendTests
 {
     private static FakeGame Home() => new() { Defenses = { Def(1), Def(2, cur: 0, broken: true), Def(3, cur: 100) } };
@@ -112,52 +112,5 @@ public class PageSendTests
         var delta = Holding(view);
 
         Assert.Equal("{\"defenses\":[\"1\",\"2\"],\"tail\":1}", delta.Next(view));
-    }
-
-    // ===== Words =====
-
-    [Fact]
-    public void The_words_go_with_the_first_call_and_not_again_while_the_language_stays()
-    {
-        var words = new WordsOnce();
-
-        Assert.Equal(PageWords.Script(isChinese: false), words.Prefix(isChinese: false));
-
-        words.Sent(isChinese: false);
-
-        Assert.Equal("", words.Prefix(isChinese: false));
-    }
-
-    [Fact]
-    public void Switching_the_games_language_sends_the_other_words()
-    {
-        var words = new WordsOnce();
-
-        words.Sent(isChinese: false);
-
-        Assert.Equal(PageWords.Script(isChinese: true), words.Prefix(isChinese: true));
-    }
-
-    /// <summary>A call that failed never put the words in the page.</summary>
-    [Fact]
-    public void Words_on_a_call_that_did_not_run_go_again()
-    {
-        var words = new WordsOnce();
-
-        words.Prefix(isChinese: false);
-
-        Assert.Equal(PageWords.Script(isChinese: false), words.Prefix(isChinese: false));
-    }
-
-    /// <summary>A reloaded page has lost the words with everything else.</summary>
-    [Fact]
-    public void A_reloaded_page_gets_the_words_again()
-    {
-        var words = new WordsOnce();
-
-        words.Sent(isChinese: true);
-        words.Forget();
-
-        Assert.Equal(PageWords.Script(isChinese: true), words.Prefix(isChinese: true));
     }
 }

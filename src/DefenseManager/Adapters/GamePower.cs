@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using DefenseManager.Core;
+using ExiledToolkit.Game;
+using ExiledToolkit.Web;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 

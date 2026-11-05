@@ -1,6 +1,7 @@
-// Just enough of Root.html and the game's Layout page (UI/BuildTips/BuildTips.html) for page.js to run in Jint: the
-// root document with its page iframes, the vuplex bridge, clicks that bubble, and the rule the game's click-through
-// uses to decide what on a page is clickable. Test code only; nothing here ships.
+// Just enough of Root.html, the game's HUD page and its Layout page (UI/BuildTips/BuildTips.html) for page.js and
+// Exiled's Toolkit's page API to run in Jint: the root document with its page iframes, the vuplex bridge, clicks
+// that bubble, and the rule the game's click-through uses to decide what on a page is clickable. Test code only;
+// nothing here ships.
 var window = this;
 
 var location = { protocol: 'https:' };
@@ -13,7 +14,7 @@ function setInterval(callback) {
   return intervals.length;
 }
 
-// One run of every interval the script set, which is how its 400 ms page check runs.
+// One run of every interval the scripts set, which is how the Toolkit's 250 ms page check runs.
 function poll() {
   intervals.slice().forEach(function (callback) { callback(); });
 }
@@ -46,7 +47,8 @@ var FakeElement = class {
     this.listeners = {};
     this.style = {};
     this.classList = {
-      contains: function (name) { return element.classes.indexOf(name) >= 0; }
+      contains: function (name) { return element.classes.indexOf(name) >= 0; },
+      add: function (name) { if (element.classes.indexOf(name) < 0) element.classes.push(name); }
     };
   }
 
@@ -208,12 +210,15 @@ function descendantsOf(roots) {
   return found;
 }
 
+// href is the page's address; the Toolkit's page check skips a document without one, as it skips the about:blank a new
+// iframe holds first.
 var FakeDocument = class {
-  constructor() {
+  constructor(href) {
     this.head = new FakeElement('head');
     this.body = new FakeElement('body');
     this.head.isRoot = true;
     this.body.isRoot = true;
+    this.defaultView = { location: { href: href || 'about:blank' } };
   }
 
   createElement(tagName) { return new FakeElement(tagName); }
@@ -245,6 +250,14 @@ var FakeDocument = class {
   querySelector(selector) {
     return this.querySelectorAll(selector)[0] || null;
   }
+
+  // Not counted as a search: in a browser this is a live list the document keeps up to date, which is what the
+  // Toolkit's page check reads each time.
+  getElementsByTagName(tagName) {
+    var wanted = tagName.toLowerCase();
+
+    return descendantsOf([this.head, this.body]).filter(function (element) { return element.tagName.toLowerCase() === wanted; });
+  }
 };
 
 // Root.html's own document, which holds the page iframes.
@@ -262,7 +275,7 @@ function openLayout() {
   var frame = document.body.appendChild(new FakeElement('iframe'));
 
   frame.src = 'https://game.local/UI/BuildTips/BuildTips.html';
-  frame.contentDocument = new FakeDocument();
+  frame.contentDocument = new FakeDocument(frame.src);
 
   return frame;
 }
@@ -273,7 +286,7 @@ function openHud() {
   var column = new FakeElement('div');
 
   frame.src = 'https://game.local/UI/CoreUI1/CoreUI1.html';
-  frame.contentDocument = new FakeDocument();
+  frame.contentDocument = new FakeDocument(frame.src);
   column.className = 'vertical-tools';
   column.appendChild(new FakeElement('button'));
   frame.contentDocument.body.appendChild(column);

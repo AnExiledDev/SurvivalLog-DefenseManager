@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
 using DefenseManager.Core;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
-using HarmonyLib;
 
 namespace DefenseManager.Adapters;
 
@@ -23,22 +23,19 @@ internal static class DodgeRulesPatch
     private static int _checkedFrame = -1;
     private static long _nextCheckAt;
     private static Action<string> _log = _ => { };
+    private static PatchKit? _hooks;
 
-    public static void Apply(Harmony harmony, Action<string> log)
+    public static void Apply(PatchKit hooks, Action<string> log)
     {
         _log = log;
-
-        try
-        {
-            harmony.Patch(
-                AccessTools.Method(typeof(TowerCombatManager), nameof(TowerCombatManager.RollDodge)),
-                prefix: new HarmonyMethod(typeof(DodgeRulesPatch), nameof(UsePlayersChances)));
-            log("hooked the crawler dodge rules");
-        }
-        catch (Exception ex)
-        {
-            log($"could not hook TowerCombatManager.RollDodge, crawlers keep the game's dodge chances: {ex.Message}");
-        }
+        _hooks = hooks;
+        hooks.Patch(
+            typeof(DodgeRulesPatch),
+            typeof(TowerCombatManager),
+            nameof(TowerCombatManager.RollDodge),
+            prefix: nameof(UsePlayersChances),
+            done: "hooked the crawler dodge rules",
+            consequence: "crawlers keep the game's dodge chances");
     }
 
     /// <summary>
@@ -90,7 +87,7 @@ internal static class DodgeRulesPatch
         catch (Exception ex)
         {
             _hasFailed = true;
-            _log($"could not set the crawler dodge chances, the game's own apply: {ex.Message}");
+            _hooks?.Fail("setting the crawler dodge chances, the game's own apply", ex);
         }
     }
 }

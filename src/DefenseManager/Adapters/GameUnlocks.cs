@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DefenseManager.Core;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle;
 using GameCore.HotUpdate.Battle.Logic;
@@ -33,7 +34,7 @@ internal sealed class UnlockSession
 
     public void Update()
     {
-        var now = Clock.Now();
+        var now = DefenseTicker.Now();
 
         if (now < _nextCheckAt) return;
 

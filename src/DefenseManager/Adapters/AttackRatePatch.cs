@@ -1,7 +1,7 @@
 using System;
 using DefenseManager.Core;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate.Battle.Logic;
-using HarmonyLib;
 
 namespace DefenseManager.Adapters;
 
@@ -19,22 +19,18 @@ internal static class AttackRatePatch
     private static bool _hasFailed;
     private static bool _hasRescaleFailed;
     private static Action<string> _log = _ => { };
+    private static PatchKit? _hooks;
 
-    public static void Apply(Harmony harmony, Action<string> log)
+    public static void Apply(PatchKit hooks, Action<string> log)
     {
         _log = log;
-
-        try
-        {
-            harmony.Patch(
-                AccessTools.Method(typeof(TowerDeviceComponent), nameof(TowerDeviceComponent.OnInit)),
-                postfix: new HarmonyMethod(typeof(AttackRatePatch), nameof(Shorten)));
-            _isHooked = true;
-        }
-        catch (Exception ex)
-        {
-            log($"could not hook TowerDeviceComponent.OnInit, devices strike at the game's rate: {ex.Message}");
-        }
+        _hooks = hooks;
+        _isHooked = hooks.Patch(
+            typeof(AttackRatePatch),
+            typeof(TowerDeviceComponent),
+            nameof(TowerDeviceComponent.OnInit),
+            postfix: nameof(Shorten),
+            consequence: "devices strike at the game's rate");
     }
 
     /// <summary>Puts a rate in use: the devices already built change to it at once, and new ones take it.</summary>
@@ -68,7 +64,7 @@ internal static class AttackRatePatch
         catch (Exception ex)
         {
             _hasFailed = true;
-            _log($"could not change a device's attack rate, devices strike at the game's rate: {ex.Message}");
+            _hooks?.Fail("changing a device's attack rate, devices strike at the game's rate", ex);
         }
     }
 

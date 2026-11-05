@@ -1,13 +1,16 @@
 // Defense Manager's web half. Runs in Root.html, the document every game page iframe sits in. Draws the panel over
 // all of them in the warm gold look of the other mod panels: the home yard as a grid of squares with a side panel
-// beside it, and tabs for power and settings. It also puts a button in the HUD's tool column (bottom left, above the
-// phone and bag buttons), built like the game's own buttons there so it reads as part of the game. While the game's
-// Layout screen is up it puts a bar of buttons at the top of that screen, built like Layout's own buttons. Talks to
-// the plugin through vuplex.postMessage("slmod|defensemanager|<verb>") and is driven by window.__sldefense.
+// beside it, and tabs for power and settings. Through Exiled's Toolkit's page API it also puts a button in the HUD's
+// tool column (bottom left, above the phone and bag buttons), built like the game's own buttons there so it reads as
+// part of the game, and while the game's Layout screen is up a bar of buttons at the top of that screen, built like
+// Layout's own buttons. Talks to the plugin through the Toolkit's bridge ("slmod|defensemanager|<verb>") and is driven
+// by window.__sldefense.
 (function () {
   if (window.__sldefense) return;
 
   var PREFIX = 'slmod|defensemanager|';
+  // The name the panel is handed to the Toolkit's UI size with, the same as the plugin's UiScale setting uses.
+  var UI_SIZE_NAME = 'DefenseManager';
   var HUD_CLASS = 'dm-hud-btn';
   // Defense Manager's place in the HUD's tool column when Exiled's Toolkit lays it out in columns of four.
   var DOCK_ORDER = '40';
@@ -85,9 +88,16 @@
   var isBusy = false;
   var busyTimer = 0;
   var layoutVersion = 0;
-  var hasReportedPageAccess = false;
   var hasReportedHudPlaced = false;
   var hasReportedLayoutPlaced = false;
+
+  // The Toolkit's page API (window.ExiledToolkit). The game can run its script after this one, so this stays null
+  // until it has; the HUD button, the Layout bar and the messages to the plugin start then.
+  var etk = null;
+  // The shield button in the HUD's tool column. The Toolkit keeps it there and writes changes into it in place.
+  var hud = null;
+  // The Toolkit's watch on the game's Layout page, which hands it to placeLayoutBar.
+  var layoutPages = null;
 
   function emptyData() {
     return { note: null, locked: null, repairAll: 0, clearAll: 0, materials: [], defenses: [], yard: null, global: null, settings: null };
@@ -102,10 +112,9 @@
     return text;
   }
 
+  // Through the Toolkit's bridge. Nothing goes before its page API is there; the page says it is ready once it is.
   function send(message) {
-    try {
-      if (window.vuplex) window.vuplex.postMessage(PREFIX + message);
-    } catch (e) {}
+    if (etk) etk.send(PREFIX, message);
   }
 
   // One press at a time: a double click would otherwise ask twice. Every press is answered by a status line, which
@@ -361,8 +370,6 @@
   function build() {
     if (ui && document.body.contains(ui.root)) return;
 
-    addStyle();
-
     var root = el('div');
     root.id = 'dm-root';
     var plate = el('div', 'dm-plate unity-interactive');
@@ -377,11 +384,6 @@
     root.appendChild(plate);
 
     document.body.appendChild(root);
-
-    // Drawn at the player's UI size (Exiled's Toolkit). The full-screen mask always fills the screen, so the window on
-    // it is what must fit.
-    uiSize(root, { fit: plate });
-
     root.addEventListener('click', onClick);
     // Clicks inside the plate must not reach the game pages underneath; the mask itself closes nothing on purpose.
     root.addEventListener('mousedown', function (e) { e.stopPropagation(); });
@@ -392,33 +394,17 @@
       if (img && img.tagName === 'IMG' && img.parentNode) img.parentNode.textContent = img.getAttribute('data-letter') || '?';
     }, true);
 
-    ui = { root: root, head: head, body: body, status: status, keys: keys };
+    ui = { root: root, plate: plate, head: head, body: body, status: status, keys: keys };
+
+    if (etk) dressPanel();
   }
 
-  // Hands a panel to Exiled's Toolkit to be drawn at the player's UI size. Before the Toolkit's script has loaded it
-  // waits in a list the Toolkit reads; without the Toolkit nothing happens.
-  function uiSize(node, options) {
-    options = Object.assign({ mod: 'DefenseManager' }, options);
-    var toolkit = window.ExiledUi;
-
-    if (toolkit) {
-      toolkit.size(node, options);
-      return;
-    }
-
-    var waiting = window.__exiledUiWait = window.__exiledUiWait || [];
-    waiting.push([node, options]);
-    if (waiting.length > 32) waiting.shift();
-  }
-
-  // The style outlives a lost panel root, so a rebuild must not stack another copy of it.
-  function addStyle() {
-    if (document.getElementById('dm-style')) return;
-
-    var style = el('style');
-    style.id = 'dm-style';
-    style.textContent = CSS;
-    document.head.appendChild(style);
+  // The panel's style, and the player's UI size from the Toolkit. The full-screen mask always fills the screen, so the
+  // window on it is what must fit. A panel drawn before the Toolkit arrived gets both when it does; the style outlives
+  // a lost panel root, and the Toolkit adds it only once.
+  function dressPanel() {
+    etk.addStyle(document, 'dm-style', CSS);
+    etk.size(ui.root, { mod: UI_SIZE_NAME, fit: ui.plate });
   }
 
   function onClick(e) {
@@ -1249,166 +1235,34 @@
 
     if (ui && state.isOpen) renderKeys();
 
-    patchPagesSafely();
+    showHudState();
+    refreshLayoutBar();
   }
 
   // What the bar on the game's Layout screen draws from (the panel's own view), or null while Layout is not up.
   function layout(data) {
     state.layout = data || null;
     layoutVersion++;
-    patchPagesSafely();
+    refreshLayoutBar();
   }
 
-  // The HUD and the Layout screen are same-origin iframes, so their documents can be reached from here; polled because
-  // the game creates and drops those iframes whenever it likes.
-  function patchPages() {
-    var frames = document.querySelectorAll('iframe');
+  // Shown only in such a game, with the panel key and the tip in the game's language. The Toolkit puts the button first
+  // in the tool column, where the game's own buttons do not move, and puts it back whenever the HUD page is rebuilt. The
+  // column hides itself in build mode, and the button with it.
+  function showHudState() {
+    if (!hud) return;
 
-    placedHud = null;
-    placedBar = null;
-
-    for (var i = 0; i < frames.length; i++) {
-      var src = frames[i].src || '';
-      var isHud = /CoreUI1\.html/.test(src);
-
-      if (!isHud && !/BuildTips\.html/.test(src)) continue;
-
-      var doc = null;
-
-      try {
-        doc = frames[i].contentDocument;
-      } catch (e) {}
-
-      if (!doc) {
-        if (!hasReportedPageAccess) send('diag|cannot reach a game page document (root ' + location.protocol + ', iframe ' + src + ')');
-        hasReportedPageAccess = true;
-        continue;
-      }
-
-      if (isHud) placeHudButton(frames[i], doc);
-      else placeLayoutBar(frames[i], doc);
-    }
+    hud.update({ shown: state.isLive, key: state.key, tip: say('tip') });
   }
 
-  function patchPagesSafely() {
-    try {
-      patchPages();
-    } catch (e) {}
-  }
-
-  // What this script last put on the game's pages, with the iframe and document it went into. The 400 ms check looks
-  // for iframes only when one of them is gone or out of date; outside a game, with nothing placed, it does nothing.
-  var placedHud = null;
-  var placedBar = null;
-
-  function checkPages() {
-    try {
-      if (!state.isLive && !placedHud && !placedBar) return;
-      if (isHudPlaced() && (state.layout ? isBarPlaced() : !placedBar)) return;
-
-      patchPages();
-    } catch (e) {}
-  }
-
-  // A node in an iframe the game dropped, or in a document the iframe has since replaced, still reads as connected to
-  // its own document, so the iframe and its document are checked too.
-  function isStillIn(placed) {
-    return placed.frame.isConnected && placed.frame.contentDocument === placed.doc;
-  }
-
-  function isHudPlaced() {
-    var placed = placedHud;
-
-    return !!placed && state.isLive && isStillIn(placed) && placed.column.isConnected && placed.node.parentNode === placed.column && placed.node.getAttribute('data-key') === state.key;
-  }
-
-  function isBarPlaced() {
-    var placed = placedBar;
-
-    return !!placed && state.isLive && !!state.layout && isStillIn(placed) && placed.node.isConnected && placed.node.getAttribute('data-version') === String(layoutVersion);
-  }
-
-  // First in the tool column: the column is anchored at the bottom, so the first child sits on top and the game's own
-  // buttons do not move. The column hides itself in build mode, and the button with it.
-  function placeHudButton(frame, doc) {
-    var column = doc.querySelector('.vertical-tools');
-    var existing = doc.querySelector('.' + HUD_CLASS);
-
-    if (!column || !state.isLive) {
-      if (existing) existing.remove();
-
-      return;
-    }
-
-    if (existing && existing.parentNode === column && existing.getAttribute('data-key') === state.key) {
-      placedHud = { frame: frame, doc: doc, column: column, node: existing };
-
-      return;
-    }
-
-    if (existing) existing.remove();
-
-    var node = hudButton(doc);
-
-    node.setAttribute('data-etk-dock', DOCK_ORDER);
-    column.insertBefore(node, column.firstChild);
-    placedHud = { frame: frame, doc: doc, column: column, node: node };
-
+  function noteHudPlaced() {
     if (!hasReportedHudPlaced) send('diag|HUD button placed in the tool column');
     hasReportedHudPlaced = true;
   }
 
-  // The same markup as the game's bag button: its classes, an svg icon, and the hover tip its stylesheet shows. The
-  // HUD page watches its body for new buttons and tells the game where they are, so a click on this one reaches it.
-  function hudButton(doc) {
-    var node = doc.createElement('button');
-    node.className = 'ui-btn icon-sq interactive-btn has-entry-tip ' + HUD_CLASS;
-    node.setAttribute('data-interactive', '');
-    node.setAttribute('data-key', state.key);
-    node.appendChild(shield(doc));
-    node.appendChild(entryTip(doc));
-    node.addEventListener('click', function (e) {
-      e.stopPropagation();
-      send('toggle');
-    });
-
-    return node;
-  }
-
-  function shield(doc) {
-    var svg = doc.createElementNS(SVG_NS, 'svg');
-    var path = doc.createElementNS(SVG_NS, 'path');
-
-    svg.setAttribute('class', 'icon-svg');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    path.setAttribute('d', SHIELD_PATH);
-    svg.appendChild(path);
-
-    return svg;
-  }
-
-  function entryTip(doc) {
-    var tip = doc.createElement('div');
-    var title = doc.createElement('div');
-    var body = doc.createElement('div');
-
-    tip.className = 'entry-tip';
-    title.className = 'entry-tip-title';
-    title.textContent = 'Defense Manager';
-    body.className = 'entry-tip-body';
-    body.textContent = say('tip');
-
-    if (state.key) {
-      var key = doc.createElement('span');
-      key.className = 'entry-tip-key';
-      key.textContent = state.key;
-      title.appendChild(key);
-    }
-
-    tip.appendChild(title);
-    tip.appendChild(body);
-
-    return tip;
+  // The bar's view or the panel key changed: the Layout page shown now is handed over again at once.
+  function refreshLayoutBar() {
+    if (layoutPages) layoutPages.refresh();
   }
 
   // Layout's own button look (its cancel button: dark plate, amber text and border, amber corner marks), so the bar
@@ -1424,43 +1278,39 @@
     '#dm-layout .dm-lb-note{position:relative;max-width:640px;text-align:center;padding:8px 18px;background-color:rgba(12,12,14,.75);border:1px solid rgba(235,163,8,.35);color:#EBA308;font-size:13px;font-weight:700;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.6)}'
   ].join('\n');
 
-  // The bar is drawn again only when its view or the panel key changed, so the game's hover and click state on it is
-  // not reset every poll. It goes away whenever Layout closes or the game is left.
-  function placeLayoutBar(frame, doc) {
-    var existing = doc.getElementById(LAYOUT_ID);
+  // Handed the Layout page at every check of the Toolkit's page watch. The bar is drawn again only when its view or the
+  // panel key changed, so the game's hover and click state on it is not reset every check, and it goes away whenever
+  // Layout closes or the game is left. The bar is kept on the page's document, so a check with it in place, or with
+  // nothing to show and nothing placed, searches nothing.
+  function placeLayoutBar(doc) {
+    var placed = doc.__dmLayoutBar;
+
+    // The game drew the page again around it.
+    if (placed && placed.isConnected !== true) placed = null;
 
     if (!state.layout || !state.isLive || !doc.body) {
-      if (existing) existing.remove();
+      if (placed) placed.remove();
+
+      doc.__dmLayoutBar = null;
 
       return;
     }
 
-    if (existing && existing.getAttribute('data-version') === String(layoutVersion)) {
-      placedBar = { frame: frame, doc: doc, node: existing };
+    if (placed && placed.getAttribute('data-version') === String(layoutVersion)) return;
 
-      return;
-    }
-
-    addLayoutStyle(doc);
-
+    // A bar an older copy of this script left in the page is replaced, not doubled.
+    var existing = placed || doc.getElementById(LAYOUT_ID);
     var bar = layoutBar(doc);
+
+    etk.addStyle(doc, LAYOUT_STYLE_ID, LAYOUT_CSS);
 
     if (existing) existing.parentNode.replaceChild(bar, existing);
     else doc.body.appendChild(bar);
 
-    placedBar = { frame: frame, doc: doc, node: bar };
+    doc.__dmLayoutBar = bar;
 
     if (!hasReportedLayoutPlaced) send('diag|Layout bar placed on the Layout screen');
     hasReportedLayoutPlaced = true;
-  }
-
-  function addLayoutStyle(doc) {
-    if (doc.getElementById(LAYOUT_STYLE_ID)) return;
-
-    var style = doc.createElement('style');
-    style.id = LAYOUT_STYLE_ID;
-    style.textContent = LAYOUT_CSS;
-    (doc.head || doc.body).appendChild(style);
   }
 
   // The same two buttons as the panel's top bar, plus one that opens the panel for the per-defense list. The row is
@@ -1511,8 +1361,21 @@
     return node;
   }
 
-  setInterval(checkPages, 400);
+  // Runs once the Toolkit's page API is there: at once when its script ran first, else when it runs.
+  function startWithToolkit(api) {
+    etk = api;
+
+    if (ui) dressPanel();
+
+    hud = etk.addHudButton({
+      id: HUD_CLASS, order: DOCK_ORDER, icon: SHIELD_PATH, title: 'Defense Manager', tip: say('tip'), key: state.key, shown: state.isLive,
+      onClick: function () { send('toggle'); },
+      onPlace: noteHudPlaced
+    });
+    layoutPages = etk.watchPages(/BuildTips\.html/, placeLayoutBar, { everyCheck: true });
+    send('ready');
+  }
 
   window.__sldefense = { open: open, setData: setData, close: close, status: status, live: live, layout: layout };
-  send('ready');
+  (window.ExiledToolkitReady = window.ExiledToolkitReady || []).push(startWithToolkit);
 })();

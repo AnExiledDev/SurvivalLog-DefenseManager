@@ -5,23 +5,35 @@ using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using DefenseManager.Adapters;
 using DefenseManager.Core;
+using ExiledToolkit;
+using ExiledToolkit.Game;
+using ExiledToolkit.Kit;
 using HarmonyLib;
 using UnityEngine;
 
 namespace DefenseManager;
 
 [BepInPlugin(Guid, "Defense Manager", Version)]
-[BepInDependency(OptionalLive.ToolkitGuid, OptionalLive.ToolkitVersion)]
+[BepInDependency(ToolkitGuid, ToolkitVersion)]
 [BepInDependency(OptionalBank.Guid, BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.11.0";
+    private const string Version = "0.11.1";
     private const string PowerFileName = Guid + ".power.txt";
+
+    /// <summary>Exiled's Toolkit: its shared helpers, toasts, live settings, UI size and typing check all come from it.</summary>
+    private const string ToolkitGuid = "com.dev.survivallog.exiledtoolkit";
+    private const string ToolkitVersion = ">=0.19.0";
+
+    private const string LogFileName = "defense-manager.log";
+
+    /// <summary>The name the page script hands its panel to the Toolkit's UI size with.</summary>
+    private const string UiSizeName = "DefenseManager";
 
     public override void Load()
     {
-        OptionalUiSize.Bind(Config);
+        ModUiSize.Bind(Config, UiSizeName);
 
         var panelKey = Config.Bind("Controls", "PanelKey", Enum.Parse<KeyCode>(Hotkey.DefaultKey),
             "Key that opens and closes the Defense Manager panel. Unbound by default: the shield button in the bottom-left corner of the screen opens the panel. Set a key here to open it from the keyboard too.\n" +
@@ -65,20 +77,18 @@ public sealed class Plugin : BasePlugin
             "Give the Reinforce Fortifications option on doors and windows, with the Fortification Reinforcement Components recipe, from the first day of a story run. The base game gives it on day 54. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
             "在剧情模式开局第一天就提供门窗的「强化加固」选项，以及「强化加固件」配方。原版游戏在第 54 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
             null, WorldRule.Tag));
-        var log = new DefenseLog(Log, Path.Combine(Paths.BepInExRootPath, "defense-manager.log"));
-        var harmony = new Harmony(Guid);
+        var log = new ModLog(Log, LogFileName);
+        var hooks = new PatchKit(new Harmony(Guid), log.Write);
         var powerSlot = new PowerSlot(new PowerFileOnDisk(Path.Combine(Paths.ConfigPath, PowerFileName), log.Write));
         var power = new PowerSession(new GamePower(log.Write), powerSlot, log.Write);
         var config = new PanelConfig(panelKey, layoutControls, defaultModeName, proximityRange, crawlerDodge, armoredCrawlerDodge, attackRateEntry, allowDuringWaves, doorUnlocks, windowUnlocks, fortificationUnlocks);
         var unlocks = new UnlockSession(log.Write);
-        var session = new DefenseSession(new GameDefenses(log.Write), power, new WebPage(log.Write), config, log.Write);
+        var session = new DefenseSession(new GameDefenses(log.Write), power, new DefensePage(log.Write), config, log.Write);
 
         log.Write($"===== Defense Manager {Version} started, device attack rate {DeviceAttackRate.From(attackRateEntry.Value).Value}");
-        InputGate.Apply(harmony, log.Write);
-        PageMessages.Apply(harmony, log.Write);
-        DodgeRulesPatch.Apply(harmony, log.Write);
-        AttackRatePatch.Apply(harmony, log.Write);
-        WaveLockPatch.Apply(harmony, log.Write);
+        DodgeRulesPatch.Apply(hooks, log.Write);
+        AttackRatePatch.Apply(hooks, log.Write);
+        WaveLockPatch.Apply(hooks, log.Write);
 
         config.ApplyControls = () =>
         {
@@ -101,12 +111,12 @@ public sealed class Plugin : BasePlugin
             log.Write($"unlocks from day one: doors {(wanted.Doors ? "on" : "off")}, windows {(wanted.Windows ? "on" : "off")}, fortifications {(wanted.Fortifications ? "on" : "off")}");
         };
 
-        OptionalLive.Watch(config.ApplyControls, panelKey, layoutControls);
-        OptionalLive.Watch(config.ApplyPower, defaultModeName, proximityRange);
-        OptionalLive.Watch(config.ApplyDodge, crawlerDodge, armoredCrawlerDodge);
-        OptionalLive.Watch(config.ApplyRate, attackRateEntry);
-        OptionalLive.Watch(config.ApplyWaveWork, allowDuringWaves);
-        OptionalLive.Watch(config.ApplyUnlocks, doorUnlocks, windowUnlocks, fortificationUnlocks);
+        LiveSettings.Watch(config.ApplyControls, panelKey, layoutControls);
+        LiveSettings.Watch(config.ApplyPower, defaultModeName, proximityRange);
+        LiveSettings.Watch(config.ApplyDodge, crawlerDodge, armoredCrawlerDodge);
+        LiveSettings.Watch(config.ApplyRate, attackRateEntry);
+        LiveSettings.Watch(config.ApplyWaveWork, allowDuringWaves);
+        LiveSettings.Watch(config.ApplyUnlocks, doorUnlocks, windowUnlocks, fortificationUnlocks);
 
         DefenseTicker.Session = session;
         DefenseTicker.Unlocks = unlocks;

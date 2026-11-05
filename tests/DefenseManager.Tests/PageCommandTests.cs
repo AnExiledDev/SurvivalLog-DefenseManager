@@ -1,4 +1,3 @@
-using System.Text.Json;
 using DefenseManager.Core;
 using Xunit;
 
@@ -101,27 +100,5 @@ public class PageCommandTests
         Assert.False(PageCommand.IsOurs("slmod|storagehub|toggle"));
         Assert.False(PageCommand.IsOurs(""));
         Assert.False(PageCommand.IsOurs(null));
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("plain")]
-    [InlineData("say \"hi\" \\ back")]
-    [InlineData("line\nbreak\r\tand \u2028 \u2029")]
-    [InlineData("</script><script>alert(1)</script>")]
-    [InlineData("\u5f53\u524d\u65e0\u6cd5\u4f7f\u7528\u3002")]
-    public void Text_pasted_into_a_script_reads_back_as_the_same_text(string text)
-    {
-        var literal = JsText.Literal(text);
-
-        Assert.Equal(text, JsonSerializer.Deserialize<string>(literal));
-        Assert.DoesNotContain("<", literal);
-        Assert.DoesNotContain("\u2028", literal);
-    }
-
-    [Fact]
-    public void Missing_text_becomes_an_empty_string()
-    {
-        Assert.Equal("\"\"", JsText.Literal(null));
     }
 }

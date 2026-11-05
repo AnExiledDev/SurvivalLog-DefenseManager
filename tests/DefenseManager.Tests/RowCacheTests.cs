@@ -1,4 +1,5 @@
 using DefenseManager.Core;
+using ExiledToolkit.Web;
 using Xunit;
 
 namespace DefenseManager.Tests;

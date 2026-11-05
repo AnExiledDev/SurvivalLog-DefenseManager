@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ExiledToolkit.Kit;
 using UnityEngine;
 
 namespace DefenseManager.Adapters;
@@ -17,8 +18,21 @@ public sealed class DefenseTicker : MonoBehaviour
     internal static Action<string> Log = _ => { };
     private static readonly HashSet<string> ReportedFailures = new();
 
+    /// <summary>The Toolkit's clock at the mod's first read of it; the mod's timers count from there.</summary>
+    private static double _startedAt = double.NaN;
+
     public DefenseTicker(IntPtr pointer) : base(pointer)
     {
+    }
+
+    /// <summary>Seconds since the mod first asked, for its timers and the beats they keep apart. Main thread only.</summary>
+    internal static float Now()
+    {
+        var now = Clock.Now;
+
+        if (double.IsNaN(_startedAt)) _startedAt = now;
+
+        return (float)(now - _startedAt);
     }
 
     private void Update()

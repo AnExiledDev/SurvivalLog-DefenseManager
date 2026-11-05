@@ -92,10 +92,10 @@ The mod checks the defenses about twice a second whenever a game is loaded, with
 
 ## Requirements
 
-- Survival Log 1.1.20151. Built for this version; a game update can break it until the mod is updated.
+- Survival Log 1.1.20719. Built for this version; a game update can break it until the mod is updated.
 - The [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12), the BepInEx 6 (IL2CPP) build for the game.
 - Optional: [Package Bank](https://www.nexusmods.com/survivallog/mods/79) 0.5.0 or newer. With it, the panel can install defenses straight from the bank.
-- [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.12.0 or newer. Defense Manager does not load without it. It keeps the panel key quiet while you type, shows results as toasts while the panel is closed, applies settings changed on the Mod Manager's Mods screen without a restart, lays out the HUD's tool buttons four high, in columns, when there are more than four, and its UI size setting sizes the panel.
+- [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.19.0 or newer. Defense Manager does not load without it. It keeps the panel key quiet while you type, shows results as toasts while the panel is closed, applies settings changed on the Mod Manager's Mods screen without a restart, lays out the HUD's tool buttons four high, in columns, when there are more than four, and its UI size setting sizes the panel.
 
 ## Install
 

@@ -143,7 +143,7 @@ public class PageScriptTests
         Assert.False(page.Is("bar()"));
     }
 
-    /// <summary>Drawing the bar again would reset the game's hover and press state on it every 400 ms.</summary>
+    /// <summary>Drawing the bar again would reset the game's hover and press state on it at every page check.</summary>
     [Fact]
     public void The_page_check_leaves_a_drawn_bar_alone()
     {
@@ -612,7 +612,7 @@ public class PageScriptTests
 
     // ===== The page check =====
 
-    /// <summary>The check runs every 400 ms for the whole session; with the button and the bar up it must not search the pages.</summary>
+    /// <summary>The Toolkit's check runs four times a second for the whole session; with the button and the bar up it must not search the pages.</summary>
     [Fact]
     public void Once_the_button_and_the_bar_are_up_the_page_check_searches_nothing()
     {
@@ -631,16 +631,22 @@ public class PageScriptTests
         Assert.True(page.Is("bar()"));
     }
 
+    /// <summary>The first look at a new HUD page clears out a button an older copy of the script left there; after that, nothing.</summary>
     [Fact]
     public void Outside_a_game_the_page_check_searches_nothing()
     {
         var page = new PageScript();
 
-        page.Run("openHud(); searches = 0");
+        page.OpenLayout();
+        page.Run("openHud()");
+        page.Poll();
+        page.Run("searches = 0");
+        page.Poll();
         page.Poll();
 
         Assert.Equal("0", page.Text("searches"));
         Assert.False(page.Is("hudButton()"));
+        Assert.False(page.Is("bar()"));
     }
 
     [Fact]
@@ -678,7 +684,7 @@ public class PageScriptTests
 
         page.Run("openHud()");
         page.Poll();
-        page.Run("document.querySelector('iframe').contentDocument = new FakeDocument()");
+        page.Run("document.querySelector('iframe').contentDocument = new FakeDocument(document.querySelector('iframe').src)");
         page.Poll();
 
         Assert.Equal("Repair all (2)", Label(page, "repairall"));
@@ -741,9 +747,9 @@ public class PageScriptTests
         Assert.True(page.Is("handed[1].options.fit === document.querySelector('.dm-plate')"));
     }
 
-    /// <summary>The Toolkit's script can load after this one; the panel waits in the list it reads when it starts.</summary>
+    /// <summary>The Toolkit's UI size script can load after this one; the panel waits in the list it reads when it starts.</summary>
     [Fact]
-    public void Before_the_toolkit_has_loaded_the_panel_waits_for_it()
+    public void Before_the_toolkits_ui_size_has_loaded_the_panel_waits_for_it()
     {
         var page = new PageScript();
 
@@ -751,7 +757,70 @@ public class PageScriptTests
 
         Assert.Equal("1", page.Text("window.__exiledUiWait.length"));
         Assert.Equal("dm-root", page.Text("window.__exiledUiWait[0][0].id"));
+        Assert.Equal("DefenseManager", page.Text("window.__exiledUiWait[0][1].mod"));
         Assert.True(page.Is("window.__exiledUiWait[0][1].fit === document.querySelector('.dm-plate')"));
+    }
+
+    // ===== Load order (Exiled's Toolkit's page API) =====
+
+    /// <summary>The plugin sends everything again when the page says it is ready, so the page must say it once it can work.</summary>
+    [Fact]
+    public void With_the_Toolkit_loaded_first_the_page_says_ready_and_its_button_opens_the_panel()
+    {
+        var page = new PageScript(isToolkitFirst: true);
+
+        page.Run("openHud()");
+        page.Live(true, "F7");
+        page.Click("hudButton()");
+
+        Assert.True(page.HasSaidReady);
+        Assert.Equal(new PageCommand[] { new PageCommand.Toggle() }, page.Sent);
+    }
+
+    /// <summary>
+    /// The game can run Defense Manager's script before the Toolkit's. Until the Toolkit's arrives the page says nothing,
+    /// and then it says it is ready and puts up the button and the Layout bar with what the plugin already sent.
+    /// </summary>
+    [Fact]
+    public void With_the_page_loaded_first_it_waits_for_the_Toolkit_then_says_ready_and_shows_the_button_and_the_bar()
+    {
+        var page = new PageScript(isToolkitFirst: false);
+
+        page.OpenLayout();
+        page.Run("openHud()");
+        page.Live(true, "F7");
+        page.Layout(BarView(Home()));
+
+        Assert.False(page.HasSaidReady);
+        Assert.False(page.Is("hudButton()"));
+        Assert.False(page.Is("bar()"));
+
+        page.LoadToolkit();
+
+        Assert.True(page.HasSaidReady);
+        Assert.True(page.Is("hudButton().parentNode.firstChild === hudButton()"));
+        Assert.Equal("F7", page.Text("hudButton().querySelector('.entry-tip-key').textContent"));
+        Assert.Equal("Repair all (2)", Label(page, "repairall"));
+    }
+
+    /// <summary>A panel opened before the Toolkit's script ran is drawn at once and gets its style and UI size when the Toolkit arrives.</summary>
+    [Fact]
+    public void A_panel_opened_before_the_Toolkit_loaded_gets_its_style_and_size_when_it_arrives()
+    {
+        var page = new PageScript(isToolkitFirst: false);
+
+        page.Run(FakeUi);
+        page.Open(YardView(Yard()));
+
+        Assert.True(page.Is("document.getElementById('dm-root')"));
+        Assert.False(page.Is("document.getElementById('dm-style')"));
+        Assert.Equal("0", page.Text("handed.length"));
+
+        page.LoadToolkit();
+
+        Assert.True(page.Is("document.getElementById('dm-style').textContent.indexOf('#dm-root') >= 0"));
+        Assert.Equal("1", page.Text("handed.length"));
+        Assert.Equal("dm-root", page.Text("handed[0].el.id"));
     }
 
     /// <summary>The page draws in English until the plugin's words arrive, so its own copy must say the same as Texts.</summary>
