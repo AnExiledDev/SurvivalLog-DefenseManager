@@ -2,7 +2,7 @@
 
 One panel for the traps and barricades outside your home.
 
-Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel: repair every damaged one in one press, clear away the broken ones, or repair and remove them one by one. It can also switch your electrical defenses on and off for you: on during waves and while zombies are at the base, on only when a zombie comes near, or always on. And it lets the Mechanical Chainsaw hit crawler zombies, which dodge it every time in the base game.
+Keeping your outdoor defenses up means walking to each one and clicking through its menu. Defense Manager lists them all in one panel: repair every damaged one in one press, clear away the broken ones, or repair and remove them one by one. It can also switch your electrical defenses on and off for you: on during waves and while zombies are at the base, on only when a zombie comes near, or always on. And it can let the Mechanical Chainsaw hit crawler zombies, which dodge it every time in the base game: lower their dodge chance in the settings.
 
 ## Features
 
@@ -26,7 +26,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 - **Settings tab**: the Layout screen buttons, the default power mode, the Proximity range, the crawler dodge chances, the device attack rate, Work during waves and the three Unlocks can be changed in the panel, and are saved to the config at once. The panel key shows there but is changed in the config.
 - **Game hotkeys paused**: the game's own hotkeys are off while the panel is open and come back when it closes, so keys you press in the panel do not reach the game.
 - **Device attack rate**: `DeviceAttackRate` in the config sets how often defense devices strike. 2 strikes twice as often. A powered device uses power on every strike, so a faster rate uses more power. It is 1, the game's own rate, by default.
-- **Crawlers can be hit by the chainsaw**: in the base game crawler zombies always dodge the Mechanical Chainsaw, so its blade never hits them. With the mod they dodge it only 25% of the time. `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` in the config set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
+- **Crawlers can be hit by the chainsaw**: in the base game crawler zombies always dodge the Mechanical Chainsaw, so its blade never hits them. `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior, and the default). Set 0.25 and they dodge it only a quarter of the time.
 - **UI size**: with Exiled's Toolkit 0.10.0 or newer, its UI size setting (`UiScale`) draws the panel and its pop-up messages bigger or smaller, as far as the panel still fits on the screen. The HUD button and the Layout screen buttons keep the game's size, like the game's own buttons around them. With Toolkit 0.11.0 or newer, Defense Manager's own `UiScale` under Interface sets a size for this mod alone; at 0, the default, it follows the Toolkit's.
 - **Log file**: every press and what came of it is written to `BepInEx\defense-manager.log`.
 

@@ -19,7 +19,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.11.1";
+    private const string Version = "0.11.2";
     private const string PowerFileName = Guid + ".power.txt";
 
     /// <summary>Exiled's Toolkit: its shared helpers, toasts, live settings, UI size and typing check all come from it.</summary>
@@ -49,13 +49,13 @@ public sealed class Plugin : BasePlugin
             "How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground; height does not count. 15 by default, from 1 to 100.\n" +
             "设为 Proximity 的防御设施在活着的僵尸进入多少米范围内时开启。按地面水平距离计算，不计高度。默认 15，可设为 1 到 100。",
             new AcceptableValueRange<float>(1f, 100f)));
-        var crawlerDodge = Config.Bind("Combat", "CrawlerDodgeChance", 0.25f, new ConfigDescription(
-            "Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. 0.25 by default.\n" +
-            "「爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1，电锯刀片完全打不到爬行者。默认 0.25。",
+        var crawlerDodge = Config.Bind("Combat", "CrawlerDodgeChance", CrawlerDodge.GameChance, new ConfigDescription(
+            "Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. 1 by default, the game's own rule; 0.25 lets 3 hits in 4 land.\n" +
+            "「爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1，电锯刀片完全打不到爬行者。默认 1，即游戏原本的规则；设为 0.25 则 4 次攻击有 3 次命中。",
             new AcceptableValueRange<float>(0f, 1f), WorldRule.Tag));
-        var armoredCrawlerDodge = Config.Bind("Combat", "ArmoredCrawlerDodgeChance", 0.25f, new ConfigDescription(
-            "Chance that an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. 0.25 by default.\n" +
-            "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1。默认 0.25。",
+        var armoredCrawlerDodge = Config.Bind("Combat", "ArmoredCrawlerDodgeChance", CrawlerDodge.GameChance, new ConfigDescription(
+            "Chance that an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. 1 by default, the game's own rule.\n" +
+            "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1。默认 1，即游戏原本的规则。",
             new AcceptableValueRange<float>(0f, 1f), WorldRule.Tag));
         var attackRateEntry = Config.Bind("Combat", "DeviceAttackRate", 1f, new ConfigDescription(
             "How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. Each strike of a powered device uses power, so a higher rate also uses more power. 1 by default, from 0.25 to 10.\n" +

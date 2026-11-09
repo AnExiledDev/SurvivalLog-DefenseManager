@@ -32,8 +32,8 @@ The defense and type settings belong to a save file. A game that carries on unde
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `CrawlerDodgeChance` | `0.25` | Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. |
-| `ArmoredCrawlerDodgeChance` | `0.25` | The same for the Armored Crawler Zombie. |
+| `CrawlerDodgeChance` | `1` | Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers, and `1` keeps the game's rule. `0.25` lets 3 hits in 4 land. |
+| `ArmoredCrawlerDodgeChance` | `1` | The same for the Armored Crawler Zombie. |
 | `AllowDuringWaves` | `false` | Lets defenses be repaired, removed, installed and moved while a zombie wave is on, from the panel and from the game's own menus and Layout screen. The base game locks all of these until the wave ends. Robot repairs and expeditions still wait for the wave to end. |
 | `DeviceAttackRate` | `1` | How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. From 0.25 to 10. A powered device uses power on every strike, so a higher rate uses more power. Devices already built change to a new rate at once. |
 

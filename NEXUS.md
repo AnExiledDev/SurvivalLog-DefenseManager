@@ -1,5 +1,5 @@
 Name: Defense Manager
-Summary: Repair every damaged trap and barricade in one press, clear all the broken ones in another, or handle them one by one on a grid of your yard, in a panel opened from a HUD button. Electrical defenses switch on only when zombies show up, and crawlers dodge the chainsaw 25% of the time instead of always. Repair all is on the Layout screen too.
+Summary: Repair every damaged trap and barricade in one press, clear all the broken ones in another, or handle them one by one on a grid of your yard, in a panel opened from a HUD button. Electrical defenses switch on only when zombies show up, and you can set how often crawlers dodge the chainsaw. Repair all is on the Layout screen too.
 
 Description (BBCode):
 [center][img]https://sldb.core-directive.com/media/save/2-changes-stay.png[/img][/center]
@@ -25,7 +25,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them on during waves and while zombies are at the base, and off otherwise, [b]Proximity[/b] turns them on while a zombie is in range (15 m by default) and off after 10 game minutes with none, [b]Always on[/b] keeps them on, and [b]Default[/b] leaves them to the game's own switch.[/*]
 [*][b]Per defense, per type, or for all[/b]: pick a mode for one defense when you click it, or for every defense of a type on the [b]Power[/b] tab. Anything without a setting follows its type, and a type without one follows the global mode (Wave only unless you change it).[/*]
 [*][b]Settings tab[/b]: change the Layout screen buttons, the global power mode, the Proximity range, the crawler dodge chances, the device attack rate, Work during waves and the Unlocks right in the panel.[/*]
-[*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. With the mod they dodge it 25% of the time, and the chance for each kind of crawler can be set in the config.[/*]
+[*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. Set the chance for each kind of crawler in the config: 0.25 makes them dodge it only a quarter of the time. It starts at the game's own 100%.[/*]
 [*][b]UI size[/b]: with Exiled's Toolkit 0.10.0 or newer, its UI size setting draws the panel bigger or smaller, as far as it still fits on the screen. With 0.11.0 or newer, Defense Manager's own UiScale setting can set a size for this mod alone.[/*]
 [/list]
 
@@ -115,7 +115,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*][b]供电模式[/b]：模组会替你切换电力防御设施。[b]仅尸潮[/b]在尸潮期间和基地有僵尸时开启，其余时间关闭；[b]僵尸靠近[/b]在有僵尸进入范围（默认 15 米）时开启，连续 10 分钟游戏时间没有僵尸后关闭；[b]常开[/b]一直开启；[b]默认[/b]交给游戏自己的开关。[/*]
 [*][b]单个、同类或全部[/b]：点击防御设施可以单独设置它的模式，在「供电」标签页可以设置同类的全部。没有单独设置的跟随它的类型，类型也没有设置的跟随全局模式（默认是仅尸潮）。[/*]
 [*][b]「设置」标签页[/b]：直接在面板里修改「规划模式」界面按钮、全局供电模式、靠近触发的范围、爬行者闪避概率、防御设施攻击频率、「尸潮期间操作」和三个提前解锁选项。[/*]
-[*][b]电锯能打到爬行者[/b]：原版游戏中爬行者总能闪避「机械电锯」。本模组把闪避概率降到 25%，每种爬行者的概率都可以在配置里设置。[/*]
+[*][b]电锯能打到爬行者[/b]：原版游戏中爬行者总能闪避「机械电锯」。每种爬行者的闪避概率都可以在配置里设置：设为 0.25 则只有四分之一的时间能闪避。默认保持游戏原本的 100%。[/*]
 [*][b]界面大小[/b]：安装 Exiled's Toolkit 0.10.0 或更新版本后，可以用它的界面大小设置放大或缩小面板，最大放到面板仍能完整显示在屏幕上为止。0.11.0 或更新版本还可以用 Defense Manager 自己的 UiScale 设置单独调整本模组的大小。[/*]
 [/list]
 

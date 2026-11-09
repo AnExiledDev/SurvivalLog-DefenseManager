@@ -40,4 +40,40 @@ public class CrawlerDodgeTests
 
         Assert.Equal(once, dodge.Rewrite(once));
     }
+
+    [Fact]
+    public void The_default_chances_keep_the_games_rules_the_older_crawlers_too()
+    {
+        // Installing the mod must change no balance until the player picks a chance.
+        var dodge = new CrawlerDodge(CrawlerDodge.GameChance, CrawlerDodge.GameChance);
+
+        Assert.Equal(GameRules, dodge.Rewrite(GameRules));
+        Assert.Null(new DodgeRulesKeeper().Next(GameRules, dodge));
+    }
+
+    [Fact]
+    public void A_chance_set_back_to_the_games_puts_the_games_rules_back()
+    {
+        var keeper = new DodgeRulesKeeper();
+        var lowered = keeper.Next(GameRules, new CrawlerDodge(0.25f, 0.25f));
+
+        Assert.NotNull(lowered);
+
+        var back = keeper.Next(lowered, new CrawlerDodge(CrawlerDodge.GameChance, CrawlerDodge.GameChance));
+
+        Assert.Equal("9008:36004:0.25;9109:36004:0.25;9110:36004:0.25", lowered);
+        Assert.Equal(GameRules, back);
+    }
+
+    [Fact]
+    public void Rules_the_game_loads_again_are_rewritten_and_rules_already_written_are_left_alone()
+    {
+        var keeper = new DodgeRulesKeeper();
+        var dodge = new CrawlerDodge(0.25f, 0.4f);
+        var written = keeper.Next(GameRules, dodge);
+
+        Assert.NotNull(written);
+        Assert.Null(keeper.Next(written, dodge));
+        Assert.Equal(written, keeper.Next(GameRules, dodge));
+    }
 }

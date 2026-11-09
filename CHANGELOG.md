@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.2
+
+- `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` now default to 1, the game's own rule, so crawlers keep dodging the Mechanical Chainsaw until you lower them. A value you already saved is kept.
+- A dodge chance set back to 1 now puts the game's own rule back at once.
+- Made for Survival Log 1.1.20719.
+
 ## 0.11.1
 
 - Now uses Exiled's Toolkit for its shared parts, so it needs Exiled's Toolkit 0.19.0 or newer.

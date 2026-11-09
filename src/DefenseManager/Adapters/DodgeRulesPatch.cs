@@ -17,8 +17,8 @@ internal static class DodgeRulesPatch
 {
     private const string RulesId = "TowerZombieDodgeVsDevice";
 
-    private static CrawlerDodge _dodge = new(0f, 0f);
-    private static string? _written;
+    private static CrawlerDodge _dodge = new(CrawlerDodge.GameChance, CrawlerDodge.GameChance);
+    private static readonly DodgeRulesKeeper Keeper = new();
     private static bool _hasFailed;
     private static int _checkedFrame = -1;
     private static long _nextCheckAt;
@@ -39,13 +39,12 @@ internal static class DodgeRulesPatch
     }
 
     /// <summary>
-    /// Called on the main thread at start and after each change. The rules are written again at the next dodge roll;
-    /// the rewrite replaces every crawler's chance, so it works on rules this mod already wrote.
+    /// Called on the main thread at start and after each change. The rules are written again at the next dodge roll,
+    /// always from the game's own text (<see cref="DodgeRulesKeeper"/>).
     /// </summary>
     public static void Use(CrawlerDodge dodge)
     {
         _dodge = dodge;
-        _written = null;
         _checkedFrame = -1;
         _nextCheckAt = 0;
         _log($"crawler dodge chances set: crawler {dodge.Crawler}, armored crawler {dodge.ArmoredCrawler}");
@@ -78,11 +77,10 @@ internal static class DodgeRulesPatch
 
             _nextCheckAt = now + Stopwatch.Frequency;
 
-            if (current == _written) return;
+            if (Keeper.Next(current, _dodge) is not { } written) return;
 
-            _written = _dodge.Rewrite(current);
-            rules.Params3 = _written;
-            _log($"dodge rules {current} -> {_written}");
+            rules.Params3 = written;
+            _log($"dodge rules {current} -> {written}");
         }
         catch (Exception ex)
         {
