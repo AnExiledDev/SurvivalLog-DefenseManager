@@ -18,7 +18,7 @@ public interface IDefenseGame
     /// <summary>Lines up one repair or removal of the defense for the character, without starting it. False when the game would not take it.</summary>
     bool TryQueue(Job job, long defenseId);
 
-    /// <summary>Starts everything lined up as one batch, the way the game's own menu buttons do. False when that failed.</summary>
+    /// <summary>Starts everything lined up as one batch, the way the game's menu buttons do. False when that failed.</summary>
     bool TryStart();
 
     /// <summary>

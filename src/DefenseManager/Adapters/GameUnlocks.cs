@@ -11,7 +11,7 @@ namespace DefenseManager.Adapters;
 /// <summary>
 /// Runs the Unlocks settings against the loaded run every few seconds, and at once after a setting changes. Only a
 /// story run after the disaster is touched: endless runs already start with all of it, and challenge and tutorial runs
-/// keep the game's own rules. Each distinct log line is written once, so a grant the game refuses is not logged every
+/// keep the game's rules. Each distinct log line is written once, so a grant the game refuses is not logged every
 /// pass.
 /// </summary>
 internal sealed class UnlockSession

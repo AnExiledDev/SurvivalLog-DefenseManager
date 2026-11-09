@@ -9,18 +9,18 @@ namespace DefenseManager.Core;
 /// </summary>
 public sealed record CrawlerDodge(float Crawler, float ArmoredCrawler)
 {
-    /// <summary>The game's own chance, and the default: installing the mod changes no balance until a chance is set.</summary>
+    /// <summary>The game's chance, and the default: installing the mod changes no balance until a chance is set.</summary>
     public const float GameChance = 1f;
 
     // Zombie type ids from the game's TowerZombieType table. 9008 is the older crawler (same model as the armored
-    // one) that the game's own rules still list.
+    // one) that the game's rules still list.
     private const int OldCrawlerId = 9008;
     private const int CrawlerId = 9109;
     private const int ArmoredCrawlerId = 9110;
 
     /// <summary>
     /// The game's dodge rules ("zombie:device:chance" entries split by ';') with every crawler's chance replaced by
-    /// the player's, except where the player's is the game's own (<see cref="GameChance"/>). Other zombies' rules and
+    /// the player's, except where the player's is the game's (<see cref="GameChance"/>). Other zombies' rules and
     /// entries that do not parse are kept as they are, so the game reads them the same way it did before.
     /// </summary>
     public string Rewrite(string rules) => string.Join(";", rules.Split(';').Select(RewriteEntry));
@@ -47,7 +47,7 @@ public sealed record CrawlerDodge(float Crawler, float ArmoredCrawler)
 }
 
 /// <summary>
-/// Which dodge rules text to write. It is always rewritten from the game's own text, kept from the last look that found
+/// Which dodge rules text to write. It is always rewritten from the game's text, kept from the last look that found
 /// text this mod did not write, so a chance set back to <see cref="CrawlerDodge.GameChance"/> puts the game's rules
 /// back instead of leaving the mod's last ones in place.
 /// </summary>

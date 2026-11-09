@@ -17,7 +17,7 @@ The game is paused while the Layout screen is open, so anything queued from its 
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `DefaultMode` | `WaveOnly` | How electrical defenses are powered when neither the defense nor its type has a setting of its own in the panel. `WaveOnly`: on during waves and while zombies are at the base, off otherwise. `AlwaysOn`: always on. `Proximity`: on while a living zombie is within `ProximityRange`, off once none has been in range for 10 minutes of game time. `Default`: the mod leaves the defense alone and the game's own power switch decides. |
+| `DefaultMode` | `WaveOnly` | How electrical defenses are powered when neither the defense nor its type has a setting of its own in the panel. `WaveOnly`: on during waves and while zombies are at the base, off otherwise. `AlwaysOn`: always on. `Proximity`: on while a living zombie is within `ProximityRange`, off once none has been in range for 10 minutes of game time. `Default`: the mod leaves the defense alone and the game's power switch decides. |
 | `ProximityRange` | `15` | How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground; height does not count. Any number from 1 to 100. |
 
 A defense's own setting wins over its type's, and a type's setting wins over `DefaultMode`. Those two are set in the panel, not in this file: a defense's own mode when you click it on the yard grid, and a type's mode on the Power tab. They are kept for each save in `BepInEx\config\com.dev.survivallog.defensemanager.power.txt`, which the mod writes itself; edit it only while the game is closed, or delete it to clear every defense and type setting.
@@ -34,8 +34,8 @@ The defense and type settings belong to a save file. A game that carries on unde
 | --- | --- | --- |
 | `CrawlerDodgeChance` | `1` | Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers, and `1` keeps the game's rule. `0.25` lets 3 hits in 4 land. |
 | `ArmoredCrawlerDodgeChance` | `1` | The same for the Armored Crawler Zombie. |
-| `AllowDuringWaves` | `false` | Lets defenses be repaired, removed, installed and moved while a zombie wave is on, from the panel and from the game's own menus and Layout screen. The base game locks all of these until the wave ends. Robot repairs and expeditions still wait for the wave to end. |
-| `DeviceAttackRate` | `1` | How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. From 0.25 to 10. A powered device uses power on every strike, so a higher rate uses more power. Devices already built change to a new rate at once. |
+| `AllowDuringWaves` | `false` | Lets defenses be repaired, removed, installed and moved while a zombie wave is on, from the panel and from the game's menus and Layout screen. The base game locks all of these until the wave ends. Robot repairs and expeditions still wait for the wave to end. |
+| `DeviceAttackRate` | `1` | How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's rate. From 0.25 to 10. A powered device uses power on every strike, so a higher rate uses more power. Devices already built change to a new rate at once. |
 
 ## Unlocks
 

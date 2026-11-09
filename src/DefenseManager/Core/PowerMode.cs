@@ -14,7 +14,7 @@ public enum PowerMode
     /// <summary>On while a living zombie is in range, and for a while after the last one was.</summary>
     Proximity,
 
-    /// <summary>Hands off: the game's own power switch decides, as if the mod were not there. Shown to the player as "Default".</summary>
+    /// <summary>Hands off: the game's power switch decides, as if the mod were not there. Shown to the player as "Default".</summary>
     GameDefault,
 }
 

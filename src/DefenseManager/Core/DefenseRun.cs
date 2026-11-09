@@ -27,7 +27,7 @@ public static class DefenseRun
 
     /// <summary>
     /// Installs a packed defense on an owned, empty yard square. A package lying in the yard is used first; only when
-    /// there is none is one taken out of Package Bank. The game's own install checks then run as if the player had
+    /// there is none is one taken out of Package Bank. The game's install checks then run as if the player had
     /// picked the square in Layout.
     /// </summary>
     public static DefenseOutcome Install(IDefenseGame game, string square, int configId) => WithSurvey(game, survey => Install(game, survey, square, configId));

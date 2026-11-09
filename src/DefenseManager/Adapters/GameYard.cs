@@ -10,7 +10,7 @@ namespace DefenseManager.Adapters;
 /// <summary>
 /// Reads the home yard's defense grid. The squares are the map slots named HomeBuildingTowerPos (slot type 10, row in
 /// TowerRow), each standing at the point of the same name in the current map's BuildingNodeMap. A square is the
-/// player's when the game's own TowerDefenseTagConstants.IsTowerSlotUnlocked says so; one with no unlock tag always
+/// player's when the game's TowerDefenseTagConstants.IsTowerSlotUnlocked says so; one with no unlock tag always
 /// is. Its price is the TowerRingCost global setting for the ring its tag names. The door and window are the house
 /// slots HomeBuildingPos07 and HomeBuildingPos08. Squares and points never change during a game, so they are read
 /// once. Who owns which square is read each time, but only for squares not yet owned: a square once bought stays

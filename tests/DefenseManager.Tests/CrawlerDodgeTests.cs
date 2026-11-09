@@ -5,7 +5,7 @@ namespace DefenseManager.Tests;
 
 public class CrawlerDodgeTests
 {
-    // The game's own rules as shipped: crawlers never get hit by the chainsaw (36004), the older crawler 70% of the time.
+    // The game's rules as shipped: crawlers never get hit by the chainsaw (36004), the older crawler 70% of the time.
     private const string GameRules = "9008:36004:0.7;9109:36004:1.0;9110:36004:1.0";
 
     [Fact]

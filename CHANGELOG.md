@@ -2,8 +2,8 @@
 
 ## 0.11.2
 
-- `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` now default to 1, the game's own rule, so crawlers keep dodging the Mechanical Chainsaw until you lower them. A value you already saved is kept.
-- A dodge chance set back to 1 now puts the game's own rule back at once.
+- `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` now default to 1, the game's rule, so crawlers keep dodging the Mechanical Chainsaw until you lower them. A value you already saved is kept.
+- A dodge chance set back to 1 now puts the game's rule back at once.
 - Made for Survival Log 1.1.20719.
 
 ## 0.11.1
@@ -33,8 +33,8 @@
 
 ## 0.9.0
 
-- New: install a packed defense from the panel. Click an empty square of yours on the Yard tab and it lists the defense packages lying in your yard and, with Package Bank 0.5.0 or newer, the ones in the bank. Install sends the character to install it there, the same as the game's own install. A banked one is taken out onto a free yard package spot first.
-- New: `AllowDuringWaves` under Combat, off by default. When on, defenses can be repaired, removed, installed and moved during a zombie wave, from the panel and from the game's own menus and Layout screen. Robot repairs and expeditions still wait for the wave to end. It can also be turned on in the panel's Settings tab.
+- New: install a packed defense from the panel. Click an empty square of yours on the Yard tab and it lists the defense packages lying in your yard and, with Package Bank 0.5.0 or newer, the ones in the bank. Install sends the character to install it there, the same as the game's install. A banked one is taken out onto a free yard package spot first.
+- New: `AllowDuringWaves` under Combat, off by default. When on, defenses can be repaired, removed, installed and moved during a zombie wave, from the panel and from the game's menus and Layout screen. Robot repairs and expeditions still wait for the wave to end. It can also be turned on in the panel's Settings tab.
 - Made for Survival Log 1.1.19611.
 
 ## 0.8.1
@@ -51,7 +51,7 @@
 ## 0.7.4
 
 - The panel and its pop-up messages can be drawn bigger or smaller with the UI size setting of Exiled's Toolkit 0.10.0 or newer. A change shows at once, and the panel only grows as far as it still fits on the screen.
-- The HUD button and the Layout screen buttons keep the game's size, like the game's own buttons around them.
+- The HUD button and the Layout screen buttons keep the game's size, like the game's buttons around them.
 - Made for Survival Log 1.1.19611.
 
 ## 0.7.3
@@ -103,13 +103,13 @@
 
 ## 0.5.0
 
-- New setting `DeviceAttackRate` sets how often defense devices strike: 2 strikes twice as often, 0.5 half as often. The default, 1, is the game's own rate.
+- New setting `DeviceAttackRate` sets how often defense devices strike: 2 strikes twice as often, 0.5 half as often. The default, 1, is the game's rate.
 - A powered device uses power on every strike, so a higher rate uses more power.
 
 ## 0.4.0
 
 - The Mechanical Chainsaw now hits crawler zombies. In the base game they dodge it every time; now they dodge it 25% of the time by default.
-- New settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior).
+- New settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's behavior).
 
 ## 0.3.3
 

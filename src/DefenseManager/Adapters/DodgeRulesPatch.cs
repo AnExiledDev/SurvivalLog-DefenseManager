@@ -40,7 +40,7 @@ internal static class DodgeRulesPatch
 
     /// <summary>
     /// Called on the main thread at start and after each change. The rules are written again at the next dodge roll,
-    /// always from the game's own text (<see cref="DodgeRulesKeeper"/>).
+    /// always from the game's text (<see cref="DodgeRulesKeeper"/>).
     /// </summary>
     public static void Use(CrawlerDodge dodge)
     {
@@ -85,7 +85,7 @@ internal static class DodgeRulesPatch
         catch (Exception ex)
         {
             _hasFailed = true;
-            _hooks?.Fail("setting the crawler dodge chances, the game's own apply", ex);
+            _hooks?.Fail("setting the crawler dodge chances, the game's apply", ex);
         }
     }
 }

@@ -141,7 +141,7 @@ internal sealed class FakeGame : IDefenseGame
         return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina, IsChinese, Yard, Packages.ToList(), IsInstalling));
     }
 
-    /// <summary>Like the game's own queue, this takes any job it is handed, whatever the materials or the repair check say.</summary>
+    /// <summary>Like the game's queue, this takes any job it is handed, whatever the materials or the repair check say.</summary>
     public bool TryQueue(Job job, long defenseId)
     {
         if (RefusesToQueue || Refuses.Contains(defenseId)) return false;

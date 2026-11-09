@@ -180,7 +180,7 @@ public static class Texts
         ("followType", new("Follow the type", "跟随类型")),
         ("noneOwn", new("None. Pick one in the Yard tab to set it alone.", "无。在「空地」标签中选中一个即可单独设置。")),
         ("noPower", new("No powered defenses yet.", "还没有用电的防御设施。")),
-        ("powerNote", new("Wave only: on during waves and while zombies are at the base. Proximity: on while a zombie is in range. Always on: never turns off. Default: the game's own power switch decides.", "仅尸潮：尸潮期间以及基地有僵尸时开启。僵尸靠近：有僵尸在范围内时开启。常开：始终开启。默认：由游戏自身的电源开关决定。")),
+        ("powerNote", new("Wave only: on during waves and while zombies are at the base. Proximity: on while a zombie is in range. Always on: never turns off. Default: the game's power switch decides.", "仅尸潮：尸潮期间以及基地有僵尸时开启。僵尸靠近：有僵尸在范围内时开启。常开：始终开启。默认：由游戏自身的电源开关决定。")),
         ("modeWaveOnly", WaveOnly),
         ("modeProximity", Proximity),
         ("modeAlwaysOn", AlwaysOn),

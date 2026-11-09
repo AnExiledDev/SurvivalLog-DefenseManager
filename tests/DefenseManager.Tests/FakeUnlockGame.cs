@@ -65,7 +65,7 @@ internal sealed class FakeUnlockGame : IUnlockGame
 
     public bool HasEventFired(int eventId) => FiredEvents.Contains(eventId);
 
-    /// <summary>The game's own tags and recipes, markers left out.</summary>
+    /// <summary>The game's tags and recipes, markers left out.</summary>
     public IEnumerable<string> GameTags => Tags.Where(tag => !tag.StartsWith(Grant.MarkerPrefix, StringComparison.Ordinal));
 
     public IEnumerable<string> Markers => Tags.Where(tag => tag.StartsWith(Grant.MarkerPrefix, StringComparison.Ordinal));

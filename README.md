@@ -7,7 +7,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 ## Features
 
 - **Panel key**: unbound by default. Set `PanelKey` in the config to open and close the panel from the keyboard at home in a loaded game, past the prologue. `Esc` or the close button in the top-right corner closes it. The key does nothing while you type in a text box.
-- **HUD button**: a shield at the top of the tool column in the bottom-left corner of the screen, above the game's own buttons there. It opens and closes the panel, and hovering it shows "Defense Manager" (with the panel key, if you set one) and "Repair or remove your outdoor defenses". It only shows at home in a loaded game past the prologue, so it is hidden on expeditions, and it hides with the rest of the column on the Layout screen.
+- **HUD button**: a shield at the top of the tool column in the bottom-left corner of the screen, above the game's buttons there. It opens and closes the panel, and hovering it shows "Defense Manager" (with the panel key, if you set one) and "Repair or remove your outdoor defenses". It only shows at home in a loaded game past the prologue, so it is hidden on expeditions, and it hides with the rest of the column on the Layout screen.
 - **Layout screen buttons**: while the game's Layout screen is open, three buttons sit at the top middle of the screen, styled like Layout's own buttons: **Repair all (n)**, **Clear all broken (n)** and **Defense list** (with the panel key in brackets, if you set one). The first two do exactly what the panel's buttons of the same name do. Defense list opens the panel. When the buttons are greyed out, the reason shows under them. They can be turned off in the config.
 - **Repair all (n)**: queues a repair for every damaged defense your materials cover (n is how many it would repair now). The character goes nearest-next from where they stand, so the round does not zigzag across the yard. A defense the remaining materials cannot cover is skipped and the round goes on to the next one they can.
 - **Clear all broken (n)**: queues the removal of every broken defense, nearest-next. A broken defense you already queued for repair is kept: you chose to fix it.
@@ -15,24 +15,24 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 - **Repairs list**: beside the yard, every defense that needs repair is listed worst first under the **Repair all** button, each with its condition and repair cost. A defense already queued shows "Repair queued" or "Removal queued".
 - **Click a defense** on the grid or in the list to see its name, where it stands, its condition, its repair cost, and a **Repair** and a **Remove** button. An electrical defense also shows whether its power is on and its power mode. **< Back to repairs** returns to the list.
 - **Install from the panel**: click an empty square of yours and the panel lists the defense packages lying in your yard's package spots and, with [Package Bank](https://www.nexusmods.com/survivallog/mods/79) 0.5.0 or newer, the ones in the bank, with how many of each. **Install** sends the character to install that defense on the square, the same install the game lines up from a package. A package in the yard is used first; otherwise one is taken out of the bank onto a free yard package spot and installed. With nothing to install, the square points you to the Layout screen.
-- **Work during waves**: `AllowDuringWaves` in the config, or **Work during waves** on the Settings tab, lets you repair, remove, install and move defenses while a zombie wave is on, from the panel and from the game's own menus and Layout screen. It is off by default, as in the base game. Robot repairs and expeditions still wait for the wave to end.
+- **Work during waves**: `AllowDuringWaves` in the config, or **Work during waves** on the Settings tab, lets you repair, remove, install and move defenses while a zombie wave is on, from the panel and from the game's menus and Layout screen. It is off by default, as in the base game. Robot repairs and expeditions still wait for the wave to end.
 - **Unlocks from day one**: three settings, all off by default, give the house's door and window upgrades from the first day of a story run instead of on the game's days. `DoorUpgradesFromDayOne` gives the door's Advanced Repair and Advanced Reinforce with the Door Repair Kit and All-Purpose Strengthener recipes (day 2 and day 5 in the base game). `WindowUpgradesFromDayOne` gives the window's Advanced Repair, Advanced Reinforce and Reinforce Window with the Window Repair Kit and All-Purpose Strengthener recipes (days 13 and 14). `FortificationsFromDayOne` gives Reinforce Fortifications on doors and windows and lets the craft table make Fortification Reinforcement Components (day 54). Turning one off takes back what the mod gave, but never what the game has given by then. Endless runs already start with all of it, and challenge and tutorial runs are left alone.
 - **Click a row number** to see that row: how many defenses and squares of yours it has, what the rest cost, and **Repair row n (count)**, which repairs every damaged defense in that row the way Repair all does. Click a square that is not yours to see its price.
-- **Buttons say why not**: a button that would be refused is greyed out and the reason shows under it: "Needs 3 more Wood", the game's own reason, or "Repair queued: let it finish or cancel it first".
+- **Buttons say why not**: a button that would be refused is greyed out and the reason shows under it: "Needs 3 more Wood", the game's reason, or "Repair queued: let it finish or cancel it first".
 - **Remove without the are-you-sure box**: Remove queues the same removal action as the defense's own menu, without the confirmation box.
 - **Short of materials**: when your materials do not cover every repair, a line under Repair all names each material you are short of as free / needed: what is left after the repairs already queued, against what the repairs not yet queued would take.
 - **Clear messages**: after each press a line says what was queued and what was left and why. Repair all names up to three defenses that are short of materials and exactly what each is missing. When the panel is closed, the message shows as a short pop-up instead.
 - **Power modes for electrical defenses**: the mod switches each electrical defense's power for you, in one of four modes (see [Power modes](#power-modes)). Click one to see whether its power is on and to pick its own mode. The **Power** tab sets the mode for every defense of a type.
 - **Settings tab**: the Layout screen buttons, the default power mode, the Proximity range, the crawler dodge chances, the device attack rate, Work during waves and the three Unlocks can be changed in the panel, and are saved to the config at once. The panel key shows there but is changed in the config.
-- **Game hotkeys paused**: the game's own hotkeys are off while the panel is open and come back when it closes, so keys you press in the panel do not reach the game.
-- **Device attack rate**: `DeviceAttackRate` in the config sets how often defense devices strike. 2 strikes twice as often. A powered device uses power on every strike, so a faster rate uses more power. It is 1, the game's own rate, by default.
-- **Crawlers can be hit by the chainsaw**: in the base game crawler zombies always dodge the Mechanical Chainsaw, so its blade never hits them. `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's own behavior, and the default). Set 0.25 and they dodge it only a quarter of the time.
-- **UI size**: with Exiled's Toolkit 0.10.0 or newer, its UI size setting (`UiScale`) draws the panel and its pop-up messages bigger or smaller, as far as the panel still fits on the screen. The HUD button and the Layout screen buttons keep the game's size, like the game's own buttons around them. With Toolkit 0.11.0 or newer, Defense Manager's own `UiScale` under Interface sets a size for this mod alone; at 0, the default, it follows the Toolkit's.
+- **Game hotkeys paused**: the game's hotkeys are off while the panel is open and come back when it closes, so keys you press in the panel do not reach the game.
+- **Device attack rate**: `DeviceAttackRate` in the config sets how often defense devices strike. 2 strikes twice as often. A powered device uses power on every strike, so a faster rate uses more power. It is 1, the game's rate, by default.
+- **Crawlers can be hit by the chainsaw**: in the base game crawler zombies always dodge the Mechanical Chainsaw, so its blade never hits them. `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's behavior, and the default). Set 0.25 and they dodge it only a quarter of the time.
+- **UI size**: with Exiled's Toolkit 0.10.0 or newer, its UI size setting (`UiScale`) draws the panel and its pop-up messages bigger or smaller, as far as the panel still fits on the screen. The HUD button and the Layout screen buttons keep the game's size, like the game's buttons around them. With Toolkit 0.11.0 or newer, Defense Manager's own `UiScale` under Interface sets a size for this mod alone; at 0, the default, it follows the Toolkit's.
 - **Log file**: every press and what came of it is written to `BepInEx\defense-manager.log`.
 
-Every repair and removal is the game's own action, the same one the defense's menu lines up, so the game's own walking, timing and material use apply. Only defenses outside your home are listed; doors and windows are not touched.
+Every repair and removal is the game's action, the same one the defense's menu lines up, so the game's walking, timing and material use apply. Only defenses outside your home are listed; doors and windows are not touched.
 
-With the Unlocks settings off, Defense Manager writes nothing into your save file. The Unlocks add the game's own unlocks to the run, which the game saves, plus a marker for each so the mod knows what it gave. Its power settings are its own data, kept for each save in `BepInEx\config\com.dev.survivallog.defensemanager.power.txt`. The repairs and removals it queues are real: they use your materials and take defenses down, exactly as if you had used each defense's menu. You can remove the mod at any time; your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
+With the Unlocks settings off, Defense Manager writes nothing into your save file. The Unlocks add the game's unlocks to the run, which the game saves, plus a marker for each so the mod knows what it gave. Its power settings are its own data, kept for each save in `BepInEx\config\com.dev.survivallog.defensemanager.power.txt`. The repairs and removals it queues are real: they use your materials and take defenses down, exactly as if you had used each defense's menu. You can remove the mod at any time; your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
 
 ## Hotkeys
 
@@ -42,13 +42,13 @@ With the Unlocks settings off, Defense Manager writes nothing into your save fil
 
 The panel key (`PanelKey`) is unbound by default: the HUD button opens the panel. Set a key in the config to open it from the keyboard too. It does nothing while you type in a text box.
 
-The mod's panel, buttons and messages follow the game's language: English or Simplified Chinese. Defense and material names, and the game's own refusal reasons, come from the game as it words them.
+The mod's panel, buttons and messages follow the game's language: English or Simplified Chinese. Defense and material names, and the game's refusal reasons, come from the game as it words them.
 
 ## How it works
 
 Repairs and removals join the end of your character's action queue, so actions you queued yourself stay and run first. Pressing Repair all or Clear all broken again while an earlier batch is still queued lines up only what that batch did not cover, and says how many are still queued from before. If the game is ever in its replace-the-queue action mode while you have actions queued, a press does nothing but say "Finish or cancel your queued actions first.", so your actions are never thrown away.
 
-Costs, the materials you have, and the game's own repair check are all read at the moment you press. Repair all keeps back the materials the repairs already queued will need.
+Costs, the materials you have, and the game's repair check are all read at the moment you press. Repair all keeps back the materials the repairs already queued will need.
 
 ### Power modes
 
@@ -57,7 +57,7 @@ Each electrical defense runs in one of four modes:
 - **Wave only**: on during zombie waves and while zombies are at the base, such as a stray one between waves, off otherwise.
 - **Proximity**: on while a living zombie is within `ProximityRange` (15 m by default, measured along the ground), and off once no zombie has been in range for 10 minutes of game time.
 - **Always on**: always on.
-- **Default**: the mod leaves the defense alone, and the game's own power switch decides, as if the mod were not installed.
+- **Default**: the mod leaves the defense alone, and the game's power switch decides, as if the mod were not installed.
 
 The mode comes from three levels, and the first one that has a setting wins:
 
@@ -72,8 +72,8 @@ The mod checks the defenses about twice a second whenever a game is loaded, with
 ## Known issues and limits
 
 - By default nothing can be repaired, removed or installed during a zombie wave, as in the base game. The panel says so and its buttons wait. Turn on `AllowDuringWaves` to work during waves.
-- The Unlocks only give early what the game gives later; the game's own story events still happen on their days. What they gave stays in the save if you remove the mod. Turning an Unlocks setting off in an endless run does nothing, since the mod never gives anything there.
-- Install takes one defense at a time: while one is being installed, the next waits. It is the game's own install, so it joins your action queue the way an install from the package's own menu does.
+- The Unlocks only give early what the game gives later; the game's story events still happen on their days. What they gave stays in the save if you remove the mod. Turning an Unlocks setting off in an endless run does nothing, since the mod never gives anything there.
+- Install takes one defense at a time: while one is being installed, the next waits. It is the game's install, so it joins your action queue the way an install from the package's own menu does.
 - On an expedition the panel, the HUD button and the Layout buttons are hidden and the panel key does nothing, since your defenses are back home. They come back when you return home.
 - The game is paused while the Layout screen is open, so repairs and removals you queue there wait. The character starts on them when you leave Layout (or, if you had paused the game before opening Layout, when you unpause). The message after each press says so.
 - The Layout buttons sit at the top middle of the screen. If they cover something you need on your screen size, turn them off with `LayoutControls` in the config; the HUD button and the panel key, if you set one, still work.

@@ -1,7 +1,7 @@
 // Defense Manager's web half. Runs in Root.html, the document every game page iframe sits in. Draws the panel over
 // all of them in the warm gold look of the other mod panels: the home yard as a grid of squares with a side panel
 // beside it, and tabs for power and settings. Through Exiled's Toolkit's page API it also puts a button in the HUD's
-// tool column (bottom left, above the phone and bag buttons), built like the game's own buttons there so it reads as
+// tool column (bottom left, above the phone and bag buttons), built like the game's buttons there so it reads as
 // part of the game, and while the game's Layout screen is up a bar of buttons at the top of that screen, built like
 // Layout's own buttons. Talks to the plugin through the Toolkit's bridge ("slmod|defensemanager|<verb>") and is driven
 // by window.__sldefense.
@@ -61,7 +61,7 @@
     inYard: '{0} in the yard', inBank: '{0} in Package Bank', noPackages: 'No defense packages in the yard or in Package Bank.', unlockFor: 'Unlock it from the Layout screen for {0} Survival Points.',
     everyType: 'Every {0}', global: 'Global ({0})', ownList: 'Set on their own', followType: 'Follow the type',
     noneOwn: 'None. Pick one in the Yard tab to set it alone.', noPower: 'No powered defenses yet.',
-    powerNote: 'Wave only: on during waves and while zombies are at the base. Proximity: on while a zombie is in range. Always on: never turns off. Default: the game\'s own power switch decides.',
+    powerNote: 'Wave only: on during waves and while zombies are at the base. Proximity: on while a zombie is in range. Always on: never turns off. Default: the game\'s power switch decides.',
     modeWaveOnly: 'Wave only', modeProximity: 'Proximity', modeAlwaysOn: 'Always on', modeDefault: 'Default',
     setControls: 'Controls', setCombat: 'Combat', setKey: 'Open the panel', setKeyDesc: 'Key that opens and closes this window.',
     keyNone: 'None', setLayout: 'Layout screen buttons',
@@ -1247,7 +1247,7 @@
   }
 
   // Shown only in such a game, with the panel key and the tip in the game's language. The Toolkit puts the button first
-  // in the tool column, where the game's own buttons do not move, and puts it back whenever the HUD page is rebuilt. The
+  // in the tool column, where the game's buttons do not move, and puts it back whenever the HUD page is rebuilt. The
   // column hides itself in build mode, and the button with it.
   function showHudState() {
     if (!hud) return;

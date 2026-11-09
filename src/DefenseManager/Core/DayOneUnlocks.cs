@@ -86,7 +86,7 @@ public interface IUnlockGame
 /// <summary>
 /// Gives the door, window and fortification upgrades from the start of a story run instead of on the game's days
 /// (2 and 5 for doors, 13 and 14 for windows, 54 for fortifications), and takes back what it gave when a setting is
-/// turned off. The game's own events still fire on their days; their rewards find the grant already there.
+/// turned off. The game's events still fire on their days; their rewards find the grant already there.
 /// </summary>
 public static class DayOneUnlocks
 {

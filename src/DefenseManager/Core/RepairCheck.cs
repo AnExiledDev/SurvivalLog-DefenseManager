@@ -23,7 +23,7 @@ public abstract record RepairVerdict
     /// <summary>It is queued for removal, and repairing what is about to be taken down would waste the materials.</summary>
     public sealed record QueuedForRemoval : RepairVerdict;
 
-    /// <summary>The game's own check refuses the repair, with its reason.</summary>
+    /// <summary>The game's check refuses the repair, with its reason.</summary>
     public sealed record Blocked(string Reason) : RepairVerdict;
 
     /// <summary>The materials left after earlier repairs do not cover it.</summary>

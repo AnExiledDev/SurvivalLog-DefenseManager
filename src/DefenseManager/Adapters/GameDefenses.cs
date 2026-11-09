@@ -323,7 +323,7 @@ internal sealed class GameDefenses : IDefenseGame
         return PackageSpots.Gather(yard, OptionalBank.Banked(_log), configId => FactsOf(config, configId, icons) is { } facts ? (facts.Name, facts.Icon) : null);
     }
 
-    /// <summary>The game runs one install at a time; a failed check counts as not installing, and the game's own check still stops a second one.</summary>
+    /// <summary>The game runs one install at a time; a failed check counts as not installing, and the game's check still stops a second one.</summary>
     private bool IsInstalling(InstallPlanManager? plans)
     {
         try
@@ -352,7 +352,7 @@ internal sealed class GameDefenses : IDefenseGame
     }
 
     /// <summary>
-    /// False in the prologue, before the disaster. This is the game's own test (SceneRatManager.IsPostDisaster reads
+    /// False in the prologue, before the disaster. This is the game's test (SceneRatManager.IsPostDisaster reads
     /// the same field), done here without the game's singleton lookup.
     /// </summary>
     private static bool IsAfterDisaster(BattleLogicWorld world) => world._GameTimeManager?.WorldStateType == WorldStateType.PostDisaster;
@@ -383,7 +383,7 @@ internal sealed class GameDefenses : IDefenseGame
     }
 
     /// <summary>
-    /// The slot is checked against the furniture table too: the game's own Repair button test
+    /// The slot is checked against the furniture table too: the game's Repair button test
     /// (Furniture.ShouldShowTowerRepairBtn) does the same before it reads the durability.
     /// </summary>
     private Defense? ReadDefense(Furniture furniture, ConfigManager config, ActionManager actions, ConditionSetManager conditions, PowerManager? power, long roleId, IconIndex icons)
@@ -444,7 +444,7 @@ internal sealed class GameDefenses : IDefenseGame
             First(removeFunc?.ActionIds) ?? DefaultRemoveAction));
     }
 
-    /// <summary>The furniture table's row, read the way the game's own lookup reads it, without its error line for a missing id.</summary>
+    /// <summary>The furniture table's row, read the way the game's lookup reads it, without its error line for a missing id.</summary>
     internal static Config_Furniture? FurnitureRow(ConfigManager config, int configId)
     {
         var rows = config._Config_Furniture_Dict;
@@ -566,7 +566,7 @@ internal sealed class GameDefenses : IDefenseGame
     /// <summary>
     /// The character's stamina, read the way the game's condition check reads it (ConditionSetManager.c:935-990), and
     /// the least stamina the repair's condition set lets a repair start with. Null when either cannot be read, so only
-    /// the game's own check applies.
+    /// the game's check applies.
     /// </summary>
     private RepairStamina? ReadStamina(ConfigManager config, LeadingRole role)
     {

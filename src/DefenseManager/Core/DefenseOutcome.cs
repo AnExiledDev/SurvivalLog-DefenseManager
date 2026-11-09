@@ -71,7 +71,7 @@ public abstract record DefenseOutcome
 /// <summary>
 /// What Repair all did, counted in defenses. Queued started repairing; AlreadyQueued were in the queue from before.
 /// The rest of the damaged ones were left, each for one reason: Short lacked materials (named, with what each is
-/// missing), Blocked were refused by the game's own check (the first reason kept), BeingRemoved are queued for removal,
+/// missing), Blocked were refused by the game's check (the first reason kept), BeingRemoved are queued for removal,
 /// and Refused were turned down by the game's queue itself.
 /// </summary>
 public sealed record RepairTally(int Queued, int AlreadyQueued, IReadOnlyList<Shortfall> Short, int Blocked, string? BlockedReason, int BeingRemoved, int Refused);

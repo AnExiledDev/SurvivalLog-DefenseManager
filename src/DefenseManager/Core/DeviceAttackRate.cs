@@ -3,7 +3,7 @@ using System;
 namespace DefenseManager.Core;
 
 /// <summary>
-/// How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. Only
+/// How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's rate. Only
 /// <see cref="From"/> makes one, so the rate is always in range and dividing by it needs no guard.
 /// </summary>
 public sealed class DeviceAttackRate

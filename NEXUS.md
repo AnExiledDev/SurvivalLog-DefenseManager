@@ -12,7 +12,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Clear all broken[/b]: queues the removal of every broken defense. One you already queued for repair is kept.[/*]
 [*][b]Your yard as a grid[/b]: every square of the yard, row by row out from the house, with each defense on its square, colored by its state. Squares you have not unlocked show their Survival Points price.[/*]
 [*][b]Click to act[/b]: click a defense for its condition, repair cost, Repair and Remove, and its power mode. Click a row number and [b]Repair row[/b] repairs everything in that row.[/*]
-[*][b]Install from the panel[/b]: click an empty square of yours to list the defense packages in your yard and, with [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 or newer, in the bank. [b]Install[/b] puts one on that square, the game's own install.[/*]
+[*][b]Install from the panel[/b]: click an empty square of yours to list the defense packages in your yard and, with [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 or newer, in the bank. [b]Install[/b] puts one on that square, the game's install.[/*]
 [*][b]Work during waves[/b]: an option, off by default, that lets you repair, remove, install and move defenses during a zombie wave. Robot repairs and expeditions still wait.[/*]
 [*][b]Unlocks from day one[/b]: three options, off by default, give the door upgrades (Advanced Repair, Advanced Reinforce), the window upgrades (Advanced Repair, Advanced Reinforce, Reinforce Window) and Reinforce Fortifications from the first day of a story run, with the recipes they use, instead of on days 2, 5, 13, 14 and 54. Turning one off takes back what the mod gave, never what the game has given by then.[/*]
 [*][b]Repairs list[/b]: every defense that needs repair, worst first, under Repair all.[/*]
@@ -21,11 +21,11 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Remove without the are-you-sure box[/b]: the same removal as the defense's own menu.[/*]
 [*][b]HUD button[/b]: a shield at the top of the bottom-left tool column opens the panel.[/*]
 [*][b]Layout screen buttons[/b]: while the game's Layout screen is open, Repair all, Clear all broken and Defense list sit at the top middle of the screen, styled like Layout's own buttons. Defense list opens the panel. Can be turned off in the config.[/*]
-[*][b]Game's own actions[/b]: repairs and removals join the end of your action queue, so your own queued actions run first.[/*]
-[*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them on during waves and while zombies are at the base, and off otherwise, [b]Proximity[/b] turns them on while a zombie is in range (15 m by default) and off after 10 game minutes with none, [b]Always on[/b] keeps them on, and [b]Default[/b] leaves them to the game's own switch.[/*]
+[*][b]Game's actions[/b]: repairs and removals join the end of your action queue, so your own queued actions run first.[/*]
+[*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them on during waves and while zombies are at the base, and off otherwise, [b]Proximity[/b] turns them on while a zombie is in range (15 m by default) and off after 10 game minutes with none, [b]Always on[/b] keeps them on, and [b]Default[/b] leaves them to the game's switch.[/*]
 [*][b]Per defense, per type, or for all[/b]: pick a mode for one defense when you click it, or for every defense of a type on the [b]Power[/b] tab. Anything without a setting follows its type, and a type without one follows the global mode (Wave only unless you change it).[/*]
 [*][b]Settings tab[/b]: change the Layout screen buttons, the global power mode, the Proximity range, the crawler dodge chances, the device attack rate, Work during waves and the Unlocks right in the panel.[/*]
-[*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. Set the chance for each kind of crawler in the config: 0.25 makes them dodge it only a quarter of the time. It starts at the game's own 100%.[/*]
+[*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. Set the chance for each kind of crawler in the config: 0.25 makes them dodge it only a quarter of the time. It starts at the game's 100%.[/*]
 [*][b]UI size[/b]: with Exiled's Toolkit 0.10.0 or newer, its UI size setting draws the panel bigger or smaller, as far as it still fits on the screen. With 0.11.0 or newer, Defense Manager's own UiScale setting can set a size for this mod alone.[/*]
 [/list]
 
@@ -33,9 +33,9 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [list]
 [*][b]Esc[/b]: close the panel.[/*]
 [/list]
-The panel key is unbound by default: the HUD button opens the panel. Set PanelKey in the config to open it from the keyboard too; it does nothing while you type in a text box. The game's own hotkeys are off while the panel is open.
+The panel key is unbound by default: the HUD button opens the panel. Set PanelKey in the config to open it from the keyboard too; it does nothing while you type in a text box. The game's hotkeys are off while the panel is open.
 
-With the Unlocks off, the mod writes nothing into your save file; the Unlocks add the game's own unlocks to the run, which the game saves. Its power settings are its own data, kept for each save in [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]. The repairs and removals it queues are real: they use your materials and take defenses down. You can remove it at any time; your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
+With the Unlocks off, the mod writes nothing into your save file; the Unlocks add the game's unlocks to the run, which the game saves. Its power settings are its own data, kept for each save in [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]. The repairs and removals it queues are real: they use your materials and take defenses down. You can remove it at any time; your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
 
 Works in English and Chinese.
 

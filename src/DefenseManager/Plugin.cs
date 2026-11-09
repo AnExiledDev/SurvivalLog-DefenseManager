@@ -42,7 +42,7 @@ public sealed class Plugin : BasePlugin
             "Show Repair all, Clear all broken and Defense list buttons at the top middle of the game's Layout screen. Set to false to hide them; the shield button and the panel key, if one is set, still work.\n" +
             "在游戏「规划模式」界面的顶部中间显示「全部修理」「清除全部损毁」「防御列表」三个按钮。设为 false 则隐藏这些按钮，盾牌按钮和面板按键（如已设置）照常可用。");
         var defaultModeName = Config.Bind("Power", "DefaultMode", PowerModes.ConfigName(PowerMode.WaveOnly), new ConfigDescription(
-            "How electrical defenses are powered when neither the defense nor its type has a setting of its own in the Defense Manager panel. WaveOnly: on during waves and while zombies are at the base, off otherwise. AlwaysOn: always on. Proximity: on while a living zombie is within ProximityRange, off once none has been in range for 10 game minutes. Default: the mod leaves the defense alone and the game's own power switch decides.\n" +
+            "How electrical defenses are powered when neither the defense nor its type has a setting of its own in the Defense Manager panel. WaveOnly: on during waves and while zombies are at the base, off otherwise. AlwaysOn: always on. Proximity: on while a living zombie is within ProximityRange, off once none has been in range for 10 game minutes. Default: the mod leaves the defense alone and the game's power switch decides.\n" +
             "电力防御设施在该设施及其类型都没有单独设置（在 Defense Manager 面板中设置）时的供电方式。WaveOnly：尸潮期间以及基地有僵尸时开启，其余时间关闭。AlwaysOn：始终开启。Proximity：有活着的僵尸进入 ProximityRange 范围内时开启，范围内连续 10 分钟游戏时间没有僵尸后关闭。Default：本模组不干预，由游戏自身的电源开关决定。",
             new AcceptableValueList<string>(PowerModes.ConfigNames)));
         var proximityRange = Config.Bind("Power", "ProximityRange", 15f, new ConfigDescription(
@@ -50,15 +50,15 @@ public sealed class Plugin : BasePlugin
             "设为 Proximity 的防御设施在活着的僵尸进入多少米范围内时开启。按地面水平距离计算，不计高度。默认 15，可设为 1 到 100。",
             new AcceptableValueRange<float>(1f, 100f)));
         var crawlerDodge = Config.Bind("Combat", "CrawlerDodgeChance", CrawlerDodge.GameChance, new ConfigDescription(
-            "Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. 1 by default, the game's own rule; 0.25 lets 3 hits in 4 land.\n" +
+            "Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. 1 by default, the game's rule; 0.25 lets 3 hits in 4 land.\n" +
             "「爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1，电锯刀片完全打不到爬行者。默认 1，即游戏原本的规则；设为 0.25 则 4 次攻击有 3 次命中。",
             new AcceptableValueRange<float>(0f, 1f), WorldRule.Tag));
         var armoredCrawlerDodge = Config.Bind("Combat", "ArmoredCrawlerDodgeChance", CrawlerDodge.GameChance, new ConfigDescription(
-            "Chance that an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. 1 by default, the game's own rule.\n" +
+            "Chance that an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. 1 by default, the game's rule.\n" +
             "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1。默认 1，即游戏原本的规则。",
             new AcceptableValueRange<float>(0f, 1f), WorldRule.Tag));
         var attackRateEntry = Config.Bind("Combat", "DeviceAttackRate", 1f, new ConfigDescription(
-            "How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's own rate. Each strike of a powered device uses power, so a higher rate also uses more power. 1 by default, from 0.25 to 10.\n" +
+            "How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's rate. Each strike of a powered device uses power, so a higher rate also uses more power. 1 by default, from 0.25 to 10.\n" +
             "防御设施攻击的频率：2 为两倍频率，0.5 为一半，1 为游戏原速。用电的防御设施每次攻击都耗电，所以频率越高耗电越多。默认 1，可设为 0.25 到 10。",
             new AcceptableValueRange<float>(DeviceAttackRate.Slowest, DeviceAttackRate.Fastest), WorldRule.Tag));
         var allowDuringWaves = Config.Bind("Combat", "AllowDuringWaves", false, new ConfigDescription(
