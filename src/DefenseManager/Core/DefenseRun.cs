@@ -32,6 +32,34 @@ public static class DefenseRun
     /// </summary>
     public static DefenseOutcome Install(IDefenseGame game, string square, int configId) => WithSurvey(game, survey => Install(game, survey, square, configId));
 
+    /// <summary>Buys a yard square with Survival Points, after the checks the game's purchase makes, so a refusal has its reason.</summary>
+    public static DefenseOutcome Buy(IDefenseGame game, string squareName) => WithSurvey(game, survey => Buy(game, survey, squareName));
+
+    /// <summary>
+    /// Moves a standing defense to another owned yard square, as Layout does. The game decides what happens when a
+    /// defense already stands there and shows its own reason when it refuses.
+    /// </summary>
+    public static DefenseOutcome Move(IDefenseGame game, long defenseId, string squareName) => WithSurvey(game, survey => Move(game, survey, defenseId, squareName));
+
+    /// <summary>
+    /// Takes a planned install or move out of the game's plan queue. Allowed during waves and away from home, like
+    /// cancelling an action in the game: it only ever stops work.
+    /// </summary>
+    public static DefenseOutcome Cancel(IDefenseGame game, PlanKind kind, long id)
+    {
+        var read = game.Read();
+
+        if (read is DefenseRead.NoGame) return new DefenseOutcome.NoGame();
+        if (read is DefenseRead.NotReady notReady) return new DefenseOutcome.NotReady(notReady.Reason);
+        if (read is not DefenseRead.Ready ready) throw new InvalidOperationException("unknown defense read " + read);
+
+        var plan = ready.Survey.Plans?.FirstOrDefault(candidate => candidate.Kind == kind && candidate.Id == id);
+
+        if (plan is null) return new DefenseOutcome.PlanGone();
+
+        return game.TryCancel(kind, id) ? new DefenseOutcome.Cancelled(plan.Name) : new DefenseOutcome.NotCancelled(plan.Name);
+    }
+
     /// <summary>Whether a square can take a new defense from the panel: the player owns it and no defense stands on it.</summary>
     public static bool IsOpenSquare(Survey survey, YardSquare square) =>
         square.IsOwned && survey.Yard is { } yard && !survey.Defenses.Any(defense => ReferenceEquals(yard.SquareAt(defense.Position), square));
@@ -149,6 +177,34 @@ public static class DefenseRun
         if (bagId == BankTakeOut.Failed) return new DefenseOutcome.BankFailed(package.Name);
 
         return game.TryInstall(bagId, squareName) ? new DefenseOutcome.Installing(package.Name, FromBank: true) : new DefenseOutcome.NotInstalled(package.Name, FromBank: true);
+    }
+
+    private static DefenseOutcome Buy(IDefenseGame game, Survey survey, string squareName)
+    {
+        var square = survey.Yard?.Squares.FirstOrDefault(candidate => candidate.Name == squareName);
+
+        if (square is null) return new DefenseOutcome.NotBought();
+
+        var verdict = BuyCheck.Judge(survey, square);
+
+        if (verdict is not BuyVerdict.Allowed) return new DefenseOutcome.BuyRefused(verdict);
+
+        return game.TryBuy(squareName) ? new DefenseOutcome.Bought(square.Price) : new DefenseOutcome.NotBought();
+    }
+
+    private static DefenseOutcome Move(IDefenseGame game, Survey survey, long defenseId, string squareName)
+    {
+        var defense = survey.Defenses.FirstOrDefault(candidate => candidate.Id == defenseId);
+
+        if (defense is null) return new DefenseOutcome.Gone();
+
+        var square = survey.Yard?.Squares.FirstOrDefault(candidate => candidate.Name == squareName);
+
+        if (square is null || !square.IsOwned) return new DefenseOutcome.NotOwned();
+        if (ReferenceEquals(survey.Yard?.SquareAt(defense.Position), square)) return new DefenseOutcome.SameSquare(defense.Name);
+        if (survey.Plans?.Any(plan => plan.Kind == PlanKind.Move && plan.Id == defenseId) == true) return new DefenseOutcome.MoveQueued(defense.Name);
+
+        return game.TryMove(defenseId, squareName) ? new DefenseOutcome.Moving(defense.Name) : new DefenseOutcome.NotMoved(defense.Name);
     }
 
     private static DefenseOutcome QueueOne(IDefenseGame game, Job job, Defense defense)

@@ -38,9 +38,9 @@
     attackrate: { step: 0.25, min: 0.25, max: 10 }
   };
   // Clicks the page answers itself: they change what the panel shows, not the game.
-  var LOCAL = { tab: true, pick: true, row: true, cell: true, back: true };
+  var LOCAL = { tab: true, pick: true, row: true, cell: true, back: true, askbuy: true, nobuy: true, startmove: true, stopmove: true };
   // Lists that keep their scroll when the panel is drawn again.
-  var SCROLLERS = ['dm-rlist', 'dm-yard', 'dm-pcards', 'dm-stab'];
+  var SCROLLERS = ['dm-rlist', 'dm-plist', 'dm-yard', 'dm-pcards', 'dm-stab'];
   // The plugin hands over the words in the game's language before every call (Texts.cs); English stands in until then.
   var ENGLISH = {
     broken: 'Broken', damaged: 'Damaged', intact: 'Intact', repairQueued: 'Repair queued', removeQueued: 'Removal queued',
@@ -59,6 +59,10 @@
     repairRow: 'Repair row {0} ({1})', emptySquare: 'Empty square', notYours: 'Not yours yet',
     buildHere: 'Build a defense here from the Layout screen.', installHere: 'Install a packed defense here:', install: 'Install',
     inYard: '{0} in the yard', inBank: '{0} in Package Bank', noPackages: 'No defense packages in the yard or in Package Bank.', unlockFor: 'Unlock it from the Layout screen for {0} Survival Points.',
+    costs: 'It costs {0} Survival Points.', youHave: 'You have {0}.', buy: 'Buy', buyAsk: 'Spend {0} Survival Points on this square?',
+    cancel: 'Cancel', move: 'Move', moveHint: 'Click one of your squares to move {0} there.', stopMoving: 'Stop moving',
+    movePlanned: 'A move is planned already. Cancel it under Planned to pick a new square.', planned: 'Planned',
+    planInstall: 'Install {0} on row {1}, square {2}', planMove: 'Move {0} to row {1}, square {2}', legPlan: 'Planned install or move',
     everyType: 'Every {0}', global: 'Global ({0})', ownList: 'Set on their own', followType: 'Follow the type',
     noneOwn: 'None. Pick one in the Yard tab to set it alone.', noPower: 'No powered defenses yet.',
     powerNote: 'Wave only: on during waves and while zombies are at the base. Proximity: on while a zombie is in range. Always on: never turns off. Default: the game\'s power switch decides.',
@@ -66,6 +70,8 @@
     setControls: 'Controls', setCombat: 'Combat', setKey: 'Open the panel', setKeyDesc: 'Key that opens and closes this window.',
     keyNone: 'None', setLayout: 'Layout screen buttons',
     setLayoutDesc: 'Show Repair all, Clear all broken and Defense list on the Layout screen.',
+    setActions: 'Buy and move from the panel',
+    setActionsDesc: 'Buy yard squares, move defenses and cancel planned installs and moves from the Yard tab. Installs and moves go in the same plan queue as on the Layout screen.',
     setMode: 'Default power mode', setModeDesc: 'Mode for powered defenses with no setting of their own.',
     setRange: 'Proximity range', setRangeDesc: 'How close a zombie must come to turn a Proximity defense on, 1 to 100 meters.',
     meters: '{0} m', setCrawler: 'Crawler dodge chance',
@@ -83,7 +89,7 @@
     keyClose: '{0} or Esc to close', noSettings: 'Settings are not available right now.'
   };
 
-  var state = { data: emptyData(), isOpen: false, isLive: false, key: '', layout: null, tab: 'yard', sel: null, row: null, cell: null };
+  var state = { data: emptyData(), isOpen: false, isLive: false, key: '', layout: null, tab: 'yard', sel: null, row: null, cell: null, moving: null, asking: null };
   var ui = null;
   var isBusy = false;
   var busyTimer = 0;
@@ -100,7 +106,7 @@
   var layoutPages = null;
 
   function emptyData() {
-    return { note: null, locked: null, repairAll: 0, clearAll: 0, materials: [], defenses: [], yard: null, global: null, settings: null };
+    return { note: null, locked: null, repairAll: 0, clearAll: 0, materials: [], defenses: [], yard: null, global: null, settings: null, points: null, buy: {}, plans: [] };
   }
 
   function say(key) {
@@ -213,8 +219,8 @@
     '.dm-n{font-style:normal;font-size:11px;padding:0 6px;border-radius:7px;background:#D32F2F;color:#fff;font-weight:700}',
     '.dm-body{flex:1;min-height:0;display:flex;gap:12px}',
     '.dm-well{background:linear-gradient(180deg,rgba(58,48,38,.75),rgba(44,36,28,.75));border:1px solid var(--dm-line);border-radius:4px;min-height:0;overflow-y:auto}',
-    '.dm-well::-webkit-scrollbar,.dm-rlist::-webkit-scrollbar{width:6px}',
-    '.dm-well::-webkit-scrollbar-thumb,.dm-rlist::-webkit-scrollbar-thumb{background:rgba(255,200,58,.35);border-radius:3px}',
+    '.dm-well::-webkit-scrollbar,.dm-rlist::-webkit-scrollbar,.dm-plist::-webkit-scrollbar{width:6px}',
+    '.dm-well::-webkit-scrollbar-thumb,.dm-rlist::-webkit-scrollbar-thumb,.dm-plist::-webkit-scrollbar-thumb{background:rgba(255,200,58,.35);border-radius:3px}',
     '.dm-sect{font-size:15px;font-weight:700;letter-spacing:3px;color:var(--dm-accent);text-shadow:0 0 12px var(--dm-glow);display:flex;align-items:center;gap:10px;padding:14px 16px 6px;text-transform:uppercase}',
     '.dm-sect::before{content:"";width:4px;height:16px;background:var(--dm-accent);box-shadow:0 0 8px var(--dm-glow)}',
     '.dm-sect::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(255,200,58,.25),transparent)}',
@@ -277,6 +283,11 @@
     '.dm-cell.dm-q{border-color:rgba(100,181,246,.8);box-shadow:none}',
     '.dm-cell.dm-inrow{box-shadow:0 0 0 1px rgba(255,200,58,.55);z-index:1}',
     '.dm-cell.dm-sel{box-shadow:0 0 0 2px var(--dm-accent),0 0 14px rgba(255,200,58,.3);z-index:1}',
+    '.dm-cell.dm-plan{border:1px dashed rgba(100,181,246,.9)}',
+    '.dm-ghost{opacity:.45}',
+    '.dm-cell.dm-target{box-shadow:inset 0 0 0 1px rgba(140,197,106,.7)}',
+    '.dm-cell.dm-target:hover{border-color:var(--dm-green);box-shadow:inset 0 0 12px rgba(140,197,106,.45)}',
+    '.dm-hint.dm-moving{color:var(--dm-green2);font-weight:600}',
     '.dm-cell .dm-track{position:absolute;left:5px;right:5px;bottom:4px;height:4px}',
     '.dm-pw{position:absolute;top:3px;right:3px;width:13px;height:13px;color:rgba(255,240,210,.3)}',
     '.dm-cell.dm-on .dm-pw{color:#ffd54f;filter:drop-shadow(0 0 3px rgba(255,213,79,.9))}',
@@ -293,6 +304,9 @@
     '.dm-lg.dm-broken{border:2px solid rgba(229,57,53,.9);background:rgba(90,30,28,.6)}',
     '.dm-lg.dm-empty{background:rgba(255,240,210,.07);border:1px solid rgba(220,188,120,.22)}',
     '.dm-lg.dm-buy{background:repeating-linear-gradient(135deg,rgba(160,40,36,.3) 0 3px,rgba(160,40,36,.12) 3px 6px);border:1px solid rgba(229,57,53,.2)}',
+    '.dm-lg.dm-plan{border:1px dashed rgba(100,181,246,.9)}',
+    '.dm-plans{flex:none;display:flex;flex-direction:column}',
+    '.dm-plist{max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:0 10px}',
     '.dm-note{padding:20px;color:var(--dm-text3);font-size:14px;text-align:center}',
     '.dm-side{width:380px;flex:none;display:flex;flex-direction:column;padding-bottom:12px;overflow:hidden}',
     '.dm-lock{margin:12px 16px 0;padding:8px 12px;border-radius:4px;border:1px solid rgba(255,193,7,.6);background:rgba(255,193,7,.1);color:#f3d38a;font-size:13px}',
@@ -419,6 +433,14 @@
     var action = target.getAttribute('data-act');
     var args = target.getAttribute('data-args');
 
+    // While a defense is being moved, a square or a defense on the grid is where it goes, not something to pick.
+    if (state.moving != null && (action === 'cell' || action === 'pick')) {
+      moveTo(action === 'cell' ? args : placeKey(byId(args)), action === 'pick' ? args : null);
+      render();
+
+      return;
+    }
+
     if (LOCAL[action]) {
       choose(action, args);
       render();
@@ -433,22 +455,63 @@
       return;
     }
 
+    // A buy that went out leaves the question behind; the redrawn square says how it went.
+    if (action === 'buy' && !isBusy) {
+      state.asking = null;
+      sendAction(action + '|' + args);
+      render();
+
+      return;
+    }
+
     sendAction(args ? action + '|' + args : action);
   }
 
   // What the side panel shows: a defense, a row, a square, or with none of those picked the repair list. A second
-  // click on what is already picked lets it go.
+  // click on what is already picked lets it go. Asking before a buy and moving a defense keep what is picked.
   function choose(action, args) {
+    if (action === 'askbuy') state.asking = state.cell;
+    if (action === 'nobuy') state.asking = null;
+    if (action === 'startmove') state.moving = args;
+    if (action === 'stopmove') state.moving = null;
+    if (action === 'askbuy' || action === 'nobuy' || action === 'startmove' || action === 'stopmove') return;
+
     var was = { sel: state.sel, row: state.row, cell: state.cell };
 
     state.sel = null;
     state.row = null;
     state.cell = null;
+    state.moving = null;
+    state.asking = null;
 
     if (action === 'tab') state.tab = args;
     if (action === 'pick' && was.sel !== args) state.sel = args;
     if (action === 'row' && was.row !== Number(args)) state.row = Number(args);
     if (action === 'cell' && was.cell !== args) state.cell = args;
+  }
+
+  // The square clicked while moving. The defense itself lets the move go; a defense off the grid is nowhere to go. The
+  // plugin answers every other square, and says why when it is not one the defense can go to.
+  function moveTo(key, clickedId) {
+    var at = key ? key.split(':').map(Number) : null;
+    var square = at ? squareAt(at[0], at[1]) : null;
+
+    if (clickedId === state.moving) {
+      state.moving = null;
+
+      return;
+    }
+
+    if (!square || isBusy) return;
+
+    var id = state.moving;
+
+    state.moving = null;
+    sendAction('move|' + id + '|' + square.n);
+  }
+
+  function placeKey(defense) {
+    return defense && isOnGrid(defense) ? defense.row + ':' + defense.col : null;
   }
 
   function icon(item, sizeClass) {
@@ -506,10 +569,17 @@
 
     if (lookup && lookup.data === data) return lookup;
 
-    var found = { data: data, squares: Object.create(null), worst: Object.create(null), owned: Object.create(null), waiting: Object.create(null), ids: Object.create(null) };
+    var found = { data: data, squares: Object.create(null), worst: Object.create(null), owned: Object.create(null), waiting: Object.create(null), ids: Object.create(null), plans: Object.create(null) };
     var list = squares();
     var all = defenses();
+    var planned = plans();
     var i;
+
+    for (i = 0; i < planned.length; i++) {
+      var plan = planned[i];
+
+      if (plan.r != null && plan.c != null && !((plan.r + ':' + plan.c) in found.plans)) found.plans[plan.r + ':' + plan.c] = plan;
+    }
 
     for (i = 0; i < list.length; i++) {
       var square = list[i];
@@ -575,6 +645,23 @@
     return looked().worst[row + ':' + col] || null;
   }
 
+  // Buying squares, moving defenses and the plan queue show only with the LayoutActions setting on.
+  function isActionsOn() {
+    return !!(state.data.settings && state.data.settings.actions);
+  }
+
+  function plans() {
+    return isActionsOn() ? state.data.plans || [] : [];
+  }
+
+  function planAt(row, col) {
+    return looked().plans[row + ':' + col] || null;
+  }
+
+  function hasMovePlanned(defense) {
+    return plans().some(function (plan) { return plan.kind === 'move' && plan.id === defense.id; });
+  }
+
   function modeWord(name) {
     return MODE_WORD[name] ? say(MODE_WORD[name]) : name;
   }
@@ -627,6 +714,8 @@
 
     if (state.tab !== 'yard' && state.tab !== 'power' && state.tab !== 'settings') state.tab = 'yard';
     if (state.sel != null && !byId(state.sel)) state.sel = null;
+    if (state.moving != null && (!isActionsOn() || state.moving !== state.sel)) state.moving = null;
+    if (state.asking != null && (!isActionsOn() || state.asking !== state.cell)) state.asking = null;
 
     renderHead();
     ui.body.textContent = '';
@@ -691,7 +780,9 @@
     var box = el('div', 'dm-yard dm-well');
     var top = el('div', 'dm-ytop');
 
-    add(top, el('span', 'dm-house', say('house')), el('span', 'dm-hint', say('hint')));
+    var mover = state.moving != null ? byId(state.moving) : null;
+
+    add(top, el('span', 'dm-house', say('house')), el('span', 'dm-hint' + (mover ? ' dm-moving' : ''), mover ? say('moveHint', mover.name) : say('hint')));
     box.appendChild(top);
 
     if (defenses().length === 0 && !data.yard) {
@@ -759,18 +850,23 @@
     var key = row + ':' + col;
     var square = squareAt(row, col);
     var defense = defenseAt(row, col);
-    var marks = (state.row === row ? ' dm-inrow' : '') + (state.cell === key ? ' dm-sel' : '');
+    var own = !!(square && square.own);
+    var plan = planAt(row, col);
+    var marks = (state.row === row ? ' dm-inrow' : '') + (state.cell === key ? ' dm-sel' : '') + (plan ? ' dm-plan' : '') + (state.moving != null && own ? ' dm-target' : '');
 
     if (defense) return reused('c' + key, defense, marks + (state.sel === defense.id ? '|sel' : ''), function () { return defenseCell(defense, marks); });
 
-    var own = !!(square && square.own);
     var price = square ? square.price : 0;
+    var planned = plan ? '|' + plan.kind + plan.id + '|' + plan.icon + '|' + plan.name : '';
 
-    return reused('c' + key, null, marks + '|' + own + '|' + price, function () { return emptyCell(key, own, price, marks); });
+    return reused('c' + key, null, marks + '|' + own + '|' + price + planned, function () { return emptyCell(key, own, price, marks, plan); });
   }
 
-  function emptyCell(key, own, price, marks) {
+  // A planned install or move headed for an empty square shows there faded, the way Layout shows a plan.
+  function emptyCell(key, own, price, marks, plan) {
     var inner = el('div', 'dm-in');
+
+    if (plan) inner.appendChild(icon(plan, 'dm-ci dm-ghost'));
 
     if (!own) {
       if (price > 0) inner.appendChild(el('span', 'dm-price', String(price)));
@@ -812,7 +908,11 @@
   function legend() {
     var box = el('div', 'dm-legend');
 
-    [['damaged', 'damaged'], ['broken', 'broken'], ['empty', 'legEmpty'], ['buy', 'legBuy']].forEach(function (entry) {
+    var entries = [['damaged', 'damaged'], ['broken', 'broken'], ['empty', 'legEmpty'], ['buy', 'legBuy']];
+
+    if (isActionsOn()) entries.push(['plan', 'legPlan']);
+
+    entries.forEach(function (entry) {
       box.appendChild(add(el('span'), el('i', 'dm-lg dm-' + entry[0]), el('span', '', say(entry[1]))));
     });
 
@@ -900,7 +1000,7 @@
 
       add(calm, svg(SHIELD_PATH), el('b', '', say('allGood')), el('small', '', queued > 0 ? say('queuedCount', queued) : say('nothingNeeds')));
 
-      return add(box, calm, foot);
+      return add(box, calm, plannedList(), foot);
     }
 
     var big = el('div', 'dm-big');
@@ -916,7 +1016,7 @@
 
     list.forEach(function (defense) { rows.appendChild(repairRow(defense)); });
 
-    return add(box, sect(say('needsRepair'), list.length), big, rows, foot);
+    return add(box, sect(say('needsRepair'), list.length), big, rows, plannedList(), foot);
   }
 
   function inspector(defense) {
@@ -937,6 +1037,11 @@
     else if (defense.state === 'intact') acts.appendChild(button(say('nothingToRepair'), 'repair', defense.id, false));
     else acts.appendChild(wrenchButton(say('repair'), 'repair', defense.id, defense.canRepair, 'dm-gold'));
 
+    var canMove = isActionsOn() && isOnGrid(defense);
+    var isMovePlanned = canMove && hasMovePlanned(defense);
+
+    if (canMove) acts.appendChild(moveButton(defense, isMovePlanned));
+
     acts.appendChild(button(say('remove'), 'remove', defense.id, defense.canRemove, 'dm-danger'));
     add(box, back(), head, condition, track(defense));
 
@@ -945,10 +1050,44 @@
     box.appendChild(acts);
 
     if (!defense.canRepair && !defense.queued && defense.state !== 'intact' && defense.why) box.appendChild(el('div', 'dm-why', defense.why));
+    if (isMovePlanned) box.appendChild(el('div', 'dm-why', say('movePlanned')));
     if (!defense.canRemove && defense.removeWhy) box.appendChild(el('div', 'dm-why', defense.removeWhy));
     if (defense.power) power(box, defense);
 
     return box;
+  }
+
+  // Move starts picking a square for the defense, and while picking it lets the move go. A wave lock is said in the
+  // banner at the top; a move already planned is said under the buttons.
+  function moveButton(defense, isMovePlanned) {
+    if (state.moving === defense.id) return button(say('stopMoving'), 'stopmove', null, true, 'dm-quiet');
+
+    return button(say('move'), 'startmove', defense.id, !isLocked() && !isMovePlanned);
+  }
+
+  // The installs and moves waiting in the game's plan queue, each with a Cancel. Cancelling only stops work, so it is
+  // never greyed by a wave.
+  function plannedList() {
+    var list = plans();
+
+    if (list.length === 0) return null;
+
+    var rows = el('div', 'dm-plist');
+
+    list.forEach(function (plan) { rows.appendChild(planRow(plan)); });
+
+    return add(el('div', 'dm-plans'), sect(say('planned'), list.length), rows);
+  }
+
+  function planRow(plan) {
+    var node = el('div', 'dm-rrow');
+    var name = el('div', 'dm-nm');
+    var isOnGridPlan = plan.r != null && plan.c != null;
+    var what = isOnGridPlan ? say(plan.kind === 'move' ? 'planMove' : 'planInstall', plan.name, plan.r, plan.c) : plan.name;
+
+    add(name, el('b', '', plan.name), el('small', '', what));
+
+    return add(node, icon(plan, 'dm-i30'), name, button(say('cancel'), 'cancel', plan.kind + '|' + plan.id, true, 'dm-sm dm-danger'));
   }
 
   // A powered defense's own setting: follow its type, or one of the modes. The pick shows what is set now.
@@ -1015,6 +1154,7 @@
     add(info, el('b', '', say(isMine ? 'emptySquare' : 'notYours')), el('small', '', say('where', at[0], at[1])));
     add(head, mark, info);
 
+    if (!isMine && square && isActionsOn()) return buyPart(add(box, back(), head), square);
     if (!isMine) return add(box, back(), head, el('p', 'dm-desc', say('unlockFor', square ? square.price : '?')));
 
     var packages = state.data.packages || [];
@@ -1026,6 +1166,27 @@
     packages.forEach(function (pack) { rows.appendChild(installRow(square, pack)); });
 
     return add(box, back(), head, el('p', 'dm-desc', say('installHere')), rows);
+  }
+
+  // A square for sale: its price, the player's points and Buy, which asks once before it spends. A square that can't
+  // be bought has Buy greyed and says why under it; the plugin sends the reason, null when it can be bought.
+  function buyPart(box, square) {
+    var reason = (state.data.buy || {})[square.n];
+    var canBuy = reason === null;
+    var acts = el('div', 'dm-acts');
+
+    if (canBuy && state.asking === state.cell) {
+      add(acts, button(say('buy'), 'buy', square.n, true, 'dm-gold'), button(say('cancel'), 'nobuy', null, true));
+
+      return add(box, el('p', 'dm-desc', say('buyAsk', square.price)), acts);
+    }
+
+    var points = state.data.points;
+    var desc = say('costs', square.price) + (points != null ? ' ' + say('youHave', points) : '');
+
+    acts.appendChild(button(say('buy'), 'askbuy', null, canBuy, 'dm-gold'));
+
+    return add(box, el('p', 'dm-desc', desc), acts, reason ? el('div', 'dm-why', reason) : null);
   }
 
   // One packed defense the square could take: where its packages are, and its Install button.
@@ -1115,6 +1276,7 @@
       sect(say('setControls')),
       setRow('setKey', 'setKeyDesc', el('span', 'dm-kbd', s.key || say('keyNone'))),
       setRow('setLayout', 'setLayoutDesc', toggle),
+      setRow('setActions', 'setActionsDesc', onOff('layoutactions', s.actions)),
       sect(say('tabPower')),
       setRow('setMode', 'setModeDesc', modes),
       setRow('setRange', 'setRangeDesc', stepper('proximityrange', s.range, function (v) { return say('meters', v); })));
@@ -1201,6 +1363,8 @@
     state.sel = null;
     state.row = null;
     state.cell = null;
+    state.moving = null;
+    state.asking = null;
     ui.status.textContent = '';
     ui.root.style.display = 'flex';
     render();

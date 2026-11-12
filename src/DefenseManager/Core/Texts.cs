@@ -38,6 +38,30 @@ public static class Texts
     public static readonly Phrase NotInstalled = new("The game would not install {0} there.", "游戏无法在这里安装{0}。");
     public static readonly Phrase Installing = new("Installing {0}.", "正在安装{0}。");
     public static readonly Phrase TakenOutOfBank = new("Took it out of Package Bank, it is in the yard now.", "已从 Package Bank 取出，现在在院子里。");
+    public static readonly Phrase ActionsOff = new("Turn on \"Buy and move from the panel\" in Settings first.", "请先在设置中开启「在面板中购买和移动」。");
+    public static readonly Phrase AlreadyYours = new("That square is already yours.", "这个格子已经属于你了。");
+
+    /// <summary>{0} is the reason, one of the Buy reasons below.</summary>
+    public static readonly Phrase CantBuy = new("Can't buy that square. {0}.", "无法购买这个格子。{0}。");
+
+    public static readonly Phrase Bought = new("Square bought for {0} Survival Points.", "已花费 {0} 生存点购买这个格子。");
+    public static readonly Phrase NotBought = new("The game would not sell that square.", "游戏没有卖出这个格子。");
+    public static readonly Phrase NotOwned = new("That square is not yours yet.", "这个格子还不属于你。");
+    public static readonly Phrase SameSquare = new("{0} is already on that square.", "{0}已经在这个格子上了。");
+    public static readonly Phrase MoveQueued = new("{0} has a move planned already. Cancel it in the Planned list first.", "{0}已经计划了移动。请先在「计划」列表中取消。");
+    public static readonly Phrase NotMoved = new("The game would not move {0} there.", "游戏无法把{0}移动到这里。");
+    public static readonly Phrase Moving = new("Moving {0}.", "正在移动{0}。");
+    public static readonly Phrase PlanGone = new("That plan is not queued any more.", "这个计划已经不在队列中了。");
+    public static readonly Phrase NotCancelled = new("Could not cancel the plan for {0}, see " + Log + ".", "无法取消{0}的计划，详见 " + Log + "。");
+    public static readonly Phrase Cancelled = new("Cancelled the plan for {0}.", "已取消{0}的计划。");
+
+    // Why a square's Buy button is off.
+    public static readonly Phrase BuyWaveLocked = new("Squares can't be bought during a zombie wave", "尸潮期间无法购买格子");
+    public static readonly Phrase PointsUnreadable = new("Your Survival Points or Defense level could not be read", "无法读取你的生存点或防御等级");
+    public static readonly Phrase BuyHidden = new("The game does not show it yet. It unlocks at Defense level {0}", "游戏中还没有显示，防御等级达到 {0} 级后解锁");
+    public static readonly Phrase BuyNeedsLevel = new("Unlocks at Defense level {0}", "防御等级达到 {0} 级后解锁");
+    public static readonly Phrase BuyShort = new("Not enough Survival Points, you have {0}", "生存点不足，你有 {0} 点");
+
     public static readonly Phrase NothingRepaired = new("Nothing repaired.", "没有修理任何防御设施。");
     public static readonly Counted AlreadyRepairing = new(new("Already repairing: 1 repair still queued.", "已在修理：还有 {0} 项修理在排队。"), new("Already repairing: {0} repairs still queued.", "已在修理：还有 {0} 项修理在排队。"));
     public static readonly Counted Repairing = new(new("Repairing 1 defense.", "正在修理 {0} 个防御设施。"), new("Repairing {0} defenses.", "正在修理 {0} 个防御设施。"));
@@ -174,6 +198,19 @@ public static class Texts
         ("inBank", new("{0} in Package Bank", "Package Bank 中 {0} 个")),
         ("noPackages", new("No defense packages in the yard or in Package Bank.", "院子里和 Package Bank 中都没有防御设施包裹。")),
         ("unlockFor", new("Unlock it from the Layout screen for {0} Survival Points.", "可在「规划模式」中花费 {0} 生存点解锁。")),
+        ("costs", new("It costs {0} Survival Points.", "需要 {0} 生存点。")),
+        ("youHave", new("You have {0}.", "你有 {0} 点。")),
+        ("buy", new("Buy", "购买")),
+        ("buyAsk", new("Spend {0} Survival Points on this square?", "花费 {0} 生存点购买这个格子？")),
+        ("cancel", new("Cancel", "取消")),
+        ("move", new("Move", "移动")),
+        ("moveHint", new("Click one of your squares to move {0} there.", "点击一个属于你的格子，把{0}移动到那里。")),
+        ("stopMoving", new("Stop moving", "停止移动")),
+        ("movePlanned", new("A move is planned already. Cancel it under Planned to pick a new square.", "已经计划了移动。在「计划」中取消后可以重新选择格子。")),
+        ("planned", new("Planned", "计划")),
+        ("planInstall", new("Install {0} on row {1}, square {2}", "在第 {1} 行第 {2} 格安装{0}")),
+        ("planMove", new("Move {0} to row {1}, square {2}", "把{0}移动到第 {1} 行第 {2} 格")),
+        ("legPlan", new("Planned install or move", "计划安装或移动")),
         ("everyType", new("Every {0}", "所有{0}")),
         ("global", new("Global ({0})", "全局（{0}）")),
         ("ownList", new("Set on their own", "单独设置")),
@@ -192,6 +229,8 @@ public static class Texts
         ("keyNone", new("None", "无")),
         ("setLayout", new("Layout screen buttons", "「规划模式」按钮")),
         ("setLayoutDesc", new("Show Repair all, Clear all broken and Defense list on the Layout screen.", "在「规划模式」界面显示「全部修理」「清除全部损毁」「防御列表」按钮。")),
+        ("setActions", new("Buy and move from the panel", "在面板中购买和移动")),
+        ("setActionsDesc", new("Buy yard squares, move defenses and cancel planned installs and moves from the Yard tab. Installs and moves go in the same plan queue as on the Layout screen.", "在「空地」标签中购买格子、移动防御设施，以及取消计划中的安装和移动。安装和移动与「规划模式」使用同一个计划队列。")),
         ("setMode", new("Default power mode", "默认供电模式")),
         ("setModeDesc", new("Mode for powered defenses with no setting of their own.", "没有单独设置的用电防御设施所用的模式。")),
         ("setRange", new("Proximity range", "靠近范围")),
@@ -236,6 +275,8 @@ public static class Texts
             NoWorld, ReadFailed, NoRepair, CostUnreadable, CheckFailed, Failed,
             NoSave, Unreadable, NoGame, NoSwitch, NotSaved, DefenseSet, DefenseFollowsType, TypeSet, TypeFollowsGlobal,
             AlwaysOn, WaveOnly, Proximity, GameDefault, Saved,
+            ActionsOff, AlreadyYours, CantBuy, Bought, NotBought, NotOwned, SameSquare, MoveQueued, NotMoved, Moving, PlanGone, NotCancelled,
+            Cancelled, BuyWaveLocked, PointsUnreadable, BuyHidden, BuyNeedsLevel, BuyShort,
         };
 
         foreach (var counted in Counts)

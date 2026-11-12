@@ -19,6 +19,8 @@ public class SettingChangeTests
         Assert.Equal(new SettingChange.Unlock(UnlockGroup.Doors, true), SettingChange.Parse("doorunlock", "1"));
         Assert.Equal(new SettingChange.Unlock(UnlockGroup.Windows, false), SettingChange.Parse("windowunlock", "0"));
         Assert.Equal(new SettingChange.Unlock(UnlockGroup.Fortifications, true), SettingChange.Parse("fortunlock", "1"));
+        Assert.Equal(new SettingChange.LayoutActions(true), SettingChange.Parse("layoutactions", "1"));
+        Assert.Equal(new SettingChange.LayoutActions(false), SettingChange.Parse("layoutactions", "0"));
         Assert.Null(SettingChange.Parse("fortunlock", "yes"));
     }
 
@@ -58,6 +60,7 @@ public class SettingChangeTests
     [InlineData("crawlerdodge", "NaN")]
     [InlineData("attackrate", "Infinity")]
     [InlineData("wavework", "true")]
+    [InlineData("layoutactions", "yes")]
     [InlineData("panelkey", "F8")]
     public void A_name_or_value_that_does_not_parse_changes_nothing(string name, string value)
     {

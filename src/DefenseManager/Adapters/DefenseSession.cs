@@ -171,6 +171,15 @@ internal sealed class DefenseSession
             case PageCommand.Install install:
                 Press($"install {install.ConfigId} on {install.Square}", () => DefenseRun.Install(_game, install.Square, install.ConfigId));
                 break;
+            case PageCommand.Buy buy:
+                PressAction($"buy {buy.Square}", () => DefenseRun.Buy(_game, buy.Square));
+                break;
+            case PageCommand.Move move:
+                PressAction($"move {move.DefenseId} to {move.Square}", () => DefenseRun.Move(_game, move.DefenseId, move.Square));
+                break;
+            case PageCommand.Cancel cancel:
+                PressAction($"cancel {cancel.Kind} {cancel.Id}", () => DefenseRun.Cancel(_game, cancel.Kind, cancel.Id));
+                break;
             case PageCommand.Power power:
                 PressPower(PowerTarget.Defense, power.DefenseId, power.Mode);
                 break;
@@ -470,6 +479,13 @@ internal sealed class DefenseSession
     /// The panel and the Layout bar are redrawn straight after, so a queued badge or a new count shows without waiting
     /// for the next refresh.
     /// </summary>
+    /// <summary>
+    /// A press that buys, moves or cancels a plan, which only runs while LayoutActions is on. A page that still shows
+    /// the buttons after the setting went off gets a status line saying so, which also frees its busy buttons.
+    /// </summary>
+    private void PressAction(string name, Func<DefenseOutcome> press) =>
+        Press(name, () => _config.LayoutActions ? press() : new DefenseOutcome.ActionsOff());
+
     private void Press(string name, Func<DefenseOutcome> press)
     {
         string? message;

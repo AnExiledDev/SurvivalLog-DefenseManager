@@ -44,7 +44,33 @@ public static class OutcomeMessage
         DefenseOutcome.Installing installing => FromBank(Texts.Installing.Say(isChinese, installing.Name), installing.FromBank, isChinese),
         DefenseOutcome.Repaired repaired => Describe(repaired.Tally, isChinese),
         DefenseOutcome.Cleared cleared => Describe(cleared.Tally, isChinese),
+        DefenseOutcome.ActionsOff => Texts.ActionsOff.Pick(isChinese),
+        DefenseOutcome.BuyRefused { Verdict: BuyVerdict.Owned } => Texts.AlreadyYours.Pick(isChinese),
+        DefenseOutcome.BuyRefused { Verdict: BuyVerdict.WaveLocked } => Texts.WaveLocked.Pick(isChinese),
+        DefenseOutcome.BuyRefused refused => Texts.CantBuy.Say(isChinese, WhyNotBuy(refused.Verdict, isChinese) ?? ""),
+        DefenseOutcome.Bought bought => Texts.Bought.Say(isChinese, bought.Price),
+        DefenseOutcome.NotBought => Texts.NotBought.Pick(isChinese),
+        DefenseOutcome.NotOwned => Texts.NotOwned.Pick(isChinese),
+        DefenseOutcome.SameSquare same => Texts.SameSquare.Say(isChinese, same.Name),
+        DefenseOutcome.MoveQueued queued => Texts.MoveQueued.Say(isChinese, queued.Name),
+        DefenseOutcome.NotMoved refused => Texts.NotMoved.Say(isChinese, refused.Name),
+        DefenseOutcome.Moving moving => Texts.Moving.Say(isChinese, moving.Name),
+        DefenseOutcome.PlanGone => Texts.PlanGone.Pick(isChinese),
+        DefenseOutcome.NotCancelled refused => Texts.NotCancelled.Say(isChinese, refused.Name),
+        DefenseOutcome.Cancelled cancelled => Texts.Cancelled.Say(isChinese, cancelled.Name),
         _ => throw new InvalidOperationException("unknown defense outcome " + outcome),
+    };
+
+    /// <summary>Why a square's Buy button is off, or null when it may be bought or is the player's already.</summary>
+    public static string? WhyNotBuy(BuyVerdict verdict, bool isChinese = false) => verdict switch
+    {
+        BuyVerdict.Allowed or BuyVerdict.Owned => null,
+        BuyVerdict.WaveLocked => Texts.BuyWaveLocked.Pick(isChinese),
+        BuyVerdict.Unreadable => Texts.PointsUnreadable.Pick(isChinese),
+        BuyVerdict.Hidden hidden => Texts.BuyHidden.Say(isChinese, hidden.Level),
+        BuyVerdict.NeedsLevel needs => Texts.BuyNeedsLevel.Say(isChinese, needs.Level),
+        BuyVerdict.Short shortOf => Texts.BuyShort.Say(isChinese, shortOf.Have),
+        _ => throw new InvalidOperationException("unknown buy verdict " + verdict),
     };
 
     /// <summary>
@@ -77,13 +103,16 @@ public static class OutcomeMessage
 
     private static bool LeavesWorkQueued(DefenseOutcome outcome) => outcome switch
     {
-        DefenseOutcome.Queued or DefenseOutcome.Installing => true,
+        DefenseOutcome.Queued or DefenseOutcome.Installing or DefenseOutcome.Moving => true,
         DefenseOutcome.Repaired repaired => repaired.Tally.Queued + repaired.Tally.AlreadyQueued > 0,
         DefenseOutcome.Cleared cleared => cleared.Tally.Queued + cleared.Tally.AlreadyQueued > 0,
         DefenseOutcome.NoGame or DefenseOutcome.NotReady or DefenseOutcome.WaveLocked or DefenseOutcome.AwayFromHome or DefenseOutcome.QueueBusy
             or DefenseOutcome.NothingToDo or DefenseOutcome.Gone or DefenseOutcome.RepairRefused or DefenseOutcome.RemoveRefused
             or DefenseOutcome.NotQueued or DefenseOutcome.StartFailed or DefenseOutcome.SquareTaken or DefenseOutcome.NoPackage
-            or DefenseOutcome.InstallBusy or DefenseOutcome.NoFreeSpot or DefenseOutcome.BankFailed or DefenseOutcome.NotInstalled => false,
+            or DefenseOutcome.InstallBusy or DefenseOutcome.NoFreeSpot or DefenseOutcome.BankFailed or DefenseOutcome.NotInstalled
+            or DefenseOutcome.ActionsOff or DefenseOutcome.BuyRefused or DefenseOutcome.Bought or DefenseOutcome.NotBought
+            or DefenseOutcome.NotOwned or DefenseOutcome.SameSquare or DefenseOutcome.MoveQueued or DefenseOutcome.NotMoved or DefenseOutcome.PlanGone
+            or DefenseOutcome.NotCancelled or DefenseOutcome.Cancelled => false,
         _ => throw new InvalidOperationException("unknown defense outcome " + outcome),
     };
 

@@ -38,6 +38,15 @@ public abstract record PageCommand
     /// <summary>Install a packed defense, by its furniture id, on a yard square, by the game's name for the square.</summary>
     public sealed record Install(string Square, int ConfigId) : PageCommand;
 
+    /// <summary>Buy a yard square, by the game's name for it, with Survival Points.</summary>
+    public sealed record Buy(string Square) : PageCommand;
+
+    /// <summary>Move a standing defense to a yard square.</summary>
+    public sealed record Move(long DefenseId, string Square) : PageCommand;
+
+    /// <summary>Take a planned install (keyed by its package) or move (keyed by its defense) out of the game's plan queue.</summary>
+    public sealed record Cancel(PlanKind Kind, long Id) : PageCommand;
+
     /// <summary>A power mode picked for that one defense; null lets it follow its type.</summary>
     public sealed record Power(long DefenseId, PowerMode? Mode) : PageCommand;
 
@@ -77,6 +86,9 @@ public abstract record PageCommand
             ("repair", 2) when TryId(parts[1], out var id) => new Repair(id),
             ("remove", 2) when TryId(parts[1], out var id) => new Remove(id),
             ("install", 3) when parts[1].Length > 0 && TryConfigId(parts[2], out var configId) => new Install(parts[1], configId),
+            ("buy", 2) when parts[1].Length > 0 => new Buy(parts[1]),
+            ("move", 3) when TryId(parts[1], out var id) && parts[2].Length > 0 => new Move(id, parts[2]),
+            ("cancel", 3) when TryKind(parts[1], out var kind) && TryId(parts[2], out var id) => new Cancel(kind, id),
             ("power", 3) when TryId(parts[1], out var id) && TryMode(parts[2], out var mode) => new Power(id, mode),
             ("powertype", 3) when TryId(parts[1], out var id) && TryMode(parts[2], out var mode) => new PowerType(id, mode),
             ("set", 3) when SettingChange.Parse(parts[1], parts[2]) is { } change => new Setting(change),
@@ -92,6 +104,13 @@ public abstract record PageCommand
     private static bool TryConfigId(string text, out int configId) => int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out configId) && configId > 0;
 
     private static bool TryRow(string text, out int row) => int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out row) && row > 0;
+
+    private static bool TryKind(string text, out PlanKind kind)
+    {
+        kind = text == "move" ? PlanKind.Move : PlanKind.Install;
+
+        return text is "install" or "move";
+    }
 
     private static bool TryMode(string text, out PowerMode? mode)
     {

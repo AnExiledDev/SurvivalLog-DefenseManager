@@ -13,6 +13,14 @@ For `PanelKey`, the value is a Unity key name, for example `F7`, `F11`, `Insert`
 
 The game is paused while the Layout screen is open, so anything queued from its buttons starts when you leave Layout.
 
+## Panel
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `LayoutActions` | `false` | Lets the panel's Yard tab buy squares with Survival Points, move defenses to other squares of yours and cancel planned installs and moves. Buying asks once before it spends, and is the same purchase as on the Layout screen. Installs and moves go in the same plan queue as the Layout screen, so it shows them too. The game's checks still apply: the Survival Points a square costs, the Defense level it unlocks at, and the wave lock, which `AllowDuringWaves` lifts. |
+
+With `LayoutActions` off, the Yard tab shows each square's price and installs packed defenses, as before.
+
 ## Power
 
 | Setting | Default | What it does |

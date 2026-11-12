@@ -225,7 +225,7 @@ internal sealed class GameDefenses : IDefenseGame
         var isWaveLocked = !WaveLockPatch.AllowsWaves && (world._TowerWaveManager?.IsWaveOperationLocked() ?? false);
         var plans = world._InstallPlanManager;
         var survey = new Survey(defenses, PositionOf(role), materials, ReadQueueOnStart(role, actions), isWaveLocked, IsHome(agents), ReadStamina(config, role), isChinese, _yard.Read(world, config, GamePower.ReadLoad(world)),
-            ReadPackages(config, agents, role, plans, tables.Icons), IsInstalling(plans));
+            ReadPackages(config, agents, role, plans, tables.Icons), IsInstalling(plans), ReadSurvivalPoints(world), ReadDefenseLevel(), ReadPlans(config, agents, actions, role.InstanceId, plans, tables.Icons));
 
         LogDefenseCount(defenses.Count);
 
@@ -321,6 +321,225 @@ internal sealed class GameDefenses : IDefenseGame
         yard.Sort((a, b) => a.BagId.CompareTo(b.BagId));
 
         return PackageSpots.Gather(yard, OptionalBank.Banked(_log), configId => FactsOf(config, configId, icons) is { } facts ? (facts.Name, facts.Icon) : null);
+    }
+
+    /// <summary>
+    /// Buys the square the way the Layout screen's buy box does once the player says yes (TowerRingUnlockManager's purchase
+    /// request): the game checks the Defense level and spends the Survival Points itself. It worked when the game counts
+    /// the square as open afterwards.
+    /// </summary>
+    public bool TryBuy(string square)
+    {
+        try
+        {
+            var rings = GameSingleton.Existing<BattleLogicWorld>()?._TowerRingUnlockManager;
+
+            if (rings == null) return false;
+
+            rings.OnPurchaseRequest(square);
+
+            var isBought = AreaUnlockConstants.IsSlotUnlocked(square);
+
+            _log(isBought ? $"bought yard square {square}" : $"the game would not sell yard square {square}");
+
+            return isBought;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("buy", ex);
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Picks the square for the defense the way the Layout screen does after the player presses Move: the game runs
+    /// every move check, shows its own reason when it refuses, and otherwise has the character carry the defense over.
+    /// The defense is set as the one to move only for this call, as with an install. It worked when the game has the
+    /// defense headed for that square afterwards.
+    /// </summary>
+    public bool TryMove(long defenseId, string square)
+    {
+        InstallPlanManager? plans = null;
+
+        try
+        {
+            plans = GameSingleton.Existing<BattleLogicWorld>()?._InstallPlanManager;
+
+            if (plans == null) return false;
+
+            plans._PendingMoveFurnitureId_k__BackingField = defenseId;
+            plans.OnSelectBuildingPos(square, Vector3.zero);
+
+            var targets = plans.PendingMoveTargets;
+            var isHeaded = targets != null && targets.TryGetValue(defenseId, out var node) && node == square;
+
+            _log(isHeaded ? $"moving defense {defenseId} to {square}" : $"the game would not move defense {defenseId} to {square}");
+
+            return isHeaded;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("move", ex);
+
+            return false;
+        }
+        finally
+        {
+            ClearPendingMove(plans, defenseId);
+        }
+    }
+
+    private void ClearPendingMove(InstallPlanManager? plans, long defenseId)
+    {
+        try
+        {
+            if (plans != null && plans._PendingMoveFurnitureId_k__BackingField == defenseId) plans._PendingMoveFurnitureId_k__BackingField = -1;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("clear the pending move", ex);
+        }
+    }
+
+    /// <summary>
+    /// Takes the plan's action out of the character's queue, as the queue's own cancel does (LeadingRole's
+    /// RemoveLeadingRoleAction on the action's parent), then drops the plan's target so the square is free again. It
+    /// worked when no such action is left.
+    /// </summary>
+    public bool TryCancel(PlanKind kind, long id)
+    {
+        try
+        {
+            var game = LoadedGame();
+
+            if (game == null) return false;
+
+            var (world, _, agents, role) = game.Value;
+            var plans = world._InstallPlanManager;
+            var actions = world._ActionManager;
+
+            if (plans == null || actions == null || PlanActionId(plans, agents, kind, id) is not { } actionId) return false;
+            if (PlanParent(actions.GetActionSource(role.InstanceId), actionId, id) is not { } parentId) return false;
+
+            role.RemoveLeadingRoleAction(parentId);
+
+            if (kind == PlanKind.Install) plans.ClearInstallData(id);
+            else plans.ClearMoveData(id);
+
+            var isCancelled = PlanParent(actions.GetActionSource(role.InstanceId), actionId, id) == null;
+
+            _log(isCancelled ? $"cancelled the planned {kind} of {id}" : $"the game kept the planned {kind} of {id}");
+
+            return isCancelled;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("cancel", ex);
+
+            return false;
+        }
+    }
+
+    /// <summary>The action the game lines up for the plan: its install action, or the move action of that piece.</summary>
+    private static int? PlanActionId(InstallPlanManager plans, AgentManager agents, PlanKind kind, long id)
+    {
+        if (kind == PlanKind.Install) return plans.GetInstallActionId();
+
+        var furniture = agents.GetAgent(id)?.TryCast<Furniture>();
+
+        return furniture == null ? null : plans.GetMoveActionId(furniture);
+    }
+
+    /// <summary>The parent of the character's action with that id and target, current or queued; null when there is none.</summary>
+    private static long? PlanParent(AgentActionSource? source, int actionId, long targetId)
+    {
+        if (source == null) return null;
+        if (IsPlanAction(source.CurrentAction, actionId, targetId)) return source.CurrentAction.ParentId;
+
+        var queued = source.ActionList;
+
+        for (var i = 0; queued != null && i < queued.Count; i++)
+        {
+            if (IsPlanAction(queued[i], actionId, targetId)) return queued[i].ParentId;
+        }
+
+        return null;
+    }
+
+    private static bool IsPlanAction(AgentAction? action, int actionId, long targetId) => action != null && action.ActionId == actionId && action.TargetId == targetId;
+
+    /// <summary>What the player has to spend on yard squares; null when it cannot be read, so nothing is promised.</summary>
+    private int? ReadSurvivalPoints(BattleLogicWorld world)
+    {
+        try
+        {
+            return world._SurvivalResultsManager?.GetSurvivalPoint();
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("survival points", ex);
+
+            return null;
+        }
+    }
+
+    /// <summary>The Defense level the game's yard square checks read (TowerRingUnlockManager's own level read); null when it cannot be read.</summary>
+    private int? ReadDefenseLevel()
+    {
+        try
+        {
+            return TowerRingUnlockManager.GetDefenseLevel();
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("defense level", ex);
+
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// The installs and moves of defenses waiting in the game's plan queue: the targets InstallPlanManager keeps, each
+    /// only while the character still has an action for it, since the game clears a stale target only later. Null
+    /// when the queue cannot be read.
+    /// </summary>
+    private IReadOnlyList<QueuedPlan>? ReadPlans(ConfigManager config, AgentManager agents, ActionManager actions, long roleId, InstallPlanManager? plans, IconIndex icons)
+    {
+        if (plans == null) return null;
+
+        try
+        {
+            var found = new List<QueuedPlan>();
+
+            AddPlans(found, PlanKind.Install, plans.PendingInstallTargets, id => agents.GetAgent(id)?.TryCast<BagFurniture>()?._FurnitureConfigId_k__BackingField);
+            AddPlans(found, PlanKind.Move, plans.PendingMoveTargets, id => agents.GetAgent(id)?.TryCast<Furniture>()?.AgentConfigId);
+
+            return found;
+        }
+        catch (Exception ex)
+        {
+            ReportOnce("plan queue", ex);
+
+            return null;
+        }
+
+        void AddPlans(List<QueuedPlan> found, PlanKind kind, Il2CppSystem.Collections.Generic.Dictionary<long, string>? targets, Func<long, int?> configIdOf)
+        {
+            if (targets == null) return;
+
+            var start = found.Count;
+
+            foreach (var target in targets)
+            {
+                if (!actions.HasActionWithTarget(roleId, target.Key)) continue;
+                if (configIdOf(target.Key) is not { } configId || FactsOf(config, configId, icons) is not { } facts) continue;
+
+                found.Add(new QueuedPlan(kind, target.Key, target.Value, facts.Name, facts.Icon));
+            }
+
+            found.Sort(start, found.Count - start, Comparer<QueuedPlan>.Create((a, b) => a.Id.CompareTo(b.Id)));
+        }
     }
 
     /// <summary>The game runs one install at a time; a failed check counts as not installing, and the game's check still stops a second one.</summary>

@@ -66,6 +66,41 @@ public abstract record DefenseOutcome
     public sealed record Installing(string Name, bool FromBank) : DefenseOutcome;
 
     public sealed record Cleared(ClearTally Tally) : DefenseOutcome;
+
+    /// <summary>Buying, moving and cancelling plans from the panel are turned off in the settings.</summary>
+    public sealed record ActionsOff : DefenseOutcome;
+
+    /// <summary>The yard square was not bought, for the verdict's reason.</summary>
+    public sealed record BuyRefused(BuyVerdict Verdict) : DefenseOutcome;
+
+    /// <summary>The game took the Survival Points and the square is the player's.</summary>
+    public sealed record Bought(int Price) : DefenseOutcome;
+
+    /// <summary>The game's purchase ran but the square is still not the player's.</summary>
+    public sealed record NotBought : DefenseOutcome;
+
+    /// <summary>The square a move named is not the player's, or not a yard square at all.</summary>
+    public sealed record NotOwned : DefenseOutcome;
+
+    /// <summary>The defense already stands on the square the move named.</summary>
+    public sealed record SameSquare(string Name) : DefenseOutcome;
+
+    /// <summary>The defense has a move planned already; the game would line up a second walk for it.</summary>
+    public sealed record MoveQueued(string Name) : DefenseOutcome;
+
+    /// <summary>The game refused the move and showed its own reason.</summary>
+    public sealed record NotMoved(string Name) : DefenseOutcome;
+
+    /// <summary>The character is on the way to move the defense.</summary>
+    public sealed record Moving(string Name) : DefenseOutcome;
+
+    /// <summary>The plan a Cancel button named is no longer in the game's plan queue.</summary>
+    public sealed record PlanGone : DefenseOutcome;
+
+    /// <summary>The plan is in the queue but the game would not take it out.</summary>
+    public sealed record NotCancelled(string Name) : DefenseOutcome;
+
+    public sealed record Cancelled(string Name) : DefenseOutcome;
 }
 
 /// <summary>

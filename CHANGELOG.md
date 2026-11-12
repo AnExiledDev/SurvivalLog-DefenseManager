@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.0
+
+- New: `LayoutActions` under Panel, off by default, lets you buy squares and move defenses from the panel's Yard tab. Turn it on in the config or with **Buy and move from the panel** on the Settings tab.
+- Click a square that is not yours yet to see its price and your Survival Points. **Buy** asks once, then does the same purchase as the Layout screen. When a square can't be bought yet, the reason shows: not enough Survival Points, the Defense level it unlocks at, or a zombie wave.
+- Click a defense and press **Move**, then click one of your squares to plan the move there.
+- Installs and moves go in the same plan queue as the Layout screen. Planned ones show on the grid and in a **Planned** list beside the yard, each with a **Cancel**.
+- Made for Survival Log 1.1.20719.
+
 ## 0.11.2
 
 - `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` now default to 1, the game's rule, so crawlers keep dodging the Mechanical Chainsaw until you lower them. A value you already saved is kept.

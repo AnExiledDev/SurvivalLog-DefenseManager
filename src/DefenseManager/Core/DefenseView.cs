@@ -38,12 +38,12 @@ public static class DefenseView
 
         var packages = (survey.Packages ?? Array.Empty<DefensePackage>()).Where(package => package.Count > 0).OrderBy(package => package.Name, StringComparer.Ordinal).Select(PackageJson);
 
-        return Json(note: null, locked, toRepair.Count, toClear, materials, rows, YardJson(survey.Yard), PowerModeJson(power?.Global, survey.IsChinese), SettingsJson(settings), packages);
+        return Json(note: null, locked, toRepair.Count, toClear, materials, rows, YardJson(survey.Yard), PowerModeJson(power?.Global, survey.IsChinese), SettingsJson(settings), packages, LayoutJson(survey));
     }
 
     /// <summary>The panel with no defenses and a note saying why, for when the game could not be read.</summary>
     public static string Empty(string note, PanelSettings? settings = null) =>
-        Json(note, locked: null, repairAll: 0, clearAll: 0, Enumerable.Empty<string>(), Enumerable.Empty<string>(), "null", "null", SettingsJson(settings), Enumerable.Empty<string>());
+        Json(note, locked: null, repairAll: 0, clearAll: 0, Enumerable.Empty<string>(), Enumerable.Empty<string>(), "null", "null", SettingsJson(settings), Enumerable.Empty<string>(), NoLayout);
 
     /// <summary>
     /// What the Layout bar draws from: the panel view's note, locked reason and two top-button counts, worked out the
@@ -95,7 +95,7 @@ public static class DefenseView
         return null;
     }
 
-    private static string Json(string? note, string? locked, int repairAll, int clearAll, IEnumerable<string> materials, IEnumerable<string> rows, string yard, string global, string settings, IEnumerable<string> packages)
+    private static string Json(string? note, string? locked, int repairAll, int clearAll, IEnumerable<string> materials, IEnumerable<string> rows, string yard, string global, string settings, IEnumerable<string> packages, string layout)
     {
         var json = new StringBuilder(4096);
 
@@ -109,9 +109,37 @@ public static class DefenseView
             .Append(",\"global\":").Append(global)
             .Append(",\"settings\":").Append(settings)
             .Append(",\"packages\":[").AppendJoin(',', packages)
-            .Append("]}");
+            .Append("],").Append(layout)
+            .Append('}');
 
         return json.ToString();
+    }
+
+    private const string NoLayout = "\"points\":null,\"buy\":{},\"plans\":[]";
+
+    /// <summary>
+    /// What buying and moving from the panel draws from: the player's Survival Points (null when unreadable), why each
+    /// square that is not the player's can't be bought (by its game name, null when it can), and the plans in the
+    /// game's plan queue with the grid square each is headed for. Ids are strings, as in the rows.
+    /// </summary>
+    private static string LayoutJson(Survey survey)
+    {
+        var yard = survey.Yard;
+        var buy = (yard?.Squares ?? Array.Empty<YardSquare>()).Where(square => !square.IsOwned)
+            .Select(square => $"{Str(square.Name)}:{Str(OutcomeMessage.WhyNotBuy(BuyCheck.Judge(survey, square), survey.IsChinese))}");
+        var plans = (survey.Plans ?? Array.Empty<QueuedPlan>()).Select(plan => PlanJson(plan, yard));
+        var points = survey.SurvivalPoints is { } have ? Num(have) : "null";
+
+        return $"\"points\":{points},\"buy\":{{{string.Join(",", buy)}}},\"plans\":[{string.Join(",", plans)}]";
+    }
+
+    private static string PlanJson(QueuedPlan plan, Yard? yard)
+    {
+        var place = yard?.Squares.FirstOrDefault(candidate => candidate.Name == plan.Square) is { } square ? yard.PlaceOf(square) : (GridPlace?)null;
+        var kind = plan.Kind == PlanKind.Move ? "move" : "install";
+
+        return $"{{\"kind\":{Str(kind)},\"id\":{Str(plan.Id.ToString(CultureInfo.InvariantCulture))},\"square\":{Str(plan.Square)}"
+            + $",\"r\":{(place is { } at ? Num(at.Row) : "null")},\"c\":{(place is { } on ? Num(on.Column) : "null")},\"name\":{Str(plan.Name)},\"icon\":{Str(plan.Icon)}}}";
     }
 
     /// <summary>A packed defense the Install list offers: how many lie in the yard and how many wait in Package Bank.</summary>
@@ -206,7 +234,7 @@ public static class DefenseView
         ? "null"
         : $"{{\"key\":{Str(settings.Key)},\"layout\":{Bool(settings.LayoutControls)},\"mode\":{Str(PowerModes.ConfigName(settings.DefaultMode))}"
             + $",\"range\":{Dec(settings.ProximityRange)},\"crawler\":{Dec(settings.CrawlerDodge)},\"armored\":{Dec(settings.ArmoredCrawlerDodge)},\"rate\":{Dec(settings.AttackRate)},\"waves\":{Bool(settings.AllowDuringWaves)}"
-            + $",\"doors\":{Bool(settings.DoorUnlocks)},\"windows\":{Bool(settings.WindowUnlocks)},\"forts\":{Bool(settings.FortificationUnlocks)}}}";
+            + $",\"doors\":{Bool(settings.DoorUnlocks)},\"windows\":{Bool(settings.WindowUnlocks)},\"forts\":{Bool(settings.FortificationUnlocks)},\"actions\":{Bool(settings.LayoutActions)}}}";
 
     private static string Dec(double value) => Math.Round(value, 2).ToString("0.##", CultureInfo.InvariantCulture);
 

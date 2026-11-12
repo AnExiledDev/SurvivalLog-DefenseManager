@@ -489,6 +489,194 @@ public class PageScriptTests
         Assert.Equal("Not on the yard grid", page.Text("document.querySelector('.dm-ihd').querySelector('small').textContent"));
     }
 
+    // ===== Buying and moving from the panel =====
+
+    private static readonly PanelSettings WithActions = Settings with { LayoutActions = true };
+
+    private static PageScript OpenWithActions(FakeGame game)
+    {
+        var page = new PageScript();
+
+        page.Open(DefenseView.Of(game.Read(), new PowerPolicy(PowerSettings.None, PowerMode.WaveOnly), game.IsChinese, WithActions) ?? throw new InvalidOperationException("no panel view"));
+
+        return page;
+    }
+
+    private static string Desc(PageScript page) => page.Text("document.querySelector('.dm-desc').textContent");
+
+    [Fact]
+    public void With_the_setting_off_the_panel_offers_no_buy_no_move_and_no_planned_list()
+    {
+        var game = Yard();
+        game.Plans.Add(new QueuedPlan(PlanKind.Move, 3, "d", "Defense 3", null));
+        var page = new PageScript();
+        page.Open(YardView(game));
+
+        Assert.Equal("0", Count(page, ".dm-plist"));
+        Assert.Equal("0", Count(page, ".dm-cell.dm-plan"));
+
+        page.Click("panelButtonWith('cell', '2:3')");
+
+        Assert.False(page.Is("panelButton('askbuy')"));
+
+        page.Click("panelButtonWith('pick', '2')");
+
+        Assert.False(page.Is("panelButton('startmove')"));
+    }
+
+    [Fact]
+    public void Buying_a_square_says_its_price_and_the_points_and_asks_once_before_it_spends()
+    {
+        var page = OpenWithActions(Yard());
+
+        page.Click("panelButtonWith('cell', '2:3')");
+
+        Assert.Equal("It costs 50 Survival Points. You have 100.", Desc(page));
+
+        page.Click("panelButton('askbuy')");
+
+        Assert.Equal("Spend 50 Survival Points on this square?", Desc(page));
+        Assert.Empty(page.Sent);
+
+        page.Click("panelButton('buy')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.Buy("f") }, page.Sent);
+    }
+
+    [Fact]
+    public void Saying_no_to_the_question_spends_nothing_and_goes_back_to_the_price()
+    {
+        var page = OpenWithActions(Yard());
+
+        page.Click("panelButtonWith('cell', '2:3')");
+        page.Click("panelButton('askbuy')");
+        page.Click("panelButton('nobuy')");
+
+        Assert.Equal("It costs 50 Survival Points. You have 100.", Desc(page));
+        Assert.Empty(page.Sent);
+    }
+
+    [Fact]
+    public void A_square_the_player_cannot_pay_for_has_buy_greyed_with_the_reason_under_it()
+    {
+        var game = Yard();
+        game.SurvivalPoints = 10;
+        var page = OpenWithActions(game);
+
+        page.Click("panelButtonWith('cell', '2:3')");
+        page.Click("panelButton('askbuy')");
+
+        Assert.True(page.Is("panelButton('askbuy').disabled"));
+        Assert.Equal("Not enough Survival Points, you have 10", page.Text("document.querySelector('.dm-why').textContent"));
+        Assert.Equal("It costs 50 Survival Points. You have 10.", Desc(page));
+        Assert.Empty(page.Sent);
+    }
+
+    [Fact]
+    public void Move_then_a_square_sends_the_defense_and_that_square()
+    {
+        var page = OpenWithActions(Yard());
+
+        page.Click("panelButtonWith('pick', '2')");
+        page.Click("panelButton('startmove')");
+
+        Assert.Equal("Click one of your squares to move Defense 2 there.", page.Text("document.querySelector('.dm-hint').textContent"));
+        Assert.Equal("Stop moving", page.Text("panelButton('stopmove').textContent"));
+        Assert.Empty(page.Sent);
+
+        page.Click("panelButtonWith('cell', '2:1')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.Move(2, "d") }, page.Sent);
+        Assert.Equal("Click a defense, a row number or a square", page.Text("document.querySelector('.dm-hint').textContent"));
+    }
+
+    [Fact]
+    public void Moving_onto_another_defense_or_a_square_not_yours_is_sent_for_the_game_and_the_plugin_to_answer()
+    {
+        var page = OpenWithActions(Yard());
+
+        page.Click("panelButtonWith('pick', '2')");
+        page.Click("panelButton('startmove')");
+        page.Click("panelButtonWith('pick', '3')");
+        page.Status("Moving Defense 2.");
+        page.Click("panelButton('startmove')");
+        page.Click("panelButtonWith('cell', '2:3')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.Move(2, "e"), new PageCommand.Move(2, "f") }, page.Sent);
+    }
+
+    [Fact]
+    public void Clicking_the_moving_defense_or_stop_moving_lets_the_move_go_without_sending_anything()
+    {
+        var page = OpenWithActions(Yard());
+
+        page.Click("panelButtonWith('pick', '2')");
+        page.Click("panelButton('startmove')");
+        page.Click("panelButtonWith('pick', '2')");
+
+        Assert.True(page.Is("panelButton('startmove')"));
+
+        page.Click("panelButton('startmove')");
+        page.Click("panelButton('stopmove')");
+        page.Click("panelButtonWith('cell', '2:1')");
+
+        Assert.Empty(page.Sent);
+    }
+
+    [Fact]
+    public void A_planned_move_shows_on_its_square_and_in_the_planned_list_and_its_cancel_sends_the_plan()
+    {
+        var game = Yard();
+        game.Plans.Add(new QueuedPlan(PlanKind.Move, 3, "d", "Defense 3", null));
+        var page = OpenWithActions(game);
+
+        Assert.True(page.Is("panelButtonWith('cell', '2:1').classList.contains('dm-plan')"));
+        Assert.Equal("Move Defense 3 to row 2, square 1", page.Text("document.querySelector('.dm-plist').querySelector('small').textContent"));
+
+        page.Click("panelButtonWith('cancel', 'move|3')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.Cancel(PlanKind.Move, 3) }, page.Sent);
+    }
+
+    [Fact]
+    public void A_defense_with_a_move_planned_has_move_greyed_and_says_why()
+    {
+        var game = Yard();
+        game.Plans.Add(new QueuedPlan(PlanKind.Move, 3, "d", "Defense 3", null));
+        var page = OpenWithActions(game);
+
+        page.Click("panelButtonWith('pick', '3')");
+
+        Assert.True(page.Is("panelButton('startmove').disabled"));
+        Assert.Equal("A move is planned already. Cancel it under Planned to pick a new square.", page.Text("document.querySelector('.dm-why').textContent"));
+    }
+
+    [Fact]
+    public void In_a_wave_move_is_greyed_but_a_plan_can_still_be_cancelled()
+    {
+        var game = Yard();
+        game.IsWaveLocked = true;
+        game.Plans.Add(new QueuedPlan(PlanKind.Install, 900, "b", "Spikes", null));
+        var page = OpenWithActions(game);
+
+        page.Click("panelButtonWith('cancel', 'install|900')");
+        page.Click("panelButtonWith('pick', '2')");
+
+        Assert.True(page.Is("panelButton('startmove').disabled"));
+        Assert.Equal(new PageCommand[] { new PageCommand.Cancel(PlanKind.Install, 900) }, page.Sent);
+    }
+
+    [Fact]
+    public void The_settings_tab_turns_buying_and_moving_on()
+    {
+        var page = OpenYard();
+
+        page.Click("panelButtonWith('tab', 'settings')");
+        page.Click("panelButtonWith('set', 'layoutactions|1')");
+
+        Assert.Equal(new PageCommand[] { new PageCommand.Setting(new SettingChange.LayoutActions(true)) }, page.Sent);
+    }
+
     // ===== Refreshing the open panel =====
 
     /// <summary>A view as the plugin sends it: trimmed to the rows the page does not hold yet, and then held by it.</summary>

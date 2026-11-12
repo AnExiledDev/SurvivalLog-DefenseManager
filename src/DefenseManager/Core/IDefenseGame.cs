@@ -33,6 +33,21 @@ public interface IDefenseGame
     /// does. False when the game refused; it then shows its own reason on screen.
     /// </summary>
     bool TryInstall(long bagId, string square);
+
+    /// <summary>
+    /// Buys the yard square with Survival Points through the game's purchase, which makes its own checks. True only
+    /// when the square is the player's afterwards.
+    /// </summary>
+    bool TryBuy(string square);
+
+    /// <summary>
+    /// Has the character move the defense to the yard square, as picking a defense and then a square in the game's
+    /// Layout screen does. False when the game refused; it then shows its own reason on screen.
+    /// </summary>
+    bool TryMove(long defenseId, string square);
+
+    /// <summary>Takes an install or move out of the game's plan queue and the character's actions. False when it is not there or that failed.</summary>
+    bool TryCancel(PlanKind kind, long id);
 }
 
 /// <summary>What <see cref="IDefenseGame.TakeOutOfBank"/> answers when no package came out.</summary>

@@ -18,7 +18,8 @@ public sealed record RepairStamina(float Have, int NeededToStart);
 /// whether the character is at home where the defenses are, their stamina (null when it could not be read), and
 /// whether the game is showing Chinese, which the words the press ends with follow, and the yard's grid of defense
 /// squares (null when it could not be read), the defense packages waiting to be installed, and whether an install is
-/// already under way (the game runs one at a time).
+/// already under way (the game runs one at a time). SurvivalPoints and DefenseLevel are what buying a yard square is
+/// judged on, null when they could not be read; Plans are the installs and moves waiting in the game's plan queue.
 /// </summary>
 public sealed record Survey(
     IReadOnlyList<Defense> Defenses,
@@ -31,7 +32,10 @@ public sealed record Survey(
     bool IsChinese = false,
     Yard? Yard = null,
     IReadOnlyList<DefensePackage>? Packages = null,
-    bool IsInstalling = false)
+    bool IsInstalling = false,
+    int? SurvivalPoints = null,
+    int? DefenseLevel = null,
+    IReadOnlyList<QueuedPlan>? Plans = null)
 {
     /// <summary>A material the game did not describe is still named, so a message never shows a bare id alone.</summary>
     public string MaterialName(int itemId) => Materials.TryGetValue(itemId, out var material) ? material.Name : Texts.UnnamedItem.Say(IsChinese, itemId);
@@ -48,6 +52,19 @@ public sealed record DefensePackage(int ConfigId, string Name, string? Icon, IRe
 {
     public int Count => YardBags.Count + Banked;
 }
+
+/// <summary>The two kinds of plan the game's Layout screen queues: a packed defense to install, a standing one to move.</summary>
+public enum PlanKind
+{
+    Install,
+    Move,
+}
+
+/// <summary>
+/// One plan in the game's plan queue: its kind, the id the game keys it by (the package for an install, the defense
+/// for a move), the yard square it is headed for, and the defense's name and picture.
+/// </summary>
+public sealed record QueuedPlan(PlanKind Kind, long Id, string Square, string Name, string? Icon);
 
 /// <summary>The game's defenses for one press, or why they could not be read.</summary>
 public abstract record DefenseRead

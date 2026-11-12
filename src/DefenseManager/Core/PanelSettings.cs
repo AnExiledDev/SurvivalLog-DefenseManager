@@ -7,6 +7,7 @@ namespace DefenseManager.Core;
 /// The config values the panel's Settings tab shows. Key is the panel key's name, "" for none. AttackRate is how often
 /// defense devices strike. AllowDuringWaves lets defenses be repaired, removed, installed and
 /// moved while a zombie wave is on. The three Unlocks give the door, window and fortification upgrades from day one.
+/// LayoutActions lets the panel buy yard squares and queue installs and moves through the game's plan queue, the one the Layout screen uses.
 /// </summary>
 public sealed record PanelSettings(
     string Key,
@@ -19,7 +20,8 @@ public sealed record PanelSettings(
     bool AllowDuringWaves = false,
     bool DoorUnlocks = false,
     bool WindowUnlocks = false,
-    bool FortificationUnlocks = false);
+    bool FortificationUnlocks = false,
+    bool LayoutActions = false);
 
 /// <summary>
 /// One change from the Settings tab. The page sends a setting's name and the value it wants; a number is pulled into
@@ -52,6 +54,8 @@ public abstract record SettingChange
 
     public sealed record Unlock(UnlockGroup Group, bool IsOn) : SettingChange;
 
+    public sealed record LayoutActions(bool IsOn) : SettingChange;
+
     /// <summary>The change a setting's name and value stand for, or null for a name or value that does not parse.</summary>
     public static SettingChange? Parse(string name, string value) => name switch
     {
@@ -70,6 +74,7 @@ public abstract record SettingChange
         "doorunlock" => OnOff(value, isOn => new Unlock(UnlockGroup.Doors, isOn)),
         "windowunlock" => OnOff(value, isOn => new Unlock(UnlockGroup.Windows, isOn)),
         "fortunlock" => OnOff(value, isOn => new Unlock(UnlockGroup.Fortifications, isOn)),
+        "layoutactions" => OnOff(value, isOn => new LayoutActions(isOn)),
         "defaultmode" => PowerModes.Parse(value) is { } mode ? new DefaultMode(mode) : null,
         "proximityrange" => TryNumber(value, out var meters) ? new ProximityRange((float)Math.Round(Math.Clamp(meters, RangeMin, RangeMax))) : null,
         "crawlerdodge" => TryNumber(value, out var chance) ? new CrawlerDodge(Stepped(chance, DodgeStep, 0f, 1f)) : null,

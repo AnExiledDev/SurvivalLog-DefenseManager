@@ -1,5 +1,5 @@
 Name: Defense Manager
-Summary: Repair every damaged trap and barricade in one press, clear all the broken ones in another, or handle them one by one on a grid of your yard, in a panel opened from a HUD button. Electrical defenses switch on only when zombies show up, and you can set how often crawlers dodge the chainsaw. Repair all is on the Layout screen too.
+Summary: Repair every damaged trap and barricade in one press, clear all the broken ones in another, or handle them one by one on a grid of your yard, in a panel opened from a HUD button. Electrical defenses switch on only when zombies show up, crawlers can be hit by the chainsaw, and an option lets you buy squares and move defenses from the panel.
 
 Description (BBCode):
 [center][img]https://sldb.core-directive.com/media/save/2-changes-stay.png[/img][/center]
@@ -13,6 +13,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Your yard as a grid[/b]: every square of the yard, row by row out from the house, with each defense on its square, colored by its state. Squares you have not unlocked show their Survival Points price.[/*]
 [*][b]Click to act[/b]: click a defense for its condition, repair cost, Repair and Remove, and its power mode. Click a row number and [b]Repair row[/b] repairs everything in that row.[/*]
 [*][b]Install from the panel[/b]: click an empty square of yours to list the defense packages in your yard and, with [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 or newer, in the bank. [b]Install[/b] puts one on that square, the game's install.[/*]
+[*][b]Buy and move from the panel[/b]: an option, off by default. Click a square that is not yours to buy it with Survival Points, after one question. When you can't buy it yet, the panel says why: not enough points, a Defense level you have not reached, or a zombie wave. Click a defense, press [b]Move[/b], then click the square it should go to. Installs and moves go in the same plan queue as the Layout screen, show on the grid, and are listed under [b]Planned[/b] with a [b]Cancel[/b] for each.[/*]
 [*][b]Work during waves[/b]: an option, off by default, that lets you repair, remove, install and move defenses during a zombie wave. Robot repairs and expeditions still wait.[/*]
 [*][b]Unlocks from day one[/b]: three options, off by default, give the door upgrades (Advanced Repair, Advanced Reinforce), the window upgrades (Advanced Repair, Advanced Reinforce, Reinforce Window) and Reinforce Fortifications from the first day of a story run, with the recipes they use, instead of on days 2, 5, 13, 14 and 54. Turning one off takes back what the mod gave, never what the game has given by then.[/*]
 [*][b]Repairs list[/b]: every defense that needs repair, worst first, under Repair all.[/*]
@@ -24,7 +25,7 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Game's actions[/b]: repairs and removals join the end of your action queue, so your own queued actions run first.[/*]
 [*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them on during waves and while zombies are at the base, and off otherwise, [b]Proximity[/b] turns them on while a zombie is in range (15 m by default) and off after 10 game minutes with none, [b]Always on[/b] keeps them on, and [b]Default[/b] leaves them to the game's switch.[/*]
 [*][b]Per defense, per type, or for all[/b]: pick a mode for one defense when you click it, or for every defense of a type on the [b]Power[/b] tab. Anything without a setting follows its type, and a type without one follows the global mode (Wave only unless you change it).[/*]
-[*][b]Settings tab[/b]: change the Layout screen buttons, the global power mode, the Proximity range, the crawler dodge chances, the device attack rate, Work during waves and the Unlocks right in the panel.[/*]
+[*][b]Settings tab[/b]: change the Layout screen buttons, the global power mode, the Proximity range, the crawler dodge chances, the device attack rate, Work during waves, Buy and move from the panel and the Unlocks right in the panel.[/*]
 [*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. Set the chance for each kind of crawler in the config: 0.25 makes them dodge it only a quarter of the time. It starts at the game's 100%.[/*]
 [*][b]UI size[/b]: with Exiled's Toolkit 0.10.0 or newer, its UI size setting draws the panel bigger or smaller, as far as it still fits on the screen. With 0.11.0 or newer, Defense Manager's own UiScale setting can set a size for this mod alone.[/*]
 [/list]
@@ -103,6 +104,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*][b]空地网格[/b]：按从房子往外一行一行显示空地的每个格子，每个防御设施放在它所在的格子上，颜色表示它的状态。还没解锁的格子会显示它的生存点价格。[/*]
 [*][b]点击即可操作[/b]：点击防御设施可查看耐久、修理费用、「修理」和「拆除」以及供电模式。点击行号后，「修理第 n 行」会修理这一行的全部防御设施。[/*]
 [*][b]在面板中安装[/b]：点击属于你的空格子，会列出院子里的防御设施包裹；安装了 [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 或更新版本时，还会列出仓库里的。「安装」会把它装到这个格子上，用的是游戏自己的安装。[/*]
+[*][b]在面板中购买和移动[/b]：一个默认关闭的选项。点击还不属于你的格子，确认一次后就能用生存点买下。暂时买不了时会显示原因：生存点不够、防御等级不够，或者尸潮正在进行。点击防御设施，按「移动」，再点击要放的格子。安装和移动与「规划模式」使用同一个计划队列，会显示在网格上，并列在「计划」下，每项都有「取消」。[/*]
 [*][b]尸潮期间操作[/b]：一个默认关闭的选项，开启后可在尸潮期间修理、拆除、安装和移动防御设施。机器人修理和外出探索仍需等尸潮结束。[/*]
 [*][b]第一天起解锁[/b]：三个默认关闭的选项，可在剧情模式第一天起就提供门的升级（「高级修理」「高级加固」）、窗户的升级（「高级修理」「高级加固」「加固窗户」）和「强化加固」，以及它们所需的配方，而不用等到第 2、5、13、14 和 54 天。关闭后会收回本模组提供的内容，游戏届时已经提供的不会收回。[/*]
 [*][b]待修理列表[/b]：「全部修理」下方按损坏程度从重到轻列出每个需要修理的防御设施。[/*]
@@ -114,7 +116,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*][b]使用游戏自己的行动[/b]：修理和拆除会排到你的行动队列末尾，你自己排好的行动先执行。[/*]
 [*][b]供电模式[/b]：模组会替你切换电力防御设施。[b]仅尸潮[/b]在尸潮期间和基地有僵尸时开启，其余时间关闭；[b]僵尸靠近[/b]在有僵尸进入范围（默认 15 米）时开启，连续 10 分钟游戏时间没有僵尸后关闭；[b]常开[/b]一直开启；[b]默认[/b]交给游戏自己的开关。[/*]
 [*][b]单个、同类或全部[/b]：点击防御设施可以单独设置它的模式，在「供电」标签页可以设置同类的全部。没有单独设置的跟随它的类型，类型也没有设置的跟随全局模式（默认是仅尸潮）。[/*]
-[*][b]「设置」标签页[/b]：直接在面板里修改「规划模式」界面按钮、全局供电模式、靠近触发的范围、爬行者闪避概率、防御设施攻击频率、「尸潮期间操作」和三个提前解锁选项。[/*]
+[*][b]「设置」标签页[/b]：直接在面板里修改「规划模式」界面按钮、全局供电模式、靠近触发的范围、爬行者闪避概率、防御设施攻击频率、「尸潮期间操作」「在面板中购买和移动」和三个提前解锁选项。[/*]
 [*][b]电锯能打到爬行者[/b]：原版游戏中爬行者总能闪避「机械电锯」。每种爬行者的闪避概率都可以在配置里设置：设为 0.25 则只有四分之一的时间能闪避。默认保持游戏原本的 100%。[/*]
 [*][b]界面大小[/b]：安装 Exiled's Toolkit 0.10.0 或更新版本后，可以用它的界面大小设置放大或缩小面板，最大放到面板仍能完整显示在屏幕上为止。0.11.0 或更新版本还可以用 Defense Manager 自己的 UiScale 设置单独调整本模组的大小。[/*]
 [/list]

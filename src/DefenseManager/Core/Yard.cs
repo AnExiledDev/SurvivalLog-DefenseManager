@@ -7,9 +7,9 @@ namespace DefenseManager.Core;
 /// <summary>
 /// One square of the home's defense grid, from the game's map slots: its slot name, its row (1 against the house, the
 /// highest at the road side), its centre on the ground, whether the player owns it, and the Survival Points it costs
-/// when they do not.
+/// when they do not, and the Defense level the game asks before it lets the player buy it (0 when it asks none).
 /// </summary>
-public sealed record YardSquare(string Name, int Row, double X, double Z, bool IsOwned, int Price);
+public sealed record YardSquare(string Name, int Row, double X, double Z, bool IsOwned, int Price, int RequiredLevel = 0);
 
 public enum WallFeatureKind
 {

@@ -19,7 +19,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.11.2";
+    private const string Version = "0.12.0";
     private const string PowerFileName = Guid + ".power.txt";
 
     /// <summary>Exiled's Toolkit: its shared helpers, toasts, live settings, UI size and typing check all come from it.</summary>
@@ -77,11 +77,14 @@ public sealed class Plugin : BasePlugin
             "Give the Reinforce Fortifications option on doors and windows, with the Fortification Reinforcement Components recipe, from the first day of a story run. The base game gives it on day 54. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
             "在剧情模式开局第一天就提供门窗的「强化加固」选项，以及「强化加固件」配方。原版游戏在第 54 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
             null, WorldRule.Tag));
+        var layoutActions = Config.Bind("Panel", "LayoutActions", false,
+            "Let the panel's Yard tab buy squares with Survival Points, move defenses to other squares and cancel planned installs and moves. These go in the same plan queue as the game's Layout screen, so it shows them too. The game's checks still apply: the Defense level a square needs, the Survival Points it costs and the wave lock. Off by default.\n" +
+            "允许在面板的「空地」标签中用生存点购买格子、把防御设施移动到别的格子，以及取消计划中的安装和移动。这些和游戏的「规划模式」使用同一个计划队列，所以「规划模式」里也会显示。游戏的检查照常生效：格子需要的防御等级、所需的生存点和尸潮锁定。默认关闭。");
         var log = new ModLog(Log, LogFileName);
         var hooks = new PatchKit(new Harmony(Guid), log.Write);
         var powerSlot = new PowerSlot(new PowerFileOnDisk(Path.Combine(Paths.ConfigPath, PowerFileName), log.Write));
         var power = new PowerSession(new GamePower(log.Write), powerSlot, log.Write);
-        var config = new PanelConfig(panelKey, layoutControls, defaultModeName, proximityRange, crawlerDodge, armoredCrawlerDodge, attackRateEntry, allowDuringWaves, doorUnlocks, windowUnlocks, fortificationUnlocks);
+        var config = new PanelConfig(panelKey, layoutControls, defaultModeName, proximityRange, crawlerDodge, armoredCrawlerDodge, attackRateEntry, allowDuringWaves, doorUnlocks, windowUnlocks, fortificationUnlocks, layoutActions);
         var unlocks = new UnlockSession(log.Write);
         var session = new DefenseSession(new GameDefenses(log.Write), power, new DefensePage(log.Write), config, log.Write);
 
@@ -111,7 +114,11 @@ public sealed class Plugin : BasePlugin
             log.Write($"unlocks from day one: doors {(wanted.Doors ? "on" : "off")}, windows {(wanted.Windows ? "on" : "off")}, fortifications {(wanted.Fortifications ? "on" : "off")}");
         };
 
+        // Every buy, move and cancel press reads the setting, and the panel's next redraw shows or hides its buttons.
+        config.ApplyActions = () => log.Write($"buy and move from the panel {(config.LayoutActions ? "on" : "off")}");
+
         LiveSettings.Watch(config.ApplyControls, panelKey, layoutControls);
+        LiveSettings.Watch(config.ApplyActions, layoutActions);
         LiveSettings.Watch(config.ApplyPower, defaultModeName, proximityRange);
         LiveSettings.Watch(config.ApplyDodge, crawlerDodge, armoredCrawlerDodge);
         LiveSettings.Watch(config.ApplyRate, attackRateEntry);

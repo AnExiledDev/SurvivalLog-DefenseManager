@@ -11,7 +11,8 @@ namespace DefenseManager.Adapters;
 /// Reads the home yard's defense grid. The squares are the map slots named HomeBuildingTowerPos (slot type 10, row in
 /// TowerRow), each standing at the point of the same name in the current map's BuildingNodeMap. A square is the
 /// player's when the game's TowerDefenseTagConstants.IsTowerSlotUnlocked says so; one with no unlock tag always
-/// is. Its price is the TowerRingCost global setting for the ring its tag names. The door and window are the house
+/// is. Its price is the TowerRingCost global setting for the ring its tag names, and the Defense level it needs is
+/// GameKey.TowerSlotRequiredDefenseLevelOf. The door and window are the house
 /// slots HomeBuildingPos07 and HomeBuildingPos08. Squares and points never change during a game, so they are read
 /// once. Who owns which square is read each time, but only for squares not yet owned: a square once bought stays
 /// bought for the rest of that load, so it is asked about again only after a load. While no square changes hands the
@@ -25,7 +26,7 @@ internal sealed class GameYard
     private const string WindowSlot = "HomeBuildingPos08";
 
     private readonly Action<string> _log;
-    private List<(string Name, int Row, double X, double Z, string Tag, int Price)>? _squares;
+    private List<(string Name, int Row, double X, double Z, string Tag, int Price, int Level)>? _squares;
     private List<WallFeature> _wall = new();
     private bool _reportedFailure;
 
@@ -82,7 +83,7 @@ internal sealed class GameYard
             for (var i = 0; i < squares.Count; i++)
             {
                 var square = squares[i];
-                owned[i] = new YardSquare(square.Name, square.Row, square.X, square.Z, _owned[i], square.Price);
+                owned[i] = new YardSquare(square.Name, square.Row, square.X, square.Z, _owned[i], square.Price, square.Level);
             }
 
             return _yard = new Yard(owned, _wall);
@@ -98,14 +99,14 @@ internal sealed class GameYard
     }
 
     /// <summary>Null when the current map has no tower points, as on an expedition, so it is read again at home.</summary>
-    private List<(string, int, double, double, string, int)>? ReadSquares(ConfigManager config)
+    private List<(string, int, double, double, string, int, int)>? ReadSquares(ConfigManager config)
     {
         var points = config.customCache?.MapConfig?.BuildingNodeMap;
         var slots = config._Config_MapSlot_Dict;
 
         if (points == null || slots == null) return null;
 
-        var squares = new List<(string, int, double, double, string, int)>();
+        var squares = new List<(string, int, double, double, string, int, int)>();
 
         foreach (var slot in slots.Values)
         {
@@ -114,7 +115,7 @@ internal sealed class GameYard
 
             var tag = slot.UnlockTag ?? "";
 
-            squares.Add((slot.Name, slot.TowerRow, point.x, point.z, tag, tag.Length == 0 ? 0 : Price(config, tag)));
+            squares.Add((slot.Name, slot.TowerRow, point.x, point.z, tag, tag.Length == 0 ? 0 : Price(config, tag), GameKey.TowerSlotRequiredDefenseLevelOf(slot.Name)));
         }
 
         if (squares.Count == 0) return null;

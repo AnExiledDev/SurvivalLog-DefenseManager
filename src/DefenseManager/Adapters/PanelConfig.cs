@@ -22,6 +22,7 @@ internal sealed class PanelConfig
     private readonly ConfigEntry<bool> _doorUnlocks;
     private readonly ConfigEntry<bool> _windowUnlocks;
     private readonly ConfigEntry<bool> _fortificationUnlocks;
+    private readonly ConfigEntry<bool> _layoutActions;
 
     public PanelConfig(
         ConfigEntry<KeyCode> panelKey,
@@ -34,7 +35,8 @@ internal sealed class PanelConfig
         ConfigEntry<bool> allowDuringWaves,
         ConfigEntry<bool> doorUnlocks,
         ConfigEntry<bool> windowUnlocks,
-        ConfigEntry<bool> fortificationUnlocks)
+        ConfigEntry<bool> fortificationUnlocks,
+        ConfigEntry<bool> layoutActions)
     {
         _panelKey = panelKey;
         _layoutControls = layoutControls;
@@ -47,6 +49,7 @@ internal sealed class PanelConfig
         _doorUnlocks = doorUnlocks;
         _windowUnlocks = windowUnlocks;
         _fortificationUnlocks = fortificationUnlocks;
+        _layoutActions = layoutActions;
     }
 
     /// <summary>Set by the plugin: puts the controls, power, dodge, attack rate, wave and unlock values in use, as at start-up.</summary>
@@ -62,6 +65,8 @@ internal sealed class PanelConfig
 
     public Action ApplyUnlocks { get; set; } = () => { };
 
+    public Action ApplyActions { get; set; } = () => { };
+
     public KeyCode PanelKey => _panelKey.Value;
 
     public bool LayoutControls => _layoutControls.Value;
@@ -71,6 +76,8 @@ internal sealed class PanelConfig
     public float ProximityRange => _proximityRange.Value;
 
     public bool AllowDuringWaves => _allowDuringWaves.Value;
+
+    public bool LayoutActions => _layoutActions.Value;
 
     public UnlockSettings Unlocks => new(_doorUnlocks.Value, _windowUnlocks.Value, _fortificationUnlocks.Value);
 
@@ -89,7 +96,8 @@ internal sealed class PanelConfig
         _allowDuringWaves.Value,
         _doorUnlocks.Value,
         _windowUnlocks.Value,
-        _fortificationUnlocks.Value);
+        _fortificationUnlocks.Value,
+        _layoutActions.Value);
 
     /// <summary>Saves the change, puts it in use and returns the status line for it.</summary>
     public string Apply(SettingChange change, bool isChinese)
@@ -123,6 +131,10 @@ internal sealed class PanelConfig
             case SettingChange.Unlock unlock:
                 Entry(unlock.Group).Value = unlock.IsOn;
                 ApplyUnlocks();
+                break;
+            case SettingChange.LayoutActions actions:
+                _layoutActions.Value = actions.IsOn;
+                ApplyActions();
                 break;
             case SettingChange.AttackRate rate:
                 _attackRate.Value = rate.Rate;

@@ -62,6 +62,28 @@ internal sealed class FakeGame : IDefenseGame
     /// <summary>Every install the game took: the package and the square.</summary>
     public List<(long BagId, string Square)> Installed { get; } = new();
 
+    /// <summary>The player's Survival Points and Defense level; null when the game could not report them.</summary>
+    public int? SurvivalPoints { get; set; } = 100;
+
+    public int? DefenseLevel { get; set; } = 1;
+
+    /// <summary>The installs and moves waiting in the game's plan queue.</summary>
+    public List<QueuedPlan> Plans { get; } = new();
+
+    /// <summary>The game's purchase, move or cancel refuses everything.</summary>
+    public bool RefusesBuy { get; set; }
+
+    public bool RefusesMove { get; set; }
+
+    public bool RefusesCancel { get; set; }
+
+    /// <summary>Every square the game sold, every move it took and every plan it cancelled.</summary>
+    public List<string> Bought { get; } = new();
+
+    public List<(long DefenseId, string Square)> Moved { get; } = new();
+
+    public List<(PlanKind Kind, long Id)> Cancelled { get; } = new();
+
     /// <summary>The furniture ids Package Bank was asked to take out.</summary>
     public List<int> TakenOut { get; } = new();
 
@@ -138,7 +160,7 @@ internal sealed class FakeGame : IDefenseGame
         var defenses = Defenses.Select(defense => defense with { IsRepairQueued = queue.Contains(new Act(Job.Repair, defense.Id)), IsRemovalQueued = queue.Contains(new Act(Job.Remove, defense.Id)) }).ToList();
         var materials = Stock.ToDictionary(entry => entry.Key, entry => new Material(NameOf(entry.Key), null, entry.Value));
 
-        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina, IsChinese, Yard, Packages.ToList(), IsInstalling));
+        return new DefenseRead.Ready(new Survey(defenses, Character, materials, WhatStartDoes(), IsWaveLocked, IsHome, Stamina, IsChinese, Yard, Packages.ToList(), IsInstalling, SurvivalPoints, DefenseLevel, Plans.ToList()));
     }
 
     /// <summary>Like the game's queue, this takes any job it is handed, whatever the materials or the repair check say.</summary>
@@ -175,6 +197,33 @@ internal sealed class FakeGame : IDefenseGame
         if (RefusesInstall) return false;
 
         Installed.Add((bagId, square));
+
+        return true;
+    }
+
+    public bool TryBuy(string square)
+    {
+        if (RefusesBuy) return false;
+
+        Bought.Add(square);
+
+        return true;
+    }
+
+    public bool TryMove(long defenseId, string square)
+    {
+        if (RefusesMove) return false;
+
+        Moved.Add((defenseId, square));
+
+        return true;
+    }
+
+    public bool TryCancel(PlanKind kind, long id)
+    {
+        if (RefusesCancel) return false;
+
+        Cancelled.Add((kind, id));
 
         return true;
     }

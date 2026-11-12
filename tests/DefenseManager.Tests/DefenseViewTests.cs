@@ -321,6 +321,50 @@ public class DefenseViewTests
     }
 
     [Fact]
+    public void The_view_carries_the_players_points_and_why_each_square_for_sale_cannot_be_bought()
+    {
+        var view = View(WithYard(Array.Empty<Defense>()) with { SurvivalPoints = 3, DefenseLevel = 1 });
+        var buy = view.GetProperty("buy").EnumerateObject().ToList();
+
+        Assert.Equal(3, view.GetProperty("points").GetInt32());
+        Assert.Equal("E", Assert.Single(buy).Name);
+        Assert.Equal("Not enough Survival Points, you have 3", buy[0].Value.GetString());
+    }
+
+    [Fact]
+    public void A_square_the_player_can_buy_has_no_reason()
+    {
+        var buy = View(WithYard(Array.Empty<Defense>()) with { SurvivalPoints = 5, DefenseLevel = 1 }).GetProperty("buy");
+
+        Assert.Equal(JsonValueKind.Null, buy.GetProperty("E").ValueKind);
+    }
+
+    [Fact]
+    public void Each_planned_install_and_move_carries_its_grid_square_and_its_id_as_a_string()
+    {
+        var plans = new[] { new QueuedPlan(PlanKind.Move, 41, "E", "Spikes", "s.png"), new QueuedPlan(PlanKind.Install, 900, "gone", "Tesla coil", null) };
+        var view = View(WithYard(Array.Empty<Defense>()) with { Plans = plans }).GetProperty("plans").EnumerateArray().ToList();
+
+        Assert.Equal("move", view[0].GetProperty("kind").GetString());
+        Assert.Equal("41", view[0].GetProperty("id").GetString());
+        Assert.Equal(2, view[0].GetProperty("r").GetInt32());
+        Assert.Equal(2, view[0].GetProperty("c").GetInt32());
+        Assert.Equal("Spikes", view[0].GetProperty("name").GetString());
+        Assert.Equal("install", view[1].GetProperty("kind").GetString());
+        Assert.Equal(JsonValueKind.Null, view[1].GetProperty("r").ValueKind);
+    }
+
+    [Fact]
+    public void An_empty_panel_has_no_points_nothing_for_sale_and_no_plans()
+    {
+        var view = JsonDocument.Parse(DefenseView.Empty("Load a game first.")).RootElement;
+
+        Assert.Equal(JsonValueKind.Null, view.GetProperty("points").ValueKind);
+        Assert.Empty(view.GetProperty("buy").EnumerateObject());
+        Assert.Empty(view.GetProperty("plans").EnumerateArray());
+    }
+
+    [Fact]
     public void Without_a_grid_the_view_says_so()
     {
         Assert.Equal(JsonValueKind.Null, View(SurveyOf(new[] { Def(1) })).GetProperty("yard").ValueKind);
@@ -342,5 +386,6 @@ public class DefenseViewTests
         Assert.False(view.GetProperty("doors").GetBoolean());
         Assert.True(view.GetProperty("windows").GetBoolean());
         Assert.False(view.GetProperty("forts").GetBoolean());
+        Assert.False(view.GetProperty("actions").GetBoolean());
     }
 }

@@ -51,6 +51,15 @@ public class PageCommandTests
     }
 
     [Fact]
+    public void A_buy_carries_the_square_a_move_the_defense_and_the_square_and_a_cancel_the_plan()
+    {
+        Assert.Equal(new PageCommand.Buy("TowerSlot_2_3"), PageCommand.Parse("slmod|defensemanager|buy|TowerSlot_2_3"));
+        Assert.Equal(new PageCommand.Move(41, "TowerSlot_1_2"), PageCommand.Parse("slmod|defensemanager|move|41|TowerSlot_1_2"));
+        Assert.Equal(new PageCommand.Cancel(PlanKind.Install, 900), PageCommand.Parse("slmod|defensemanager|cancel|install|900"));
+        Assert.Equal(new PageCommand.Cancel(PlanKind.Move, 41), PageCommand.Parse("slmod|defensemanager|cancel|move|41"));
+    }
+
+    [Fact]
     public void A_settings_change_carries_the_setting_and_its_value()
     {
         Assert.Equal(new PageCommand.Setting(new SettingChange.LayoutControls(false)), PageCommand.Parse("slmod|defensemanager|set|layoutcontrols|0"));
@@ -86,6 +95,16 @@ public class PageCommandTests
     [InlineData("slmod|defensemanager|install|s1|-5")]
     [InlineData("slmod|defensemanager|install|s1|tesla")]
     [InlineData("slmod|defensemanager|install|s1|36001|2")]
+    [InlineData("slmod|defensemanager|buy")]
+    [InlineData("slmod|defensemanager|buy|")]
+    [InlineData("slmod|defensemanager|buy|s1|s2")]
+    [InlineData("slmod|defensemanager|move|x|s1")]
+    [InlineData("slmod|defensemanager|move|7|")]
+    [InlineData("slmod|defensemanager|move|7")]
+    [InlineData("slmod|defensemanager|cancel|other|1")]
+    [InlineData("slmod|defensemanager|cancel|move|x")]
+    [InlineData("slmod|defensemanager|cancel|move")]
+    [InlineData("slmod|defensemanager|set|layoutactions|on")]
     [InlineData("slmod|defensemanager|diag|hud button placed")]
     [InlineData("slmod|unpackall|toggle")]
     public void Anything_else_is_unknown_and_kept_whole_for_the_log(string message)
