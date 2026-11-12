@@ -36,7 +36,7 @@ internal static class WaveLockPatch
     public static void Use(bool allowsWaves)
     {
         AllowsWaves = allowsWaves;
-        _log($"defense work during waves {(allowsWaves ? "allowed" : "locked as in the game")}");
+        _log($"defense work during waves {(allowsWaves ? "allowed" : "locked as usual")}");
     }
 
     private static void Hook(PatchKit hooks, Type type, string method, string what, string? prefix = null, string? postfix = null) =>
