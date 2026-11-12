@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.3
+
+- Fixed: the Yard tab showed no grid when playing as the Female College Student or the Warehouse Manager. It only knew the Wage Slave's yard.
+- The Warehouse Manager's yard wraps round a corner of the warehouse, so the grid shows that shape, with blank space where the warehouse stands. Its rows follow the lines of squares, so the row panel there doesn't say how far a row is from the house.
+- The door and window above the grid are now the ones on the wall facing the yard, in every home.
+- Made for Survival Log 1.1.20719.
+
 ## 0.12.2
 
 - Clearer wording in the log.

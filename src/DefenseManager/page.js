@@ -275,6 +275,7 @@
     '.dm-cell.dm-empty{background:rgba(255,240,210,.07);border-color:rgba(220,188,120,.22)}',
     '.dm-cell.dm-def{background:linear-gradient(180deg,rgba(74,62,48,.85),rgba(56,46,35,.85));border-color:rgba(220,188,120,.32)}',
     '.dm-cell:hover{border-color:var(--dm-accent)}',
+    '.dm-cell.dm-gap{cursor:default;pointer-events:none;background:none;border-color:transparent}',
     '.dm-ci{width:78%;height:78%;background:none;font-size:14px}',
     '.dm-cell.dm-def img{filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}',
     '.dm-cell.dm-s-damaged{border-color:var(--dm-accent);box-shadow:inset 0 0 10px rgba(255,200,58,.25)}',
@@ -854,6 +855,9 @@
     var plan = planAt(row, col);
     var marks = (state.row === row ? ' dm-inrow' : '') + (state.cell === key ? ' dm-sel' : '') + (plan ? ' dm-plan' : '') + (state.moving != null && own ? ' dm-target' : '');
 
+    // A yard that turns a corner leaves places in the grid with no square, where the house stands.
+    if (!square && !defense && !plan) return reused('c' + key, null, 'gap', function () { return el('div', 'dm-cell dm-gap'); });
+
     if (defense) return reused('c' + key, defense, marks + (state.sel === defense.id ? '|sel' : ''), function () { return defenseCell(defense, marks); });
 
     var price = square ? square.price : 0;
@@ -1119,10 +1123,14 @@
     var prices = inRow.filter(function (square) { return !square.own && square.price > 0; }).map(function (square) { return square.price; });
     var head = el('div', 'dm-ihd');
     var info = el('div');
-    var desc = say('rowInfo', list.length, mine, yardData.cols);
+    var desc = say('rowInfo', list.length, mine, inRow.length);
     var rows = el('div', 'dm-rlist');
 
-    add(info, el('b', '', say('row', row)), el('small', '', row === 1 ? say('againstHouse') : row === 2 ? say('rowOut1') : say('rowsOut', row - 1)));
+    add(info, el('b', '', say('row', row)));
+
+    // In a yard that turns a corner a row's number does not say how far it is from the house.
+    if (yardData.straight) info.appendChild(el('small', '', row === 1 ? say('againstHouse') : row === 2 ? say('rowOut1') : say('rowsOut', row - 1)));
+
     add(head, el('div', 'dm-rbig', String(row)), info);
 
     if (prices.length > 0) desc += ' ' + say('rowPrice', distinct(prices).join(' / '));

@@ -8,26 +8,28 @@ using GameCore.HotUpdate.Battle.Logic;
 namespace DefenseManager.Adapters;
 
 /// <summary>
-/// Reads the home yard's defense grid. The squares are the map slots named HomeBuildingTowerPos (slot type 10, row in
-/// TowerRow), each standing at the point of the same name in the current map's BuildingNodeMap. A square is the
+/// Reads the home yard's defense grid. The squares are the map slots of type 10 (row in TowerRow), each standing at the
+/// point of the same name in the current map's BuildingNodeMap. Every character has a home of their own (the Wage
+/// Slave's squares are HomeBuildingTowerPos, the College Student's NeighborGirlTowerPos, the Warehouse Manager's
+/// WarehouseTowerPos), all in the one slot table, and the map holds points only for the home being played, so a
+/// square with a point is one of this home's. A square is the
 /// player's when the game's TowerDefenseTagConstants.IsTowerSlotUnlocked says so; one with no unlock tag always
 /// is. Its price is the TowerRingCost global setting for the ring its tag names, and the Defense level it needs is
-/// GameKey.TowerSlotRequiredDefenseLevelOf. The door and window are the house
-/// slots HomeBuildingPos07 and HomeBuildingPos08. Squares and points never change during a game, so they are read
+/// GameKey.TowerSlotRequiredDefenseLevelOf. Doors are the slots of type 8 and windows of type 9; only those in the wall
+/// along the yard are kept. Squares and points never change during a game, so they are read
 /// once. Who owns which square is read each time, but only for squares not yet owned: a square once bought stays
 /// bought for the rest of that load, so it is asked about again only after a load. While no square changes hands the
 /// same grid is handed back.
 /// </summary>
 internal sealed class GameYard
 {
-    private const string SquarePrefix = "HomeBuildingTowerPos";
     private const int SquareType = 10;
-    private const string DoorSlot = "HomeBuildingPos07";
-    private const string WindowSlot = "HomeBuildingPos08";
+    private const int DoorType = 8;
+    private const int WindowType = 9;
 
     private readonly Action<string> _log;
     private List<(string Name, int Row, double X, double Z, string Tag, int Price, int Level)>? _squares;
-    private List<WallFeature> _wall = new();
+    private IReadOnlyList<WallFeature> _wall = Array.Empty<WallFeature>();
     private bool _reportedFailure;
 
     private bool[] _owned = Array.Empty<bool>();
@@ -107,11 +109,15 @@ internal sealed class GameYard
         if (points == null || slots == null) return null;
 
         var squares = new List<(string, int, double, double, string, int, int)>();
+        var openings = new List<WallOpening>();
 
         foreach (var slot in slots.Values)
         {
-            if (slot == null || slot.Type != SquareType || slot.Name == null || !slot.Name.StartsWith(SquarePrefix, StringComparison.Ordinal)) continue;
-            if (!points.TryGetValue(slot.Name, out var point)) continue;
+            if (slot?.Name == null || !points.TryGetValue(slot.Name, out var point)) continue;
+
+            if (slot.Type == DoorType) openings.Add(new WallOpening(WallFeatureKind.Door, point.x, point.z));
+            if (slot.Type == WindowType) openings.Add(new WallOpening(WallFeatureKind.Window, point.x, point.z));
+            if (slot.Type != SquareType) continue;
 
             var tag = slot.UnlockTag ?? "";
 
@@ -120,13 +126,10 @@ internal sealed class GameYard
 
         if (squares.Count == 0) return null;
 
-        var wall = new List<WallFeature>();
+        var placed = squares.Select(square => new YardSquare(square.Item1, square.Item2, square.Item3, square.Item4, false, 0)).ToList();
 
-        if (points.TryGetValue(DoorSlot, out var door)) wall.Add(new WallFeature(WallFeatureKind.Door, door.x));
-        if (points.TryGetValue(WindowSlot, out var window)) wall.Add(new WallFeature(WallFeatureKind.Window, window.x));
-
-        _wall = wall;
-        _log($"yard grid: {squares.Count} squares in {squares.Select(square => square.Item2).Distinct().Count()} rows");
+        _wall = Yard.WallAlongTheYard(placed, openings);
+        _log($"yard grid: {squares.Count} squares in {squares.Select(square => square.Item2).Distinct().Count()} rows, {_wall.Count} doors and windows along it");
 
         return squares;
     }

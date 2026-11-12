@@ -367,6 +367,33 @@ public class PageScriptTests
     }
 
     [Fact]
+    public void A_straight_row_says_how_far_it_is_from_the_house()
+    {
+        var page = OpenYard();
+
+        page.Click("panelButtonWith('row', '1')");
+
+        Assert.Equal("Against the house", page.Text("document.querySelector('.dm-ihd').querySelector('small').textContent"));
+    }
+
+    [Fact]
+    public void A_yard_round_a_corner_leaves_the_places_with_no_square_blank_and_counts_only_a_row_s_own_squares()
+    {
+        var page = new PageScript();
+
+        page.Open(YardView(new FakeGame { Yard = YardTests.Corner() }));
+
+        Assert.Equal("2", Count(page, ".dm-cell.dm-gap"));
+        Assert.True(page.Is("document.querySelector('.dm-gap').getAttribute('data-act') == null"));
+
+        page.Click("panelButtonWith('row', '1')");
+
+        // Row 1 holds two squares, not one for each of the four columns, and its number is no distance from the house.
+        Assert.Equal("Defenses: 0. Your squares: 1 of 2.", page.Text("document.querySelector('.dm-desc').textContent").Split(" The other")[0]);
+        Assert.Equal("0", page.Text("document.querySelector('.dm-ihd').querySelectorAll('small').length"));
+    }
+
+    [Fact]
     public void A_square_not_yet_yours_says_its_price()
     {
         var page = OpenYard();

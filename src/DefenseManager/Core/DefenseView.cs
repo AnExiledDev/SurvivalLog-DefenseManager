@@ -227,7 +227,7 @@ public static class DefenseView
         });
         var wall = yard.Wall.Select(feature => $"{{\"kind\":{Str(feature.Kind == WallFeatureKind.Door ? "door" : "window")},\"at\":{Dec(yard.ColumnAt(feature.X))}}}");
 
-        return $"{{\"cols\":{Num(yard.Columns)},\"rows\":{Num(yard.Rows)},\"squares\":[{string.Join(",", squares)}],\"wall\":[{string.Join(",", wall)}]}}";
+        return $"{{\"cols\":{Num(yard.Columns)},\"rows\":{Num(yard.Rows)},\"straight\":{Bool(yard.HasStraightRows)},\"squares\":[{string.Join(",", squares)}],\"wall\":[{string.Join(",", wall)}]}}";
     }
 
     private static string SettingsJson(PanelSettings? settings) => settings is null
