@@ -175,6 +175,6 @@ public class PowerPressTests
         var message = Press(PowerTarget.Defense, 1, Home(), slot);
 
         Assert.StartsWith("Tesla coil set to Always on.", message);
-        Assert.EndsWith("so it lasts until the game is closed.", message);
+        Assert.EndsWith("so it only lasts until you close the game.", message);
     }
 }

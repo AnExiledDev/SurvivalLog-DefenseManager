@@ -12,45 +12,45 @@ Keeping your outdoor defenses up means walking to each one and clicking through 
 [*][b]Clear all broken[/b]: queues the removal of every broken defense. One you already queued for repair is kept.[/*]
 [*][b]Your yard as a grid[/b]: every square of the yard, row by row out from the house, with each defense on its square, colored by its state. Squares you have not unlocked show their Survival Points price.[/*]
 [*][b]Click to act[/b]: click a defense for its condition, repair cost, Repair and Remove, and its power mode. Click a row number and [b]Repair row[/b] repairs everything in that row.[/*]
-[*][b]Install from the panel[/b]: click an empty square of yours to list the defense packages in your yard and, with [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 or newer, in the bank. [b]Install[/b] puts one on that square, the game's install.[/*]
-[*][b]Buy and move from the panel[/b]: an option, off by default. Click a square that is not yours to buy it with Survival Points, after one question. When you can't buy it yet, the panel says why: not enough points, a Defense level you have not reached, or a zombie wave. Click a defense, press [b]Move[/b], then click the square it should go to. Installs and moves go in the same plan queue as the Layout screen, show on the grid, and are listed under [b]Planned[/b] with a [b]Cancel[/b] for each.[/*]
+[*][b]Install from the panel[/b]: click an empty square of yours to list the defense packages in your yard and, with [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 or newer, in the bank. [b]Install[/b] sends your character to install one on that square, just like installing from the package.[/*]
+[*][b]Buy and move from the panel[/b]: an option, off by default. Click a square that is not yours to buy it with Survival Points after you confirm. When you can't buy it yet, the panel says why: not enough points, a Defense level you have not reached, or a zombie wave. Click a defense, press [b]Move[/b], then click the square it should go to. Installs and moves go in the same plan queue as the Layout screen, show on the grid, and are listed under [b]Planned[/b] with a [b]Cancel[/b] for each.[/*]
 [*][b]Work during waves[/b]: an option, off by default, that lets you repair, remove, install and move defenses during a zombie wave. Robot repairs and expeditions still wait.[/*]
 [*][b]Unlocks from day one[/b]: three options, off by default, give the door upgrades (Advanced Repair, Advanced Reinforce), the window upgrades (Advanced Repair, Advanced Reinforce, Reinforce Window) and Reinforce Fortifications from the first day of a story run, with the recipes they use, instead of on days 2, 5, 13, 14 and 54. Turning one off takes back what the mod gave, never what the game has given by then.[/*]
 [*][b]Repairs list[/b]: every defense that needs repair, worst first, under Repair all.[/*]
 [*][b]Buttons say why not[/b]: a greyed-out button shows the reason, like "Needs 3 more Wood".[/*]
 [*][b]Short of materials[/b]: a line under Repair all names each material you are short of, as free / needed.[/*]
-[*][b]Remove without the are-you-sure box[/b]: the same removal as the defense's own menu.[/*]
+[*][b]Remove without a confirmation box[/b]: the same removal as the defense's menu.[/*]
 [*][b]HUD button[/b]: a shield at the top of the bottom-left tool column opens the panel.[/*]
-[*][b]Layout screen buttons[/b]: while the game's Layout screen is open, Repair all, Clear all broken and Defense list sit at the top middle of the screen, styled like Layout's own buttons. Defense list opens the panel. Can be turned off in the config.[/*]
-[*][b]Game's actions[/b]: repairs and removals join the end of your action queue, so your own queued actions run first.[/*]
-[*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them on during waves and while zombies are at the base, and off otherwise, [b]Proximity[/b] turns them on while a zombie is in range (15 m by default) and off after 10 game minutes with none, [b]Always on[/b] keeps them on, and [b]Default[/b] leaves them to the game's switch.[/*]
+[*][b]Layout screen buttons[/b]: while the game's Layout screen is open, Repair all, Clear all broken and Defense list sit at the top middle of the screen, styled like the other buttons on that screen. Defense list opens the panel. You can turn them off in the config.[/*]
+[*][b]Uses your action queue[/b]: repairs and removals join the end of your action queue, so the actions you queued yourself run first.[/*]
+[*][b]Power modes[/b]: electrical defenses are switched for you. [b]Wave only[/b] keeps them on during waves and while zombies are at the base, and off the rest of the time. [b]Proximity[/b] turns them on while a zombie is in range (15 m by default), and off after 10 game minutes with none. [b]Always on[/b] keeps them on. [b]Default[/b] leaves them to the game's power switch.[/*]
 [*][b]Per defense, per type, or for all[/b]: pick a mode for one defense when you click it, or for every defense of a type on the [b]Power[/b] tab. Anything without a setting follows its type, and a type without one follows the global mode (Wave only unless you change it).[/*]
 [*][b]Settings tab[/b]: change the Layout screen buttons, the global power mode, the Proximity range, the crawler dodge chances, the device attack rate, Work during waves, Buy and move from the panel and the Unlocks right in the panel.[/*]
-[*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. Set the chance for each kind of crawler in the config: 0.25 makes them dodge it only a quarter of the time. It starts at the game's 100%.[/*]
-[*][b]UI size[/b]: with Exiled's Toolkit 0.10.0 or newer, its UI size setting draws the panel bigger or smaller, as far as it still fits on the screen. With 0.11.0 or newer, Defense Manager's own UiScale setting can set a size for this mod alone.[/*]
+[*][b]Crawlers can be hit by the chainsaw[/b]: in the base game crawlers always dodge the Mechanical Chainsaw. Set the chance for each kind of crawler in the settings. At 0.25 they dodge it only a quarter of the time. The default is 100%, the same as the base game.[/*]
+[*][b]UI size[/b]: with Exiled's Toolkit 0.10.0 or newer, its UI size setting draws the panel bigger or smaller, as far as it still fits on the screen. With 0.11.0 or newer, Defense Manager's UiScale setting can set a size for this mod alone.[/*]
 [/list]
 
 [size=5]Hotkeys[/size]
 [list]
 [*][b]Esc[/b]: close the panel.[/*]
 [/list]
-The panel key is unbound by default: the HUD button opens the panel. Set PanelKey in the config to open it from the keyboard too; it does nothing while you type in a text box. The game's hotkeys are off while the panel is open.
+The panel key is unbound by default: the HUD button opens the panel. Set PanelKey in the config to open it from the keyboard too. It does nothing while you type in a text box. The game's hotkeys are off while the panel is open.
 
-With the Unlocks off, the mod writes nothing into your save file; the Unlocks add the game's unlocks to the run, which the game saves. Its power settings are its own data, kept for each save in [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]. The repairs and removals it queues are real: they use your materials and take defenses down. You can remove it at any time; your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
+With the Unlocks off, the mod writes nothing into your save file. The Unlocks add the game's normal unlocks to the run, which the game saves. Power settings are kept outside the save, for each save, in [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]. The repairs and removals it queues are real: they use your materials and take defenses down. You can remove it at any time. Your defenses stay as they are, and each electrical defense keeps the power state the mod last switched it to, because the game saves that switch.
 
 Works in English and Chinese.
 
 [size=5]Known issues[/size]
 [list]
 [*]By default nothing can be repaired, removed or installed during a zombie wave, as in the base game. Turn on Work during waves to change that.[/*]
-[*]The Unlocks only give early what the game gives later; the story events still happen on their days. What they gave stays in the save if you remove the mod.[/*]
-[*]Install takes one defense at a time; the next waits until it is done.[/*]
+[*]The Unlocks only give early what the game gives later. The story events still happen on their days. What they gave stays in the save if you remove the mod.[/*]
+[*]Install takes one defense at a time. The next waits until it is done.[/*]
 [*]On an expedition the panel, the HUD button and the Layout buttons are hidden, since your defenses are back home.[/*]
 [*]The game is paused while the Layout screen is open, so anything you queue there starts when you leave Layout (or when you unpause, if you had paused before).[/*]
 [*]The Layout buttons sit at the top middle of the screen. If they cover something on your screen size, turn them off in the config.[/*]
-[*]Nearest first is measured in a straight line, not along the path the character walks.[/*]
+[*]Nearest first is measured in a straight line. The path the character walks can be longer.[/*]
 [*]Robot repair is not included.[/*]
-[*]A queued repair or removal cannot be cancelled from the panel; cancel it from the game's action queue.[/*]
+[*]A queued repair or removal cannot be cancelled from the panel. Cancel it from the game's action queue.[/*]
 [*]Remove has no confirmation box. A removal you did not mean can be cancelled from the action queue.[/*]
 [*]A defense in any mode but Default is switched back if you flip its power by hand. Set it to Default to switch it yourself.[/*]
 [*]Nothing is switched while the Layout screen is open. Power settings are kept per save, so a new game is only switched once it has been saved.[/*]
@@ -80,14 +80,14 @@ Works in English and Chinese.
 [/list]
 
 [size=5]Uninstall[/size]
-Delete [font=Courier New]DefenseManager.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder. Each electrical defense stays in the power state the mod last switched it to; switch any you want changed from the defense's own menu.
+Delete [font=Courier New]DefenseManager.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder. Each electrical defense stays in the power state the mod last switched it to. Switch any you want changed from the defense's menu.
 
 [size=5]Configuration[/size]
-Most settings can be changed on the panel's Settings tab. To change the key, turn off the Layout screen buttons, or set the global power mode ([font=Courier New]DefaultMode[/font]) and the Proximity range ([font=Courier New]ProximityRange[/font]), edit [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.cfg[/font] while the game is closed, or do it in game on the Mod Manager's Mods screen, where changes take effect at once (see [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url]; the cfg file explains each setting in English and Chinese). With Exiled's Toolkit 0.17.0 or newer, each world can keep its own crawler dodge chances, device attack rate, Work during waves and Unlocks settings: pick them for a new world in Customizable Difficulty, or, while you play, change them for that world alone on the Mods screen.
+Every setting but the panel key can be changed on the panel's Settings tab. To set the panel key ([font=Courier New]PanelKey[/font]), use the Mod Manager's Mods screen in game, where changes take effect at once, or edit [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.cfg[/font] while the game is closed. The cfg file explains each setting in English and Chinese, and [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url] lists them all. With Exiled's Toolkit 0.17.0 or newer, each world can keep its own crawler dodge chances, device attack rate, Work during waves and Unlocks settings. Pick them for a new world in Customizable Difficulty, or change them for the world you are playing on the Mods screen.
 
 [size=5]Feedback[/size]
 Found a bug or have an idea? Come say hi on the [url=https://discord.gg/trTsyxUFqg]Core Directive Discord[/url], or post in this page's Posts tab. For bugs, please include [font=Courier New]BepInEx\LogOutput.log[/font] and [font=Courier New]BepInEx\defense-manager.log[/font].
-To reach me directly, message [b]exiled.dev[/b] on Discord; you can find me in the [url=https://discord.gg/MZGg4gQAUe]official Survival Log Discord[/url]. I'm also on X as [url=https://x.com/AnExiledDev]@AnExiledDev[/url].
+To reach me directly, message [b]exiled.dev[/b] on Discord. You can find me in the [url=https://discord.gg/MZGg4gQAUe]official Survival Log Discord[/url]. I'm also on X as [url=https://x.com/AnExiledDev]@AnExiledDev[/url].
 
 [size=5]Source and license[/size]
 Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager]github.com/AnExiledDev/SurvivalLog-DefenseManager[/url]
@@ -103,43 +103,43 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*][b]清除全部损毁[/b]：为每个损毁的防御设施排队拆除。已经排队修理的会保留。[/*]
 [*][b]空地网格[/b]：按从房子往外一行一行显示空地的每个格子，每个防御设施放在它所在的格子上，颜色表示它的状态。还没解锁的格子会显示它的生存点价格。[/*]
 [*][b]点击即可操作[/b]：点击防御设施可查看耐久、修理费用、「修理」和「拆除」以及供电模式。点击行号后，「修理第 n 行」会修理这一行的全部防御设施。[/*]
-[*][b]在面板中安装[/b]：点击属于你的空格子，会列出院子里的防御设施包裹；安装了 [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 或更新版本时，还会列出仓库里的。「安装」会把它装到这个格子上，用的是游戏自己的安装。[/*]
+[*][b]在面板中安装[/b]：点击属于你的空格子，会列出院子里的防御设施包裹。安装了 [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 或更新版本时，还会列出仓库里的。「安装」会让角色把它装到这个格子上，和从包裹安装一样。[/*]
 [*][b]在面板中购买和移动[/b]：一个默认关闭的选项。点击还不属于你的格子，确认一次后就能用生存点买下。暂时买不了时会显示原因：生存点不够、防御等级不够，或者尸潮正在进行。点击防御设施，按「移动」，再点击要放的格子。安装和移动与「规划模式」使用同一个计划队列，会显示在网格上，并列在「计划」下，每项都有「取消」。[/*]
 [*][b]尸潮期间操作[/b]：一个默认关闭的选项，开启后可在尸潮期间修理、拆除、安装和移动防御设施。机器人修理和外出探索仍需等尸潮结束。[/*]
 [*][b]第一天起解锁[/b]：三个默认关闭的选项，可在剧情模式第一天起就提供门的升级（「高级修理」「高级加固」）、窗户的升级（「高级修理」「高级加固」「加固窗户」）和「强化加固」，以及它们所需的配方，而不用等到第 2、5、13、14 和 54 天。关闭后会收回本模组提供的内容，游戏届时已经提供的不会收回。[/*]
 [*][b]待修理列表[/b]：「全部修理」下方按损坏程度从重到轻列出每个需要修理的防御设施。[/*]
 [*][b]按钮会说明原因[/b]：灰掉的按钮下方会显示原因，例如「还差 3 个木材」。[/*]
 [*][b]材料不足提示[/b]：「全部修理」下方会列出每种不够的材料，显示为 可用 / 所需。[/*]
-[*][b]拆除时不弹确认框[/b]：和防御设施自己菜单里的拆除完全一样。[/*]
+[*][b]拆除时不弹确认框[/b]：和防御设施菜单里的拆除完全一样。[/*]
 [*][b]HUD 按钮[/b]：左下角工具栏最上方的盾牌按钮可以打开面板。[/*]
-[*][b]「规划模式」界面按钮[/b]：打开游戏的「规划模式」界面时，「全部修理」「清除全部损毁」「防御列表」三个按钮会出现在屏幕顶部中间，样式和「规划模式」自己的按钮一致。「防御列表」会打开面板。可以在配置中关闭。[/*]
-[*][b]使用游戏自己的行动[/b]：修理和拆除会排到你的行动队列末尾，你自己排好的行动先执行。[/*]
-[*][b]供电模式[/b]：模组会替你切换电力防御设施。[b]仅尸潮[/b]在尸潮期间和基地有僵尸时开启，其余时间关闭；[b]僵尸靠近[/b]在有僵尸进入范围（默认 15 米）时开启，连续 10 分钟游戏时间没有僵尸后关闭；[b]常开[/b]一直开启；[b]默认[/b]交给游戏自己的开关。[/*]
+[*][b]「规划模式」界面按钮[/b]：打开游戏的「规划模式」界面时，「全部修理」「清除全部损毁」「防御列表」三个按钮会出现在屏幕顶部中间，样式和这个界面上的其他按钮一致。「防御列表」会打开面板。可以在配置中关闭。[/*]
+[*][b]使用你的行动队列[/b]：修理和拆除会排到你的行动队列末尾，你自己排好的行动先执行。[/*]
+[*][b]供电模式[/b]：模组会替你切换电力防御设施。[b]仅尸潮[/b]在尸潮期间和基地有丧尸时开启，其余时间关闭。[b]丧尸靠近[/b]在有丧尸进入范围（默认 15 米）时开启，连续 10 分钟游戏时间没有丧尸后关闭。[b]常开[/b]一直开启。[b]默认[/b]交给游戏的电源开关。[/*]
 [*][b]单个、同类或全部[/b]：点击防御设施可以单独设置它的模式，在「供电」标签页可以设置同类的全部。没有单独设置的跟随它的类型，类型也没有设置的跟随全局模式（默认是仅尸潮）。[/*]
 [*][b]「设置」标签页[/b]：直接在面板里修改「规划模式」界面按钮、全局供电模式、靠近触发的范围、爬行者闪避概率、防御设施攻击频率、「尸潮期间操作」「在面板中购买和移动」和三个提前解锁选项。[/*]
-[*][b]电锯能打到爬行者[/b]：原版游戏中爬行者总能闪避「机械电锯」。每种爬行者的闪避概率都可以在配置里设置：设为 0.25 则只有四分之一的时间能闪避。默认保持游戏原本的 100%。[/*]
-[*][b]界面大小[/b]：安装 Exiled's Toolkit 0.10.0 或更新版本后，可以用它的界面大小设置放大或缩小面板，最大放到面板仍能完整显示在屏幕上为止。0.11.0 或更新版本还可以用 Defense Manager 自己的 UiScale 设置单独调整本模组的大小。[/*]
+[*][b]电锯能打到爬行者[/b]：不装模组时，爬行者总能闪避「机械电锯」。每种爬行者的闪避概率都可以在设置里调整：设为 0.25 则只有四分之一的时间能闪避。默认是 100%，和不装模组时一样。[/*]
+[*][b]界面大小[/b]：安装 Exiled's Toolkit 0.10.0 或更新版本后，可以用它的界面大小设置放大或缩小面板，最大放到面板仍能完整显示在屏幕上为止。0.11.0 或更新版本还可以用 Defense Manager 的 UiScale 设置单独调整本模组的大小。[/*]
 [/list]
 
 [size=5]快捷键[/size]
 [list]
 [*][b]Esc[/b]：关闭面板。[/*]
 [/list]
-面板按键默认不绑定，用 HUD 按钮打开面板。在配置中设置 PanelKey 后也可以用键盘打开；在输入框里打字时按键不起作用。面板打开时游戏自己的快捷键不起作用。
+面板按键默认不绑定，用 HUD 按钮打开面板。在配置中设置 PanelKey 后也可以用键盘打开。在输入框里打字时按键不起作用。面板打开时游戏的快捷键不起作用。
 
-关闭提前解锁选项时，模组不会往存档里写入任何数据；提前解锁会把游戏自己的解锁内容加入本局，由游戏保存。它的供电设置是它自己的数据，按存档分别保存在 [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]。它排队的修理和拆除都是真实的：会消耗你的材料，也会拆掉防御设施。你可以随时移除它；防御设施保持原样，每个电力防御设施会保持模组最后一次切换的供电状态，因为游戏会保存这个开关。
+关闭提前解锁选项时，模组不会往存档里写入任何数据。提前解锁会把游戏正常的解锁内容加入本局，由游戏保存。供电设置不在存档里，而是按存档分别保存在 [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.power.txt[/font]。它排队的修理和拆除都是真实的：会消耗你的材料，也会拆掉防御设施。你可以随时移除它。防御设施保持原样，每个电力防御设施会保持模组最后一次切换的供电状态，因为游戏会保存这个开关。
 
 支持英文和中文。
 
 [size=5]已知问题[/size]
 [list]
-[*]默认情况下，尸潮期间无法修理、拆除或安装任何防御设施，和原版游戏一样。开启「尸潮期间操作」即可改变。[/*]
-[*]提前解锁只是把游戏之后才给的内容提前给你；剧情事件仍会在原来的日子发生。移除模组后，已提供的内容仍留在存档里。[/*]
-[*]一次只安装一个防御设施；下一个要等它装完。[/*]
+[*]默认情况下，尸潮期间无法修理、拆除或安装任何防御设施，和不装模组时一样。开启「尸潮期间操作」即可改变。[/*]
+[*]提前解锁只是把游戏之后才给的内容提前给你。剧情事件仍会在原来的日子发生。移除模组后，已提供的内容仍留在存档里。[/*]
+[*]一次只安装一个防御设施，下一个要等它装完。[/*]
 [*]外出探索时，面板、HUD 按钮和「规划模式」界面上的按钮都会隐藏，因为你的防御设施在家里。[/*]
 [*]「规划模式」界面打开时游戏是暂停的，所以在那里排队的行动会在离开「规划模式」后开始（如果之前已经暂停，则在取消暂停后开始）。[/*]
 [*]「规划模式」界面上的按钮在屏幕顶部中间。如果在你的屏幕尺寸下挡住了东西，可以在配置中关闭。[/*]
-[*]「最近优先」按直线距离计算，而不是角色实际走的路线。[/*]
+[*]「最近优先」按直线距离计算，角色实际走的路线可能更长。[/*]
 [*]不包括机器人修理。[/*]
 [*]已排队的修理或拆除不能在面板里取消，请在游戏的行动队列中取消。[/*]
 [*]拆除没有确认框。误拆的可以在行动队列中取消。[/*]
@@ -156,7 +156,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [*]Survival Log 1.1.20719。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]，请先安装。[/*]
 [*]可选：[url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 或更新版本，用来直接从仓库安装防御设施。[/*]
-[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.19.0 或更新版本。没有它本模组不会加载。打字时它让面板按键不起作用；面板关闭时，它把结果显示为弹出通知；它让在 Mod Manager 的「模组」界面改动的设置无需重启即可生效，它的界面大小设置还能调整面板的大小。[/*]
+[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.19.0 或更新版本。没有它本模组不会加载。打字时它让面板按键不起作用，面板关闭时它把结果显示为弹出通知，它还让在 Mod Manager 的「模组」界面改动的设置无需重启即可生效。它的界面大小设置也能调整面板的大小。[/*]
 [*]可选：[url=https://www.nexusmods.com/survivallog/mods/73]Mod Manager[/url]。装了它，可以在游戏里它的「模组」界面修改每项设置，并看到每项的说明，不用打开配置文件。[/*]
 [/list]
 
@@ -170,10 +170,10 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 [/list]
 
 [size=5]卸载[/size]
-从 [font=Courier New]BepInEx\plugins[/font] 文件夹中删除 [font=Courier New]DefenseManager.dll[/font]。每个电力防御设施会保持模组最后一次切换的供电状态；想改的话，用该防御设施自己的菜单切换。
+从 [font=Courier New]BepInEx\plugins[/font] 文件夹中删除 [font=Courier New]DefenseManager.dll[/font]。每个电力防御设施会保持模组最后一次切换的供电状态。想改的话，用该防御设施的菜单切换。
 
 [size=5]配置[/size]
-大部分设置可以在面板的「设置」标签页修改。如需修改按键、关闭「规划模式」界面上的按钮，或设置全局供电模式（[font=Courier New]DefaultMode[/font]）和靠近触发的范围（[font=Courier New]ProximityRange[/font]），可以在游戏内 Mod Manager 的「模组」界面修改（立即生效），也可以在游戏关闭时编辑 [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.cfg[/font]。配置文件中每项设置都有中文说明，完整说明见 [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url]（英文）。装了 Exiled's Toolkit 0.17.0 或更新版本时，每个存档都可以有自己的爬行者闪避概率、防御设施攻击频率、「尸潮期间操作」和提前解锁设置：新存档可以在「自定义难度」里选，游戏中也可以在「模组」界面只为当前存档修改。
+除了面板按键，每项设置都可以在面板的「设置」标签页修改。面板按键（[font=Courier New]PanelKey[/font]）可以在游戏内 Mod Manager 的「模组」界面修改（立即生效），也可以在游戏关闭时编辑 [font=Courier New]BepInEx\config\com.dev.survivallog.defensemanager.cfg[/font]。配置文件中每项设置都有中文说明，完整列表见 [url=https://github.com/AnExiledDev/SurvivalLog-DefenseManager/blob/main/CONFIG.md]CONFIG.md[/url]（英文）。装了 Exiled's Toolkit 0.17.0 或更新版本时，每个存档都可以有自己的爬行者闪避概率、防御设施攻击频率、「尸潮期间操作」和提前解锁设置。新存档可以在「自定义难度」里选，游戏中也可以在「模组」界面只为当前存档修改。
 
 [size=5]反馈[/size]
 发现 bug 或有好点子？欢迎来 [url=https://discord.gg/trTsyxUFqg]Core Directive Discord[/url] 打个招呼，或在本页的「Posts」标签里发帖。报告 bug 时，请附上 [font=Courier New]BepInEx\LogOutput.log[/font] 和 [font=Courier New]BepInEx\defense-manager.log[/font]。

@@ -45,7 +45,7 @@ public class OutcomeMessageTests
         var tally = Tally(queued: 2, shortfalls: new[] { new Shortfall("Spike barrier", new[] { ThreeWood }) }, blocked: 1, reason: "Needs a workbench", beingRemoved: 1, refused: 1);
 
         Assert.Equal(
-            "Repairing 2 defenses. 1 left for lack of materials: Spike barrier needs 3 more Wood. 1 can't be repaired right now: Needs a workbench. 1 queued for removal, so not repaired. 1 refused by the game's queue.",
+            "Repairing 2 defenses. Not enough materials for 1 more: Spike barrier needs 3 more Wood. 1 can't be repaired right now: Needs a workbench. Skipped 1 already queued for removal. The game's queue refused 1.",
             Repaired(tally));
     }
 
@@ -55,7 +55,7 @@ public class OutcomeMessageTests
         var tally = Tally(shortfalls: new[] { new Shortfall("Sandbags", new[] { ThreeWood }), new Shortfall("Electric fence", new[] { ThreeWood, TwoNails, OnePart }), new Shortfall("Chainsaw", new[] { TwoNails, OnePart }) });
 
         Assert.Equal(
-            "Nothing repaired. 3 left for lack of materials: Sandbags needs 3 more Wood; Electric fence needs 3 more Wood, 2 more Nail and 1 more Part; Chainsaw needs 2 more Nail and 1 more Part.",
+            "Nothing repaired. Not enough materials for 3 more: Sandbags needs 3 more Wood; Electric fence needs 3 more Wood, 2 more Nail and 1 more Part; Chainsaw needs 2 more Nail and 1 more Part.",
             Repaired(tally));
     }
 
@@ -65,7 +65,7 @@ public class OutcomeMessageTests
         var shortfalls = Enumerable.Range(1, 5).Select(number => new Shortfall($"Trap {number}", new[] { OnePart })).ToList();
 
         Assert.Equal(
-            "Nothing repaired. 5 left for lack of materials: Trap 1 needs 1 more Part; Trap 2 needs 1 more Part; Trap 3 needs 1 more Part; and 2 more.",
+            "Nothing repaired. Not enough materials for 5 more: Trap 1 needs 1 more Part; Trap 2 needs 1 more Part; Trap 3 needs 1 more Part; and 2 more.",
             Repaired(Tally(shortfalls: shortfalls)));
     }
 
@@ -89,7 +89,7 @@ public class OutcomeMessageTests
         Assert.Equal("Removing 1 broken defense.", Cleared(queued: 1));
         Assert.Equal("Removing 2 broken defenses, 1 more already queued.", Cleared(queued: 2, alreadyQueued: 1));
         Assert.Equal("Already clearing: 2 removals still queued.", Cleared(alreadyQueued: 2));
-        Assert.Equal("Nothing cleared. 1 queued for repair, so kept. 1 refused by the game's queue.", Cleared(beingRepaired: 1, refused: 1));
+        Assert.Equal("Nothing cleared. Kept 1 already queued for repair. The game's queue refused 1.", Cleared(beingRepaired: 1, refused: 1));
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public class OutcomeMessageTests
         Assert.Equal(Texts.WaveLocked.En, OutcomeMessage.Describe(new DefenseOutcome.WaveLocked()));
         Assert.Equal(Texts.AwayFromHome.En, OutcomeMessage.Describe(new DefenseOutcome.AwayFromHome()));
         Assert.Equal("Finish or cancel your queued actions first.", OutcomeMessage.Describe(new DefenseOutcome.QueueBusy()));
-        Assert.Equal("Every defense is in full repair.", OutcomeMessage.Describe(new DefenseOutcome.NothingToDo(Job.Repair)));
+        Assert.Equal("Every defense is fully repaired.", OutcomeMessage.Describe(new DefenseOutcome.NothingToDo(Job.Repair)));
         Assert.Equal("No broken defenses.", OutcomeMessage.Describe(new DefenseOutcome.NothingToDo(Job.Remove)));
         Assert.Equal("That defense is gone.", OutcomeMessage.Describe(new DefenseOutcome.Gone()));
         Assert.Equal("Can't manage defenses right now: no character.", OutcomeMessage.Describe(new DefenseOutcome.NotReady("no character.")));
@@ -189,12 +189,12 @@ public class OutcomeMessageTests
         Assert.Equal(Texts.WaveLocked.En, InLayout(new DefenseOutcome.WaveLocked()));
         Assert.Equal(Texts.AwayFromHome.En, InLayout(new DefenseOutcome.AwayFromHome()));
         Assert.Equal("Finish or cancel your queued actions first.", InLayout(new DefenseOutcome.QueueBusy()));
-        Assert.Equal("Every defense is in full repair.", InLayout(new DefenseOutcome.NothingToDo(Job.Repair)));
+        Assert.Equal("Every defense is fully repaired.", InLayout(new DefenseOutcome.NothingToDo(Job.Repair)));
         Assert.Equal("That defense is gone.", InLayout(new DefenseOutcome.Gone()));
         Assert.Equal("Sandbags needs no repair.", InLayout(new DefenseOutcome.RepairRefused("Sandbags", new RepairVerdict.Undamaged())));
         Assert.Equal("The game would not queue the removal of Sandbags.", InLayout(new DefenseOutcome.NotQueued(Job.Remove, "Sandbags")));
         Assert.Equal("Could not start the repair, see BepInEx/defense-manager.log.", InLayout(new DefenseOutcome.StartFailed(Job.Repair, 1)));
         Assert.Equal("Nothing repaired. 2 can't be repaired right now.", InLayout(new DefenseOutcome.Repaired(Tally(blocked: 2))));
-        Assert.Equal("Nothing cleared. 1 queued for repair, so kept.", InLayout(new DefenseOutcome.Cleared(new ClearTally(0, 0, 1, 0))));
+        Assert.Equal("Nothing cleared. Kept 1 already queued for repair.", InLayout(new DefenseOutcome.Cleared(new ClearTally(0, 0, 1, 0))));
     }
 }

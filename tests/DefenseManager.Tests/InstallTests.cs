@@ -150,7 +150,7 @@ public class InstallTests
     public void Install_messages_name_the_defense_and_say_when_it_came_out_of_the_bank()
     {
         Assert.Equal("Installing Tesla coil.", OutcomeMessage.Describe(new DefenseOutcome.Installing("Tesla coil", false)));
-        Assert.Equal("Installing Tesla coil. Took it out of Package Bank, it is in the yard now.", OutcomeMessage.Describe(new DefenseOutcome.Installing("Tesla coil", true)));
+        Assert.Equal("Installing Tesla coil. Took it out of Package Bank and put it in the yard.", OutcomeMessage.Describe(new DefenseOutcome.Installing("Tesla coil", true)));
         Assert.Equal("Tesla coil is in Package Bank, but every yard package spot is full.", OutcomeMessage.Describe(new DefenseOutcome.NoFreeSpot("Tesla coil")));
         Assert.Equal("The game would not install Tesla coil there.", OutcomeMessage.Describe(new DefenseOutcome.NotInstalled("Tesla coil", false)));
     }

@@ -1,13 +1,13 @@
 # Defense Manager settings
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Changed on the Mods screen, every setting takes effect at once. Every setting but `PanelKey` can also be changed on the panel's Settings tab, which saves to this file and takes effect at once. With Exiled's Toolkit 0.17.0 or newer, each world can keep its own combat and unlock settings: every setting in Combat and Unlocks. Pick them for a new world in Customizable Difficulty, or, while you play, change them for that world alone on the Mods screen. The panel's Settings tab changes a setting the world has its own value for in that world alone, and any other for every world. Delete the file to get the defaults back.
+Settings live in `BepInEx\config\com.dev.survivallog.defensemanager.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. Every setting changed on the Mods screen takes effect at once. Every setting but `PanelKey` can also be changed on the panel's Settings tab, which saves to this file and also takes effect at once. With Exiled's Toolkit 0.17.0 or newer, each world can keep its own value for every setting in Combat and Unlocks. Pick them for a new world in Customizable Difficulty, or change them for the world you are playing on the Mods screen. If the world has its own value for a setting, the panel's Settings tab changes it for that world only. Other settings change for every world. Delete the file to get the defaults back.
 
 ## Controls
 
 | Setting | Default | What it does |
 | --- | --- | --- |
 | `PanelKey` | `None` | Key that opens and closes the Defense Manager panel. Unbound by default: the shield button in the bottom-left corner of the screen opens the panel. Set a key here to open it from the keyboard too. |
-| `LayoutControls` | `true` | Shows Repair all, Clear all broken and Defense list buttons at the top middle of the game's Layout screen. `false` hides them; the shield button and the panel key, if one is set, still work. |
+| `LayoutControls` | `true` | Shows Repair all, Clear all broken and Defense list buttons at the top middle of the game's Layout screen. `false` hides them. The shield button and the panel key, if one is set, still work. |
 
 For `PanelKey`, the value is a Unity key name, for example `F7`, `F11`, `Insert` or `Keypad5`. `None`, the default, leaves it unbound. The key does nothing while you type in a text box. `Esc` always closes the open panel and cannot be changed. The panel, the shield button and the Layout screen's Defense list button show the key you pick, and no key while it is unbound.
 
@@ -17,18 +17,18 @@ The game is paused while the Layout screen is open, so anything queued from its 
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `LayoutActions` | `false` | Lets the panel's Yard tab buy squares with Survival Points, move defenses to other squares of yours and cancel planned installs and moves. Buying asks once before it spends, and is the same purchase as on the Layout screen. Installs and moves go in the same plan queue as the Layout screen, so it shows them too. The game's checks still apply: the Survival Points a square costs, the Defense level it unlocks at, and the wave lock, which `AllowDuringWaves` lifts. |
+| `LayoutActions` | `false` | Lets the panel's Yard tab buy squares with Survival Points, move defenses to other squares of yours and cancel planned installs and moves. Buying asks once before it spends, and is the same purchase as on the Layout screen. Installs and moves go in the same plan queue as the Layout screen, so it shows them too. The game's checks still apply: the Survival Points a square costs, the Defense level it unlocks at, and no buying or moving during a zombie wave unless `AllowDuringWaves` is on. |
 
-With `LayoutActions` off, the Yard tab shows each square's price and installs packed defenses, as before.
+With `LayoutActions` off, the Yard tab still shows each square's price and can install packed defenses.
 
 ## Power
 
 | Setting | Default | What it does |
 | --- | --- | --- |
 | `DefaultMode` | `WaveOnly` | How electrical defenses are powered when neither the defense nor its type has a setting of its own in the panel. `WaveOnly`: on during waves and while zombies are at the base, off otherwise. `AlwaysOn`: always on. `Proximity`: on while a living zombie is within `ProximityRange`, off once none has been in range for 10 minutes of game time. `Default`: the mod leaves the defense alone and the game's power switch decides. |
-| `ProximityRange` | `15` | How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground; height does not count. Any number from 1 to 100. |
+| `ProximityRange` | `15` | How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground, so height does not count. Any number from 1 to 100. |
 
-A defense's own setting wins over its type's, and a type's setting wins over `DefaultMode`. Those two are set in the panel, not in this file: a defense's own mode when you click it on the yard grid, and a type's mode on the Power tab. They are kept for each save in `BepInEx\config\com.dev.survivallog.defensemanager.power.txt`, which the mod writes itself; edit it only while the game is closed, or delete it to clear every defense and type setting.
+A defense's own setting wins over its type's, and a type's setting wins over `DefaultMode`. You set those two in the panel. Click a defense on the yard grid to pick its mode, and pick a type's mode on the Power tab. They are kept for each save in `BepInEx\config\com.dev.survivallog.defensemanager.power.txt`, which the mod writes. Edit it only while the game is closed, or delete it to clear every defense and type setting.
 
 Changing `DefaultMode` here changes every defense and type that has no setting of its own.
 
@@ -40,10 +40,10 @@ The defense and type settings belong to a save file. A game that carries on unde
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `CrawlerDodgeChance` | `1` | Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers, and `1` keeps the game's rule. `0.25` lets 3 hits in 4 land. |
+| `CrawlerDodgeChance` | `1` | Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. The default is `1`, which changes nothing. At `0.25`, 3 hits in 4 land. |
 | `ArmoredCrawlerDodgeChance` | `1` | The same for the Armored Crawler Zombie. |
 | `AllowDuringWaves` | `false` | Lets defenses be repaired, removed, installed and moved while a zombie wave is on, from the panel and from the game's menus and Layout screen. The base game locks all of these until the wave ends. Robot repairs and expeditions still wait for the wave to end. |
-| `DeviceAttackRate` | `1` | How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's rate. From 0.25 to 10. A powered device uses power on every strike, so a higher rate uses more power. Devices already built change to a new rate at once. |
+| `DeviceAttackRate` | `1` | How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the normal rate. From 0.25 to 10. A powered device uses power on every strike, so a higher rate uses more power. Devices already built change to a new rate at once. |
 
 ## Unlocks
 
@@ -55,7 +55,7 @@ The defense and type settings belong to a save file. A game that carries on unde
 
 These only work in story runs, once the disaster has happened. Endless runs already start with all of it, and challenge and tutorial runs are left alone. The mod checks every few seconds, so a run gets them within a few seconds of loading.
 
-Turning a setting off takes back what the mod gave in the loaded run, but never what the game has given by then (from its own event, or from the work desk manual for the repair recipes). The All-Purpose Strengthener belongs to both doors and windows, so it stays while either is on. What the mod gave is kept in the save, with a marker for each so it knows what is its own; it stays there if you remove the mod.
+Turning a setting off takes back what the mod gave in the loaded run, but never what the game has given by then (from its story event, or from the work desk manual for the repair recipes). The All-Purpose Strengthener belongs to both doors and windows, so it stays while either is on. What the mod gave is kept in the save, with a marker for each so the mod knows what it gave. It stays there if you remove the mod.
 
 ## Interface
 

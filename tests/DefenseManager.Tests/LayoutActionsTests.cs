@@ -128,7 +128,7 @@ public class LayoutActionsTests
         Assert.Null(OutcomeMessage.WhyNotBuy(new BuyVerdict.Allowed()));
         Assert.Null(OutcomeMessage.WhyNotBuy(new BuyVerdict.Owned()));
         Assert.Equal("Unlocks at Defense level 2", OutcomeMessage.WhyNotBuy(new BuyVerdict.NeedsLevel(2)));
-        Assert.Equal("The game does not show it yet. It unlocks at Defense level 3", OutcomeMessage.WhyNotBuy(new BuyVerdict.Hidden(3)));
+        Assert.Equal("It doesn't show on the Layout screen yet. It unlocks at Defense level 3", OutcomeMessage.WhyNotBuy(new BuyVerdict.Hidden(3)));
         Assert.Equal("Not enough Survival Points, you have 10", OutcomeMessage.WhyNotBuy(new BuyVerdict.Short(50, 10)));
         Assert.Equal("Squares can't be bought during a zombie wave", OutcomeMessage.WhyNotBuy(new BuyVerdict.WaveLocked()));
         Assert.Equal("Can't buy that square. Unlocks at Defense level 2.", OutcomeMessage.Describe(new DefenseOutcome.BuyRefused(new BuyVerdict.NeedsLevel(2))));

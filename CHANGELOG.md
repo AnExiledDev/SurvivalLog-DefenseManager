@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.1
+
+- Clearer wording in the settings, the panel and the messages after each press.
+- Made for Survival Log 1.1.20719.
+
 ## 0.12.0
 
 - New: `LayoutActions` under Panel, off by default, lets you buy squares and move defenses from the panel's Yard tab. Turn it on in the config or with **Buy and move from the panel** on the Settings tab.
@@ -10,8 +15,8 @@
 
 ## 0.11.2
 
-- `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` now default to 1, the game's rule, so crawlers keep dodging the Mechanical Chainsaw until you lower them. A value you already saved is kept.
-- A dodge chance set back to 1 now puts the game's rule back at once.
+- `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` now default to 1, like the base game, so crawlers keep dodging the Mechanical Chainsaw until you lower them. A value you already saved is kept.
+- Setting a dodge chance back to 1 now makes crawlers dodge every time again, right away.
 - Made for Survival Log 1.1.20719.
 
 ## 0.11.1
@@ -21,7 +26,7 @@
 
 ## 0.11.0
 
-- Each world can keep its own combat and unlock settings: `CrawlerDodgeChance`, `ArmoredCrawlerDodgeChance`, `DeviceAttackRate`, `AllowDuringWaves`, `DoorUpgradesFromDayOne`, `WindowUpgradesFromDayOne` and `FortificationsFromDayOne`. With Exiled's Toolkit 0.17.0 or newer, pick them for a new world in Customizable Difficulty, or change them for the world you are playing on the Mod Manager's Mods screen. The panel's Settings tab changes a setting the world has its own value for in that world alone, and any other for every world. The Controls, Power and Interface settings stay the same for every world.
+- Each world can keep its own combat and unlock settings: `CrawlerDodgeChance`, `ArmoredCrawlerDodgeChance`, `DeviceAttackRate`, `AllowDuringWaves`, `DoorUpgradesFromDayOne`, `WindowUpgradesFromDayOne` and `FortificationsFromDayOne`. With Exiled's Toolkit 0.17.0 or newer, pick them for a new world in Customizable Difficulty, or change them for the world you are playing on the Mod Manager's Mods screen. If the world has its own value for a setting, the panel's Settings tab changes it for that world only. Other settings change for every world. The Controls, Power and Interface settings are the same for every world.
 - `DeviceAttackRate` now takes effect at once, from the Mods screen and from the panel's Settings tab, and reaches the defense devices already built.
 - Made for Survival Log 1.1.20151.
 
@@ -34,14 +39,14 @@
 
 ## 0.9.1
 
-- The panel key is now unbound by default; use the HUD button, or set a key in the settings.
+- The panel key is now unbound by default. Use the HUD button, or set a key in the settings.
 - The panel key no longer opens or closes the panel while you type in a text box.
 - Exiled's Toolkit 0.12.0 or newer is now required.
 - Made for Survival Log 1.1.20151.
 
 ## 0.9.0
 
-- New: install a packed defense from the panel. Click an empty square of yours on the Yard tab and it lists the defense packages lying in your yard and, with Package Bank 0.5.0 or newer, the ones in the bank. Install sends the character to install it there, the same as the game's install. A banked one is taken out onto a free yard package spot first.
+- New: install a packed defense from the panel. Click an empty square of yours on the Yard tab and it lists the defense packages lying in your yard and, with Package Bank 0.5.0 or newer, the ones in the bank. Install sends your character to install it there, just like installing from the package. A banked one is taken out onto a free yard package spot first.
 - New: `AllowDuringWaves` under Combat, off by default. When on, defenses can be repaired, removed, installed and moved during a zombie wave, from the panel and from the game's menus and Layout screen. Robot repairs and expeditions still wait for the wave to end. It can also be turned on in the panel's Settings tab.
 - Made for Survival Log 1.1.19611.
 
@@ -53,7 +58,7 @@
 
 ## 0.8.0
 
-- New: `UiScale` under Interface sets the size of Defense Manager's own windows on their own, from 75% to 200%, whatever Exiled's Toolkit's UI size is. At 0, the default, they follow the Toolkit's. Needs Exiled's Toolkit 0.11.0 or newer.
+- New: `UiScale` under Interface sets the size of Defense Manager's windows by themselves, from 75% to 200%, apart from Exiled's Toolkit's UI size. At 0, the default, they follow the Toolkit's. Needs Exiled's Toolkit 0.11.0 or newer.
 - Made for Survival Log 1.1.19611.
 
 ## 0.7.4
@@ -111,13 +116,13 @@
 
 ## 0.5.0
 
-- New setting `DeviceAttackRate` sets how often defense devices strike: 2 strikes twice as often, 0.5 half as often. The default, 1, is the game's rate.
+- New setting `DeviceAttackRate` sets how often defense devices strike: 2 strikes twice as often, 0.5 half as often. The default, 1, is the normal rate.
 - A powered device uses power on every strike, so a higher rate uses more power.
 
 ## 0.4.0
 
-- The Mechanical Chainsaw now hits crawler zombies. In the base game they dodge it every time; now they dodge it 25% of the time by default.
-- New settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (the game's behavior).
+- The Mechanical Chainsaw now hits crawler zombies. In the base game they dodge it every time. Now they dodge it 25% of the time by default.
+- New settings `CrawlerDodgeChance` and `ArmoredCrawlerDodgeChance` set the chance for each kind of crawler, from 0 (every hit lands) to 1 (they always dodge, like in the base game).
 
 ## 0.3.3
 

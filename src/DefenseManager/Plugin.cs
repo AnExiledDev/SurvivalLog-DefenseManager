@@ -19,7 +19,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.12.0";
+    private const string Version = "0.12.1";
     private const string PowerFileName = Guid + ".power.txt";
 
     /// <summary>Exiled's Toolkit: its shared helpers, toasts, live settings, UI size and typing check all come from it.</summary>
@@ -39,47 +39,47 @@ public sealed class Plugin : BasePlugin
             "Key that opens and closes the Defense Manager panel. Unbound by default: the shield button in the bottom-left corner of the screen opens the panel. Set a key here to open it from the keyboard too.\n" +
             "打开和关闭 Defense Manager 面板的按键。默认不绑定：屏幕左下角的盾牌按钮可以打开面板。在这里设置按键后，也可以用键盘打开。");
         var layoutControls = Config.Bind("Controls", "LayoutControls", true,
-            "Show Repair all, Clear all broken and Defense list buttons at the top middle of the game's Layout screen. Set to false to hide them; the shield button and the panel key, if one is set, still work.\n" +
+            "Show Repair all, Clear all broken and Defense list buttons at the top middle of the game's Layout screen. Set to false to hide them. The shield button and the panel key, if one is set, still work.\n" +
             "在游戏「规划模式」界面的顶部中间显示「全部修理」「清除全部损毁」「防御列表」三个按钮。设为 false 则隐藏这些按钮，盾牌按钮和面板按键（如已设置）照常可用。");
         var defaultModeName = Config.Bind("Power", "DefaultMode", PowerModes.ConfigName(PowerMode.WaveOnly), new ConfigDescription(
             "How electrical defenses are powered when neither the defense nor its type has a setting of its own in the Defense Manager panel. WaveOnly: on during waves and while zombies are at the base, off otherwise. AlwaysOn: always on. Proximity: on while a living zombie is within ProximityRange, off once none has been in range for 10 game minutes. Default: the mod leaves the defense alone and the game's power switch decides.\n" +
-            "电力防御设施在该设施及其类型都没有单独设置（在 Defense Manager 面板中设置）时的供电方式。WaveOnly：尸潮期间以及基地有僵尸时开启，其余时间关闭。AlwaysOn：始终开启。Proximity：有活着的僵尸进入 ProximityRange 范围内时开启，范围内连续 10 分钟游戏时间没有僵尸后关闭。Default：本模组不干预，由游戏自身的电源开关决定。",
+            "电力防御设施在该设施及其类型都没有单独设置（在 Defense Manager 面板中设置）时的供电方式。WaveOnly：尸潮期间以及基地有丧尸时开启，其余时间关闭。AlwaysOn：始终开启。Proximity：有活着的丧尸进入 ProximityRange 范围内时开启，范围内连续 10 分钟游戏时间没有丧尸后关闭。Default：本模组不干预，由游戏的电源开关决定。",
             new AcceptableValueList<string>(PowerModes.ConfigNames)));
         var proximityRange = Config.Bind("Power", "ProximityRange", 15f, new ConfigDescription(
-            "How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground; height does not count. 15 by default, from 1 to 100.\n" +
-            "设为 Proximity 的防御设施在活着的僵尸进入多少米范围内时开启。按地面水平距离计算，不计高度。默认 15，可设为 1 到 100。",
+            "How close, in meters, a living zombie must come to turn on a defense set to Proximity. Measured along the ground, so height does not count. 15 by default, from 1 to 100.\n" +
+            "设为 Proximity 的防御设施在活着的丧尸进入多少米范围内时开启。按地面水平距离计算，不计高度。默认 15，可设为 1 到 100。",
             new AcceptableValueRange<float>(1f, 100f)));
         var crawlerDodge = Config.Bind("Combat", "CrawlerDodgeChance", CrawlerDodge.GameChance, new ConfigDescription(
-            "Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. 1 by default, the game's rule; 0.25 lets 3 hits in 4 land.\n" +
-            "「爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1，电锯刀片完全打不到爬行者。默认 1，即游戏原本的规则；设为 0.25 则 4 次攻击有 3 次命中。",
+            "Chance that a Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1, so the chainsaw blade never hits crawlers. The default is 1, which changes nothing. At 0.25, 3 hits in 4 land.\n" +
+            "「爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。不装模组时为 1，电锯刀片完全打不到爬行者。默认 1，即不做改动。设为 0.25 则 4 次攻击有 3 次命中。",
             new AcceptableValueRange<float>(0f, 1f), WorldRule.Tag));
         var armoredCrawlerDodge = Config.Bind("Combat", "ArmoredCrawlerDodgeChance", CrawlerDodge.GameChance, new ConfigDescription(
-            "Chance that an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. 1 by default, the game's rule.\n" +
-            "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。原版游戏中为 1。默认 1，即游戏原本的规则。",
+            "Chance that an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw, from 0 (every hit lands) to 1 (never hit). In the base game it is 1. The default is 1, which changes nothing.\n" +
+            "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率，0（每次都命中）到 1（永远打不到）。不装模组时为 1。默认 1，即不做改动。",
             new AcceptableValueRange<float>(0f, 1f), WorldRule.Tag));
         var attackRateEntry = Config.Bind("Combat", "DeviceAttackRate", 1f, new ConfigDescription(
-            "How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the game's rate. Each strike of a powered device uses power, so a higher rate also uses more power. 1 by default, from 0.25 to 10.\n" +
-            "防御设施攻击的频率：2 为两倍频率，0.5 为一半，1 为游戏原速。用电的防御设施每次攻击都耗电，所以频率越高耗电越多。默认 1，可设为 0.25 到 10。",
+            "How often defense devices strike: 2 strikes twice as often, 0.5 half as often, 1 is the normal rate. Each strike of a powered device uses power, so a higher rate also uses more power. 1 by default, from 0.25 to 10.\n" +
+            "防御设施攻击的频率：2 为两倍频率，0.5 为一半，1 为正常速度。用电的防御设施每次攻击都耗电，所以频率越高耗电越多。默认 1，可设为 0.25 到 10。",
             new AcceptableValueRange<float>(DeviceAttackRate.Slowest, DeviceAttackRate.Fastest), WorldRule.Tag));
         var allowDuringWaves = Config.Bind("Combat", "AllowDuringWaves", false, new ConfigDescription(
             "Let defenses be repaired, removed, installed and moved while a zombie wave is on. The base game locks all of these until the wave ends. Off by default. Robot repairs and expeditions still wait for the wave to end.\n" +
-            "允许在尸潮进行时修理、拆除、安装和移动防御设施。原版游戏在尸潮结束前禁止这些操作。默认关闭。机器人修理和外出探索仍需等尸潮结束。",
+            "允许在尸潮进行时修理、拆除、安装和移动防御设施。不装模组时要等尸潮结束才能进行这些操作。默认关闭。机器人修理和外出探索仍需等尸潮结束。",
             null, WorldRule.Tag));
         var doorUnlocks = Config.Bind("Unlocks", "DoorUpgradesFromDayOne", false, new ConfigDescription(
             "Give the door's Advanced Repair and Advanced Reinforce options, with the Door Repair Kit and All-Purpose Strengthener recipes, from the first day of a story run. The base game gives them on days 2 and 5. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
-            "在剧情模式开局第一天就提供门的「高级修理」「高级加固」选项，以及「门板修补材料」「万能加固件」配方。原版游戏在第 2 天和第 5 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
+            "在剧情模式开局第一天就提供门的「高级修理」「高级加固」选项，以及「门板修补材料」「万能加固件」配方。游戏本来在第 2 天和第 5 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
             null, WorldRule.Tag));
         var windowUnlocks = Config.Bind("Unlocks", "WindowUpgradesFromDayOne", false, new ConfigDescription(
             "Give the window's Advanced Repair, Advanced Reinforce and Reinforce Window options, with the Window Repair Kit and All-Purpose Strengthener recipes, from the first day of a story run. The base game gives them on days 13 and 14. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
-            "在剧情模式开局第一天就提供窗户的「高级修理」「高级加固」「加固窗户」选项，以及「窗户修补材料」「万能加固件」配方。原版游戏在第 13 天和第 14 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
+            "在剧情模式开局第一天就提供窗户的「高级修理」「高级加固」「加固窗户」选项，以及「窗户修补材料」「万能加固件」配方。游戏本来在第 13 天和第 14 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
             null, WorldRule.Tag));
         var fortificationUnlocks = Config.Bind("Unlocks", "FortificationsFromDayOne", false, new ConfigDescription(
             "Give the Reinforce Fortifications option on doors and windows, with the Fortification Reinforcement Components recipe, from the first day of a story run. The base game gives it on day 54. Off by default. Turning it off takes back what the mod gave, unless the game has given it by then.\n" +
-            "在剧情模式开局第一天就提供门窗的「强化加固」选项，以及「强化加固件」配方。原版游戏在第 54 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
+            "在剧情模式开局第一天就提供门窗的「强化加固」选项，以及「强化加固件」配方。游戏本来在第 54 天提供。默认关闭。关闭后会收回本模组提供的内容，游戏已经提供的除外。",
             null, WorldRule.Tag));
         var layoutActions = Config.Bind("Panel", "LayoutActions", false,
-            "Let the panel's Yard tab buy squares with Survival Points, move defenses to other squares and cancel planned installs and moves. These go in the same plan queue as the game's Layout screen, so it shows them too. The game's checks still apply: the Defense level a square needs, the Survival Points it costs and the wave lock. Off by default.\n" +
-            "允许在面板的「空地」标签中用生存点购买格子、把防御设施移动到别的格子，以及取消计划中的安装和移动。这些和游戏的「规划模式」使用同一个计划队列，所以「规划模式」里也会显示。游戏的检查照常生效：格子需要的防御等级、所需的生存点和尸潮锁定。默认关闭。");
+            "Let the panel's Yard tab buy squares with Survival Points, move defenses to other squares and cancel planned installs and moves. These go in the same plan queue as the game's Layout screen, so it shows them too. The game's checks still apply: the Defense level a square needs, the Survival Points it costs, and no buying or moving during a zombie wave unless AllowDuringWaves is on. Off by default.\n" +
+            "允许在面板的「空地」标签中用生存点购买格子、把防御设施移动到别的格子，以及取消计划中的安装和移动。这些和游戏的「规划模式」使用同一个计划队列，所以「规划模式」里也会显示。游戏的检查照常生效：格子需要的防御等级、所需的生存点，以及尸潮期间不能购买或移动（开启 AllowDuringWaves 后可以）。默认关闭。");
         var log = new ModLog(Log, LogFileName);
         var hooks = new PatchKit(new Harmony(Guid), log.Write);
         var powerSlot = new PowerSlot(new PowerFileOnDisk(Path.Combine(Paths.ConfigPath, PowerFileName), log.Write));

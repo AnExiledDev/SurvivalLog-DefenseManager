@@ -10,11 +10,11 @@ public static class Texts
 
     // Press results and the reasons beside a disabled button.
     public static readonly Phrase NotReady = new("Can't manage defenses right now: {0}.", "现在无法管理防御设施：{0}。");
-    public static readonly Phrase WaveLocked = new("A zombie wave is on: defenses can't be repaired or removed until it ends. Work during waves in Settings lifts this.", "尸潮正在进行：结束前无法修理或拆除防御设施。可在设置中开启「尸潮期间操作」。");
+    public static readonly Phrase WaveLocked = new("A zombie wave is on, so defenses can't be repaired or removed until it ends. Turn on Work during waves in Settings to change that.", "尸潮正在进行，结束前无法修理或拆除防御设施。在设置中开启「尸潮期间操作」即可。");
     public static readonly Phrase AwayFromHome = new("Go home first: your defenses are there.", "请先回家：你的防御设施在那里。");
     public static readonly Phrase InLayout = new("Work starts when you leave Layout.", "离开「规划模式」后开始工作。");
     public static readonly Phrase QueueBusy = new("Finish or cancel your queued actions first.", "请先完成或取消已排队的行动。");
-    public static readonly Phrase AllRepaired = new("Every defense is in full repair.", "所有防御设施都不需要修理。");
+    public static readonly Phrase AllRepaired = new("Every defense is fully repaired.", "所有防御设施都不需要修理。");
     public static readonly Phrase NoneBroken = new("No broken defenses.", "没有损毁的防御设施。");
     public static readonly Phrase Gone = new("That defense is gone.", "这个防御设施已经不在了。");
 
@@ -37,7 +37,7 @@ public static class Texts
     public static readonly Phrase BankFailed = new("Package Bank would not give {0} back, see " + Log + ".", "Package Bank 没能取出{0}，详见 " + Log + "。");
     public static readonly Phrase NotInstalled = new("The game would not install {0} there.", "游戏无法在这里安装{0}。");
     public static readonly Phrase Installing = new("Installing {0}.", "正在安装{0}。");
-    public static readonly Phrase TakenOutOfBank = new("Took it out of Package Bank, it is in the yard now.", "已从 Package Bank 取出，现在在院子里。");
+    public static readonly Phrase TakenOutOfBank = new("Took it out of Package Bank and put it in the yard.", "已从 Package Bank 取出，放到了院子里。");
     public static readonly Phrase ActionsOff = new("Turn on \"Buy and move from the panel\" in Settings first.", "请先在设置中开启「在面板中购买和移动」。");
     public static readonly Phrase AlreadyYours = new("That square is already yours.", "这个格子已经属于你了。");
 
@@ -58,7 +58,7 @@ public static class Texts
     // Why a square's Buy button is off.
     public static readonly Phrase BuyWaveLocked = new("Squares can't be bought during a zombie wave", "尸潮期间无法购买格子");
     public static readonly Phrase PointsUnreadable = new("Your Survival Points or Defense level could not be read", "无法读取你的生存点或防御等级");
-    public static readonly Phrase BuyHidden = new("The game does not show it yet. It unlocks at Defense level {0}", "游戏中还没有显示，防御等级达到 {0} 级后解锁");
+    public static readonly Phrase BuyHidden = new("It doesn't show on the Layout screen yet. It unlocks at Defense level {0}", "「规划模式」中还不显示，防御等级达到 {0} 级后解锁");
     public static readonly Phrase BuyNeedsLevel = new("Unlocks at Defense level {0}", "防御等级达到 {0} 级后解锁");
     public static readonly Phrase BuyShort = new("Not enough Survival Points, you have {0}", "生存点不足，你有 {0} 点");
 
@@ -73,12 +73,12 @@ public static class Texts
     public static readonly Counted AlreadyClearing = new(new("Already clearing: 1 removal still queued.", "已在清除：还有 {0} 项拆除在排队。"), new("Already clearing: {0} removals still queued.", "已在清除：还有 {0} 项拆除在排队。"));
     public static readonly Counted Removing = new(new("Removing 1 broken defense.", "正在拆除 {0} 个损毁的防御设施。"), new("Removing {0} broken defenses.", "正在拆除 {0} 个损毁的防御设施。"));
     public static readonly Counted RemovingMore = new(new("Removing 1 broken defense, {1} more already queued.", "正在拆除 {0} 个损毁的防御设施，另有 {1} 个已在队列中。"), new("Removing {0} broken defenses, {1} more already queued.", "正在拆除 {0} 个损毁的防御设施，另有 {1} 个已在队列中。"));
-    public static readonly Phrase BeingRemoved = new("{0} queued for removal, so not repaired.", "{0} 个已排队拆除，因此未修理。");
-    public static readonly Phrase BeingRepaired = new("{0} queued for repair, so kept.", "{0} 个已排队修理，因此保留。");
-    public static readonly Phrase RefusedByQueue = new("{0} refused by the game's queue.", "{0} 个被游戏的队列拒绝。");
+    public static readonly Phrase BeingRemoved = new("Skipped {0} already queued for removal.", "{0} 个已排队拆除，因此未修理。");
+    public static readonly Phrase BeingRepaired = new("Kept {0} already queued for repair.", "{0} 个已排队修理，因此保留。");
+    public static readonly Phrase RefusedByQueue = new("The game's queue refused {0}.", "{0} 个被游戏的队列拒绝。");
 
     /// <summary>{0} is how many, {1} the named list.</summary>
-    public static readonly Phrase ShortOfMaterials = new("{0} left for lack of materials: {1}.", "{0} 个因材料不足未修理：{1}。");
+    public static readonly Phrase ShortOfMaterials = new("Not enough materials for {0} more: {1}.", "{0} 个因材料不足未修理：{1}。");
 
     public static readonly Phrase ShortfallNamed = new("{0} needs {1}", "{0}还差{1}");
     public static readonly Phrase AndMore = new("and {0} more", "另有 {0} 个");
@@ -121,7 +121,7 @@ public static class Texts
     public static readonly Phrase Unreadable = new("The power settings file could not be read, so nothing was changed. See " + Log + ".", "无法读取供电设置文件，因此没有做任何更改。详见 " + Log + "。");
     public static readonly Phrase NoGame = new("Load a game first.", "请先载入游戏。");
     public static readonly Phrase NoSwitch = new("That defense has no power switch.", "这个防御设施没有电源开关。");
-    public static readonly Phrase NotSaved = new("It could not be written to the settings file, so it lasts until the game is closed.", "设置无法写入设置文件，只在关闭游戏前有效。");
+    public static readonly Phrase NotSaved = new("The setting couldn't be saved to the file, so it only lasts until you close the game.", "设置无法写入文件，关闭游戏后就会失效。");
 
     /// <summary>{0} is the defense, {1} the mode.</summary>
     public static readonly Phrase DefenseSet = new("{0} set to {1}.", "{0}已设为{1}。");
@@ -131,7 +131,7 @@ public static class Texts
     public static readonly Phrase TypeFollowsGlobal = new("Every {0} now follows the global setting ({1}).", "所有{0}现在跟随全局设置（{1}）。");
     public static readonly Phrase AlwaysOn = new("Always on", "常开");
     public static readonly Phrase WaveOnly = new("Wave only", "仅尸潮");
-    public static readonly Phrase Proximity = new("Proximity", "僵尸靠近");
+    public static readonly Phrase Proximity = new("Proximity", "丧尸靠近");
     public static readonly Phrase GameDefault = new("Default", "默认");
 
     // The Settings tab.
@@ -156,7 +156,7 @@ public static class Texts
         ("defenseList", new("Defense list", "防御列表")),
         ("defenseListKey", new("Defense list ({0})", "防御列表（{0}）")),
         ("title", new("DEFENSES", "防御设施")),
-        ("placed", new("{0} placed, {1} of {2} squares yours", "已放置 {0} 个，{2} 格中 {1} 格属于你")),
+        ("placed", new("{0} placed, {1} of {2} squares are yours", "已放置 {0} 个，{2} 格中 {1} 格属于你")),
         ("placedOnly", new("{0} placed", "已放置 {0} 个")),
         ("tabYard", new("Yard", "空地")),
         ("tabPower", new("Power", "供电")),
@@ -186,7 +186,7 @@ public static class Texts
         ("againstHouse", new("Against the house", "紧贴房屋")),
         ("rowOut1", new("1 row out from the house", "离房屋 1 行")),
         ("rowsOut", new("{0} rows out from the house", "离房屋 {0} 行")),
-        ("rowInfo", new("Defenses: {0}. Squares yours: {1} of {2}.", "防御设施：{0} 个。属于你的格子：{2} 格中 {1} 格。")),
+        ("rowInfo", new("Defenses: {0}. Your squares: {1} of {2}.", "防御设施：{0} 个。属于你的格子：{2} 格中 {1} 格。")),
         ("rowPrice", new("The other squares cost {0} Survival Points each.", "其余格子每格需要 {0} 生存点。")),
         ("repairRow", new("Repair row {0} ({1})", "修理第 {0} 行（{1}）")),
         ("emptySquare", new("Empty square", "空格")),
@@ -215,9 +215,9 @@ public static class Texts
         ("global", new("Global ({0})", "全局（{0}）")),
         ("ownList", new("Set on their own", "单独设置")),
         ("followType", new("Follow the type", "跟随类型")),
-        ("noneOwn", new("None. Pick one in the Yard tab to set it alone.", "无。在「空地」标签中选中一个即可单独设置。")),
+        ("noneOwn", new("None. Click a defense on the Yard tab to give it its own mode.", "无。在「空地」标签中点击防御设施即可单独设置模式。")),
         ("noPower", new("No powered defenses yet.", "还没有用电的防御设施。")),
-        ("powerNote", new("Wave only: on during waves and while zombies are at the base. Proximity: on while a zombie is in range. Always on: never turns off. Default: the game's power switch decides.", "仅尸潮：尸潮期间以及基地有僵尸时开启。僵尸靠近：有僵尸在范围内时开启。常开：始终开启。默认：由游戏自身的电源开关决定。")),
+        ("powerNote", new("Wave only: on during waves and while zombies are at the base. Proximity: on while a zombie is in range. Always on: never turns off. Default: the mod leaves it alone.", "仅尸潮：尸潮期间以及基地有丧尸时开启。丧尸靠近：有丧尸在范围内时开启。常开：始终开启。默认：本模组不管它。")),
         ("modeWaveOnly", WaveOnly),
         ("modeProximity", Proximity),
         ("modeAlwaysOn", AlwaysOn),
@@ -232,25 +232,25 @@ public static class Texts
         ("setActions", new("Buy and move from the panel", "在面板中购买和移动")),
         ("setActionsDesc", new("Buy yard squares, move defenses and cancel planned installs and moves from the Yard tab. Installs and moves go in the same plan queue as on the Layout screen.", "在「空地」标签中购买格子、移动防御设施，以及取消计划中的安装和移动。安装和移动与「规划模式」使用同一个计划队列。")),
         ("setMode", new("Default power mode", "默认供电模式")),
-        ("setModeDesc", new("Mode for powered defenses with no setting of their own.", "没有单独设置的用电防御设施所用的模式。")),
+        ("setModeDesc", new("The mode for powered defenses that have no setting of their own.", "没有单独设置的用电防御设施所用的模式。")),
         ("setRange", new("Proximity range", "靠近范围")),
-        ("setRangeDesc", new("How close a zombie must come to turn a Proximity defense on, 1 to 100 meters.", "僵尸进入多少米内时开启设为「僵尸靠近」的防御设施，1 到 100 米。")),
+        ("setRangeDesc", new("How close a zombie must come to turn a Proximity defense on, 1 to 100 meters.", "丧尸进入多少米内时开启设为「丧尸靠近」的防御设施，1 到 100 米。")),
         ("meters", new("{0} m", "{0} 米")),
         ("setCrawler", new("Crawler dodge chance", "「爬行者丧尸」闪避概率")),
-        ("setCrawlerDesc", new("Chance a Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.", "「爬行者丧尸」闪避「机械电锯」攻击的概率。原版游戏为 100%。")),
+        ("setCrawlerDesc", new("Chance a Crawler Zombie dodges a hit from the Mechanical Chainsaw. In the base game it's 100%.", "「爬行者丧尸」闪避「机械电锯」攻击的概率。不装模组时为 100%。")),
         ("setArmored", new("Armored crawler dodge chance", "「重甲爬行者丧尸」闪避概率")),
-        ("setArmoredDesc", new("Chance an Armored Crawler Zombie dodges a Mechanical Chainsaw hit. The base game has 100%.", "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率。原版游戏为 100%。")),
+        ("setArmoredDesc", new("Chance an Armored Crawler Zombie dodges a hit from the Mechanical Chainsaw. In the base game it's 100%.", "「重甲爬行者丧尸」闪避「机械电锯」攻击的概率。不装模组时为 100%。")),
         ("setRate", new("Device attack rate", "防御设施攻击频率")),
         ("setRateDesc", new("How often defense devices strike, 0.25 to 10.", "防御设施攻击的频率，0.25 到 10。")),
         ("setWaves", new("Work during waves", "尸潮期间操作")),
-        ("setWavesDesc", new("Repair, remove, install and move defenses while a zombie wave is on. The base game locks them until it ends.", "尸潮进行时也可修理、拆除、安装和移动防御设施。原版游戏在尸潮结束前禁止这些操作。")),
+        ("setWavesDesc", new("Repair, remove, install and move defenses while a zombie wave is on. Without this, they wait until the wave ends.", "尸潮进行时也可修理、拆除、安装和移动防御设施。不开启时要等尸潮结束才能操作。")),
         ("setUnlocks", new("Unlocks", "提前解锁")),
         ("setDoors", new("Door upgrades from day one", "第一天起解锁门的升级")),
-        ("setDoorsDesc", new("Advanced Repair and Advanced Reinforce on doors, with their recipes, from the first day of a story run. The base game gives them on days 2 and 5.", "剧情模式第一天起即可对门使用「高级修理」「高级加固」，并获得对应配方。原版游戏在第 2 天和第 5 天提供。")),
+        ("setDoorsDesc", new("Advanced Repair and Advanced Reinforce on doors, with their recipes, from the first day of a story run. The base game gives them on days 2 and 5.", "剧情模式第一天起即可对门使用「高级修理」「高级加固」，并获得对应配方。游戏本来在第 2 天和第 5 天提供。")),
         ("setWindows", new("Window upgrades from day one", "第一天起解锁窗户的升级")),
-        ("setWindowsDesc", new("Advanced Repair, Advanced Reinforce and Reinforce Window on windows, with their recipes, from the first day of a story run. The base game gives them on days 13 and 14.", "剧情模式第一天起即可对窗户使用「高级修理」「高级加固」「加固窗户」，并获得对应配方。原版游戏在第 13 天和第 14 天提供。")),
+        ("setWindowsDesc", new("Advanced Repair, Advanced Reinforce and Reinforce Window on windows, with their recipes, from the first day of a story run. The base game gives them on days 13 and 14.", "剧情模式第一天起即可对窗户使用「高级修理」「高级加固」「加固窗户」，并获得对应配方。游戏本来在第 13 天和第 14 天提供。")),
         ("setForts", new("Reinforce Fortifications from day one", "第一天起解锁「强化加固」")),
-        ("setFortsDesc", new("Reinforce Fortifications on doors and windows, with its recipe, from the first day of a story run. The base game gives it on day 54.", "剧情模式第一天起即可对门窗使用「强化加固」，并获得对应配方。原版游戏在第 54 天提供。")),
+        ("setFortsDesc", new("Reinforce Fortifications on doors and windows, with its recipe, from the first day of a story run. The base game gives it on day 54.", "剧情模式第一天起即可对门窗使用「强化加固」，并获得对应配方。游戏本来在第 54 天提供。")),
         ("keyClose", new("{0} or Esc to close", "按 {0} 或 Esc 关闭")),
         ("noSettings", new("Settings are not available right now.", "现在无法读取设置。")),
     };

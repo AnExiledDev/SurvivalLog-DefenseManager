@@ -471,7 +471,7 @@ public class PageScriptTests
 
         Assert.Equal("第 1 行，第 1 格", page.Text("document.querySelector('.dm-ihd').querySelector('small').textContent"));
         Assert.Equal("与所有Tesla coil相同（仅尸潮）", page.Text("panelButtonWith('power', '1|none').textContent"));
-        Assert.Equal("僵尸靠近", page.Text("panelButtonWith('power', '1|Proximity').textContent"));
+        Assert.Equal("丧尸靠近", page.Text("panelButtonWith('power', '1|Proximity').textContent"));
     }
 
     [Fact]
@@ -768,7 +768,7 @@ public class PageScriptTests
         page.Show(YardView(game));
 
         Assert.False(page.Is("document.querySelector('.dm-logo') === logo"));
-        Assert.Equal("2 placed, 5 of 6 squares yours", page.Text("document.querySelector('.dm-ttl').querySelector('small').textContent"));
+        Assert.Equal("2 placed, 5 of 6 squares are yours", page.Text("document.querySelector('.dm-ttl').querySelector('small').textContent"));
     }
 
     /// <summary>Opening the panel again sends only the rows that changed while it was shut, and must draw it as a whole view would.</summary>
