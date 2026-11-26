@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.6
+
+- The power check makes less garbage for the game to clean up.
+- Made for Survival Log 1.1.21671.
+
 ## 0.12.5
 
 - The Unlocks settings are checked when a save loads, when a trip starts and when you change one, instead of every 5 seconds.

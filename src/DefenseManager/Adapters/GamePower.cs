@@ -26,6 +26,10 @@ internal sealed class GamePower : IPowerGame
     // The zombies are read only if the pass asks about them (see PowerControl), from the game objects of the latest read.
     private readonly Func<IReadOnlyList<Spot>> _readZombies;
     private readonly Func<bool> _hasZombies;
+
+    // Filled again by each read. A scene is used only within the pass or press that read it, so the lists can be reused.
+    private readonly List<PowerUnit> _units = new();
+    private readonly List<Spot> _zombieSpots = new();
     private AgentManager? _agents;
     private TowerWaveManager? _waves;
 
@@ -107,8 +111,9 @@ internal sealed class GamePower : IPowerGame
     private List<PowerUnit> ReadUnits(AgentManager agents, ConfigManager config, PowerManager power)
     {
         var found = agents.GetHomeFurnituresBySlotType(GameDefenses.DefenseSlot);
-        var units = new List<PowerUnit>();
+        var units = _units;
 
+        units.Clear();
         _names.Follow(new TableKey(config.Pointer.ToInt64(), GameLanguage.IsChinese(), IconIndex.Empty));
 
         for (var i = 0; found != null && i < found.Count; i++)
@@ -174,7 +179,9 @@ internal sealed class GamePower : IPowerGame
         try
         {
             var ids = _waves?.aliveZombieIds;
-            var spots = new List<Spot>();
+            var spots = _zombieSpots;
+
+            spots.Clear();
 
             for (var i = 0; _agents != null && ids != null && i < ids.Count; i++)
             {
