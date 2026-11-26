@@ -19,7 +19,7 @@ namespace DefenseManager;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensemanager";
-    private const string Version = "0.12.4";
+    private const string Version = "0.12.5";
     private const string PowerFileName = Guid + ".power.txt";
 
     /// <summary>Exiled's Toolkit: its shared helpers, toasts, live settings, UI size and typing check all come from it.</summary>
@@ -85,13 +85,14 @@ public sealed class Plugin : BasePlugin
         var powerSlot = new PowerSlot(new PowerFileOnDisk(Path.Combine(Paths.ConfigPath, PowerFileName), log.Write));
         var power = new PowerSession(new GamePower(log.Write), powerSlot, log.Write);
         var config = new PanelConfig(panelKey, layoutControls, defaultModeName, proximityRange, crawlerDodge, armoredCrawlerDodge, attackRateEntry, allowDuringWaves, doorUnlocks, windowUnlocks, fortificationUnlocks, layoutActions);
-        var unlocks = new UnlockSession(log.Write);
         var session = new DefenseSession(new GameDefenses(log.Write), power, new DefensePage(log.Write), config, log.Write);
 
         log.Write($"===== Defense Manager {Version} started, device attack rate {DeviceAttackRate.From(attackRateEntry.Value).Value}");
         DodgeRulesPatch.Apply(hooks, log.Write);
         AttackRatePatch.Apply(hooks, log.Write);
         WaveLockPatch.Apply(hooks, log.Write);
+
+        var unlocks = new UnlockSession(log.Write, UnlockSession.HookStart(hooks));
 
         config.ApplyControls = () =>
         {

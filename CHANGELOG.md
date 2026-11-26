@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.5
+
+- The Unlocks settings are checked when a save loads, when a trip starts and when you change one, instead of every 5 seconds.
+- Made for Survival Log 1.1.21671.
+
 ## 0.12.4
 
 - Fixed: after loading another character's save, the Yard tab could keep showing the last home's grid until the game was restarted.

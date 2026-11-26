@@ -9,38 +9,60 @@ using GameCore.HotUpdate.Battle.Logic;
 namespace DefenseManager.Adapters;
 
 /// <summary>
-/// Runs the Unlocks settings against the loaded run every few seconds, and at once after a setting changes. Only a
-/// story run after the disaster is touched: endless runs already start with all of it, and challenge and tutorial runs
-/// keep the game's rules. Each distinct log line is written once, so a grant the game refuses is not logged every
-/// pass.
+/// Runs the Unlocks settings against the loaded run when play starts (a load, a new game or a trip) and when a setting
+/// changes, on the schedule UnlockSchedule keeps. Only a story run after the disaster is touched: endless runs already
+/// start with all of it, and challenge and tutorial runs keep the game's rules. Each distinct log line is written once,
+/// so a grant the game refuses is not logged every pass.
 /// </summary>
 internal sealed class UnlockSession
 {
-    private const float CheckSeconds = 5f;
+    private static bool _isStarted;
 
     private readonly Action<string> _log;
     private readonly HashSet<string> _logged = new();
+    private readonly UnlockSchedule _schedule;
     private UnlockSettings _settings = UnlockSettings.None;
-    private float _nextCheckAt;
     private IntPtr _world;
 
-    public UnlockSession(Action<string> log) => _log = log;
+    public UnlockSession(Action<string> log, bool isHooked)
+    {
+        _log = log;
+        _schedule = new UnlockSchedule(isHooked);
+    }
+
+    /// <summary>
+    /// Hooks AgentManager.StartBattle, which runs at every start of play; its first 14 bytes have no relative jump or
+    /// call. The disaster starts a new world, so it comes through here too. Returns false when the hook did not go in.
+    /// </summary>
+    public static bool HookStart(PatchKit hooks) =>
+        hooks.Patch(typeof(UnlockSession), typeof(AgentManager), nameof(AgentManager.StartBattle), new[] { typeof(GameSaveData), typeof(GameMode) },
+            postfix: nameof(AfterStart), consequence: "the Unlocks are checked every 5 seconds instead");
+
+    private static void AfterStart() => _isStarted = true;
 
     public void Use(UnlockSettings settings)
     {
         _settings = settings;
-        _nextCheckAt = 0f;
+        _schedule.Ask();
     }
 
     public void Update()
     {
         var now = DefenseTicker.Now();
 
-        if (now < _nextCheckAt) return;
+        if (_isStarted)
+        {
+            _isStarted = false;
+            _schedule.Started(now);
+        }
 
-        _nextCheckAt = now + CheckSeconds;
+        if (!_schedule.IsDue(now)) return;
 
-        if (GameUnlocks.StoryRun() is not { } game) return;
+        var game = GameUnlocks.StoryRun(out var isLoading);
+
+        _schedule.Ran(now, isLoading);
+
+        if (game == null) return;
 
         // A new run (another save loaded) logs its own gifts again.
         if (game.World != _world)
@@ -79,17 +101,22 @@ internal sealed class GameUnlocks : IUnlockGame
 
     public IntPtr World { get; }
 
-    /// <summary>The loaded story run after the disaster, or null for anything else (a run still loading included).</summary>
-    public static GameUnlocks? StoryRun()
+    /// <summary>
+    /// The loaded story run after the disaster, or null for anything else. isLoading says a run is there but not ready
+    /// yet (still loading, or the world is not running), so it is worth asking again soon.
+    /// </summary>
+    public static GameUnlocks? StoryRun(out bool isLoading)
     {
         var main = GameSingleton.Existing<BattleMain>();
         var world = GameSingleton.Existing<BattleLogicWorld>();
         var save = GameSingleton.Existing<GameSaveManager>()?.gameSave;
         var config = GameSingleton.Existing<ConfigManager>();
 
-        if (main == null || !main._IsLoadingFinished || main.IsGameOver) return null;
+        isLoading = main != null && !main.IsGameOver && (!main._IsLoadingFinished || world == null || !world.IsUpdate || save == null || config == null);
 
-        if (world == null || !world.IsUpdate || save == null || config == null) return null;
+        if (main == null || isLoading || main.IsGameOver) return null;
+
+        if (world == null || save == null || config == null) return null;
 
         if (world.GameModeKey != GameMode.Default || save.EndlessActive || save.ChallengeTargetId > 0) return null;
 
