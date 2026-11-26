@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.4
+
+- Fixed: after loading another character's save, the Yard tab could keep showing the last home's grid until the game was restarted.
+- Made for Survival Log 1.1.21671.
+
 ## 0.12.3
 
 - Fixed: the Yard tab showed no grid when playing as the Female College Student or the Warehouse Manager. It only knew the Wage Slave's yard.

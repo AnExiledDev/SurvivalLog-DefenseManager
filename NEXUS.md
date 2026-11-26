@@ -63,7 +63,7 @@ Works in English and Chinese.
 
 [size=5]Requirements[/size]
 [list]
-[*]Survival Log 1.1.20719. A game update can break it until the mod is updated.[/*]
+[*]Survival Log 1.1.21671. A game update can break it until the mod is updated.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
 [*]Optional: [url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 or newer, to install defenses straight from the bank.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.19.0 or newer. Defense Manager does not load without it. It keeps the panel key quiet while you type, shows results as toasts while the panel is closed, applies settings changed on the Mod Manager's Mods screen without a restart, and its UI size setting sizes the panel.[/*]
@@ -153,7 +153,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-DefenseMa
 
 [size=5]前置要求[/size]
 [list]
-[*]Survival Log 1.1.20719。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
+[*]Survival Log 1.1.21671。游戏更新后模组可能暂时失效，直到模组更新为止。[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]，请先安装。[/*]
 [*]可选：[url=https://www.nexusmods.com/survivallog/mods/79]Package Bank[/url] 0.5.0 或更新版本，用来直接从仓库安装防御设施。[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.19.0 或更新版本。没有它本模组不会加载。打字时它让面板按键不起作用，面板关闭时它把结果显示为弹出通知，它还让在 Mod Manager 的「模组」界面改动的设置无需重启即可生效。它的界面大小设置也能调整面板的大小。[/*]

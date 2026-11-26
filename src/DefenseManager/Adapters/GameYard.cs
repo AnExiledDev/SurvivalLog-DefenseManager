@@ -16,8 +16,8 @@ namespace DefenseManager.Adapters;
 /// player's when the game's TowerDefenseTagConstants.IsTowerSlotUnlocked says so; one with no unlock tag always
 /// is. Its price is the TowerRingCost global setting for the ring its tag names, and the Defense level it needs is
 /// GameKey.TowerSlotRequiredDefenseLevelOf. Doors are the slots of type 8 and windows of type 9; only those in the wall
-/// along the yard are kept. Squares and points never change during a game, so they are read
-/// once. Who owns which square is read each time, but only for squares not yet owned: a square once bought stays
+/// along the yard are kept. Squares and points never change during a load, so they are read
+/// once per load. Who owns which square is read each time, but only for squares not yet owned: a square once bought stays
 /// bought for the rest of that load, so it is asked about again only after a load. While no square changes hands the
 /// same grid is handed back.
 /// </summary>
@@ -46,6 +46,13 @@ internal sealed class GameYard
     {
         try
         {
+            // Each character has their own home, so a new load may be a different yard.
+            if (_ownedLoad != load)
+            {
+                _squares = null;
+                _wall = Array.Empty<WallFeature>();
+            }
+
             var squares = _squares ??= ReadSquares(config);
 
             if (squares == null || squares.Count == 0)
